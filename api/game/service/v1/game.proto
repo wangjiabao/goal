@@ -21,6 +21,12 @@ service Game {
 		};
 	};
 
+	rpc GetTeamList (GetTeamListRequest) returns (GetTeamListReply) {
+		option (google.api.http) = {
+			get: "/api/team/list"
+		};
+	};
+
 	rpc GetGameSortList (GetGameSortListRequest) returns (GetGameSortListReply) {
 		option (google.api.http) = {
 			get: "/api/game/sorts"
@@ -77,5 +83,17 @@ message GetGameSortListReply {
 		string sort_type = 2;
 		string sort_name = 3;
 		string end_time = 4;
+	}
+}
+
+message GetTeamListRequest {
+
+}
+
+message GetTeamListReply {
+	repeated Team teams = 1;
+	message Team {
+		int64  team_id = 1;
+		string team_name = 3;
 	}
 }

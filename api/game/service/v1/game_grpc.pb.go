@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type GameClient interface {
 	DisplayGame(ctx context.Context, in *DisplayGameRequest, opts ...grpc.CallOption) (*DisplayGameReply, error)
 	GetGameList(ctx context.Context, in *GetGameListRequest, opts ...grpc.CallOption) (*GetGameListReply, error)
+	GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...grpc.CallOption) (*GetTeamListReply, error)
 	GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error)
 }
 
@@ -53,6 +54,15 @@ func (c *gameClient) GetGameList(ctx context.Context, in *GetGameListRequest, op
 	return out, nil
 }
 
+func (c *gameClient) GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...grpc.CallOption) (*GetTeamListReply, error) {
+	out := new(GetTeamListReply)
+	err := c.cc.Invoke(ctx, "/api.game.service.v1.Game/GetTeamList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gameClient) GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error) {
 	out := new(GetGameSortListReply)
 	err := c.cc.Invoke(ctx, "/api.game.service.v1.Game/GetGameSortList", in, out, opts...)
@@ -68,6 +78,7 @@ func (c *gameClient) GetGameSortList(ctx context.Context, in *GetGameSortListReq
 type GameServer interface {
 	DisplayGame(context.Context, *DisplayGameRequest) (*DisplayGameReply, error)
 	GetGameList(context.Context, *GetGameListRequest) (*GetGameListReply, error)
+	GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error)
 	GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error)
 	mustEmbedUnimplementedGameServer()
 }
@@ -81,6 +92,9 @@ func (UnimplementedGameServer) DisplayGame(context.Context, *DisplayGameRequest)
 }
 func (UnimplementedGameServer) GetGameList(context.Context, *GetGameListRequest) (*GetGameListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGameList not implemented")
+}
+func (UnimplementedGameServer) GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTeamList not implemented")
 }
 func (UnimplementedGameServer) GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGameSortList not implemented")
@@ -134,6 +148,24 @@ func _Game_GetGameList_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Game_GetTeamList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTeamListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).GetTeamList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.game.service.v1.Game/GetTeamList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).GetTeamList(ctx, req.(*GetTeamListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Game_GetGameSortList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetGameSortListRequest)
 	if err := dec(in); err != nil {
@@ -166,6 +198,10 @@ var Game_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetGameList",
 			Handler:    _Game_GetGameList_Handler,
+		},
+		{
+			MethodName: "GetTeamList",
+			Handler:    _Game_GetTeamList_Handler,
 		},
 		{
 			MethodName: "GetGameSortList",

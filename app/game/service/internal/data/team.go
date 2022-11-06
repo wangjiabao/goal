@@ -41,3 +41,20 @@ func (t *TeamRepo) GetTeamByIds(ctx context.Context, ids ...int64) (map[int64]*b
 
 	return res, nil
 }
+
+func (t *TeamRepo) GetTeamList(ctx context.Context) ([]*biz.Team, error) {
+	var team []*Team
+	if err := t.data.DB(ctx).Table("soccer_team").Find(&team).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "队伍不存在")
+	}
+
+	res := make([]*biz.Team, 0)
+	for _, item := range team {
+		res = append(res, &biz.Team{
+			ID:   item.ID,
+			Name: item.Name,
+		})
+	}
+
+	return res, nil
+}

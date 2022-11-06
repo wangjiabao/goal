@@ -22,17 +22,20 @@ const _ = http.SupportPackageIsVersion1
 const OperationGameDisplayGame = "/api.game.service.v1.Game/DisplayGame"
 const OperationGameGetGameList = "/api.game.service.v1.Game/GetGameList"
 const OperationGameGetGameSortList = "/api.game.service.v1.Game/GetGameSortList"
+const OperationGameGetTeamList = "/api.game.service.v1.Game/GetTeamList"
 
 type GameHTTPServer interface {
 	DisplayGame(context.Context, *DisplayGameRequest) (*DisplayGameReply, error)
 	GetGameList(context.Context, *GetGameListRequest) (*GetGameListReply, error)
 	GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error)
+	GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error)
 }
 
 func RegisterGameHTTPServer(s *http.Server, srv GameHTTPServer) {
 	r := s.Route("/")
 	r.GET("/api/display_game/{type}", _Game_DisplayGame0_HTTP_Handler(srv))
 	r.GET("/api/games", _Game_GetGameList0_HTTP_Handler(srv))
+	r.GET("/api/team/list", _Game_GetTeamList0_HTTP_Handler(srv))
 	r.GET("/api/game/sorts", _Game_GetGameSortList0_HTTP_Handler(srv))
 }
 
@@ -77,6 +80,25 @@ func _Game_GetGameList0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) 
 	}
 }
 
+func _Game_GetTeamList0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetTeamListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGameGetTeamList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetTeamList(ctx, req.(*GetTeamListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetTeamListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _Game_GetGameSortList0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetGameSortListRequest
@@ -100,6 +122,7 @@ type GameHTTPClient interface {
 	DisplayGame(ctx context.Context, req *DisplayGameRequest, opts ...http.CallOption) (rsp *DisplayGameReply, err error)
 	GetGameList(ctx context.Context, req *GetGameListRequest, opts ...http.CallOption) (rsp *GetGameListReply, err error)
 	GetGameSortList(ctx context.Context, req *GetGameSortListRequest, opts ...http.CallOption) (rsp *GetGameSortListReply, err error)
+	GetTeamList(ctx context.Context, req *GetTeamListRequest, opts ...http.CallOption) (rsp *GetTeamListReply, err error)
 }
 
 type GameHTTPClientImpl struct {
@@ -141,6 +164,19 @@ func (c *GameHTTPClientImpl) GetGameSortList(ctx context.Context, in *GetGameSor
 	pattern := "/api/game/sorts"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGameGetGameSortList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *GameHTTPClientImpl) GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...http.CallOption) (*GetTeamListReply, error) {
+	var out GetTeamListReply
+	pattern := "/api/team/list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationGameGetTeamList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

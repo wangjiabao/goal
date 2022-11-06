@@ -33,11 +33,12 @@ func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logg
 	gameRepo := data.NewGameRepo(dataData, logger)
 	teamRepo := data.NewTeamRepo(dataData, logger)
 	gameUseCase := biz.NewGameUseCase(gameRepo, teamRepo, logger)
+	teamUseCase := biz.NewTeamUseCase(teamRepo, logger)
 	displayGameRepo := data.NewDisplayGameRepo(dataData, logger)
 	displayGameUseCase := biz.NewDisplayGameUseCase(displayGameRepo, gameRepo, teamRepo, logger)
 	gameSortRepo := data.NewGameSortRepo(dataData, logger)
 	gameSortUseCase := biz.NewGameSortUseCase(gameSortRepo, logger)
-	gameService := service.NewGameService(gameUseCase, displayGameUseCase, gameSortUseCase, logger)
+	gameService := service.NewGameService(gameUseCase, teamUseCase, displayGameUseCase, gameSortUseCase, logger)
 	httpServer := server.NewHTTPServer(confServer, auth, gameService, logger)
 	app := newApp(logger, httpServer)
 	return app, func() {
