@@ -3319,7 +3319,7 @@ func (m *CreatePlayGameSortRequest_SendBody) validate(all bool) error {
 
 	// no validation rules for Content
 
-	// no validation rules for PlayType
+	// no validation rules for SortId
 
 	if len(errors) > 0 {
 		return CreatePlayGameSortRequest_SendBodyMultiError(errors)
@@ -3430,7 +3430,7 @@ func (m *CreatePlayGameGoalRequest_SendBody) validate(all bool) error {
 
 	// no validation rules for Pay
 
-	// no validation rules for TeamType
+	// no validation rules for TeamId
 
 	// no validation rules for Goal
 

@@ -59,17 +59,17 @@ func (p *PlayService) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 	return p.uc.CreatePlayGameScore(ctx, req)
 }
 
-//// CreatePlayGameResult 创建比赛结果玩法竞猜
-//func (g *PlayService) CreatePlayGameResult(ctx context.Context, req *v1.CreatePlayGameResultRequest) (*v1.CreatePlayGameResultReply, error) {
-//	return g.uc.CreateRoom(ctx, req)
-//}
-//
-//// CreatePlayGameGoal 创建进球数玩法竞猜
-//func (g *PlayService) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlayGameGoalRequest) (*v1.CreatePlayGameGoalReply, error) {
-//	return g.uc.CreateRoom(ctx, req)
-//}
-//
-//// CreatePlayGameSort 创建比赛排名玩法竞猜
-//func (g *PlayService) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlayGameSortRequest) (*v1.CreatePlayGameSortReply, error) {
-//	return g.uc.CreateRoom(ctx, req)
-//}
+// CreatePlayGameResult 创建输赢平玩法竞猜
+func (p *PlayService) CreatePlayGameResult(ctx context.Context, req *v1.CreatePlayGameResultRequest) (*v1.CreatePlayGameResultReply, error) {
+	return p.uc.CreatePlayGameResult(ctx, req)
+}
+
+// CreatePlayGameGoal 创建进球数玩法竞猜
+func (p *PlayService) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlayGameGoalRequest) (*v1.CreatePlayGameGoalReply, error) {
+	return p.uc.CreatePlayGameGoal(ctx, req)
+}
+
+// CreatePlayGameSort 创建比赛排名玩法竞猜
+func (p *PlayService) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlayGameSortRequest) (*v1.CreatePlayGameSortReply, error) {
+	return p.uc.CreatePlayGameSort(ctx, req)
+}

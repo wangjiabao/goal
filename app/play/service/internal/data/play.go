@@ -49,6 +49,7 @@ type PlayGameScoreUserRel struct {
 	UserId    int64     `gorm:"type:int;not null"`
 	Content   string    `gorm:"type:varchar(45);not null"`
 	Pay       int64     `gorm:"type:int;not null"`
+	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -57,8 +58,10 @@ type PlayGameTeamSortUserRel struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	PlayId    int64     `gorm:"type:int;not null"`
 	UserId    int64     `gorm:"type:int;not null"`
+	SortId    int64     `gorm:"type:int;not null"`
 	Content   string    `gorm:"type:varchar(45);not null"`
 	Pay       int64     `gorm:"type:int;not null"`
+	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -70,7 +73,8 @@ type PlayGameTeamGoalUserRel struct {
 	TeamId    int64     `gorm:"type:int;not null"`
 	Goal      int64     `gorm:"type:int;not null"`
 	Type      string    `gorm:"type:varchar(45);not null"`
-	pay       int64     `gorm:"type:int;not null"`
+	Pay       int64     `gorm:"type:int;not null"`
+	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -81,6 +85,7 @@ type PlayGameTeamResultUserRel struct {
 	UserId    int64     `gorm:"type:int;not null"`
 	Content   string    `gorm:"type:varchar(45);not null"`
 	Pay       int64     `gorm:"type:int;not null"`
+	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -120,7 +125,7 @@ type PlayGameTeamSortUserRelRepo struct {
 	log  *log.Helper
 }
 
-type PlayGameTeamResultUserRepo struct {
+type PlayGameTeamResultUserRelRepo struct {
 	data *Data
 	log  *log.Helper
 }
@@ -153,8 +158,8 @@ func NewPlayRoomRelRepo(data *Data, logger log.Logger) biz.PlayRoomRelRepo {
 	}
 }
 
-func NewPlayGameTeamResultUserRepo(data *Data, logger log.Logger) biz.PlayPlayGameTeamResultUserRepo {
-	return &PlayGameTeamResultUserRepo{
+func NewPlayGameTeamResultUserRepo(data *Data, logger log.Logger) biz.PlayGameTeamResultUserRelRepo {
+	return &PlayGameTeamResultUserRelRepo{
 		data: data,
 		log:  log.NewHelper(logger),
 	}
@@ -401,9 +406,10 @@ func (p *PlayGameScoreUserRelRepo) CreatePlayGameScoreUserRel(ctx context.Contex
 	playGameScoreUserRel.PlayId = pr.PlayId
 	playGameScoreUserRel.Pay = pr.Pay
 	playGameScoreUserRel.Content = pr.Content
+	playGameScoreUserRel.Status = pr.Status
 	res := p.data.DB(ctx).Table("play_game_score_user_rel").Create(&playGameScoreUserRel)
 	if res.Error != nil {
-		return nil, errors.New(500, "CREATE_PLAY_GAME_SORT_REL_ERROR", "玩法比赛比分竞猜创建失败")
+		return nil, errors.New(500, "CREATE_PLAY_GAME_SCORE_REL_ERROR", "玩法比赛比分竞猜创建失败")
 	}
 
 	return &biz.PlayGameScoreUserRel{
@@ -412,5 +418,80 @@ func (p *PlayGameScoreUserRelRepo) CreatePlayGameScoreUserRel(ctx context.Contex
 		PlayId:  playGameScoreUserRel.PlayId,
 		Pay:     playGameScoreUserRel.Pay,
 		Content: playGameScoreUserRel.Content,
+		Status:  playGameScoreUserRel.Status,
+	}, nil
+}
+
+// CreatePlayGameTeamResultUserRel .
+func (p *PlayGameTeamResultUserRelRepo) CreatePlayGameTeamResultUserRel(ctx context.Context, pr *biz.PlayGameTeamResultUserRel) (*biz.PlayGameTeamResultUserRel, error) {
+	var playGameTeamResultUserRel PlayGameTeamResultUserRel
+	playGameTeamResultUserRel.UserId = pr.UserId
+	playGameTeamResultUserRel.PlayId = pr.PlayId
+	playGameTeamResultUserRel.Pay = pr.Pay
+	playGameTeamResultUserRel.Content = pr.Content
+	playGameTeamResultUserRel.Status = pr.Status
+	res := p.data.DB(ctx).Table("play_game_team_result_user_rel").Create(&playGameTeamResultUserRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_RESULT_REL_ERROR", "玩法比赛结果竞猜创建失败")
+	}
+
+	return &biz.PlayGameTeamResultUserRel{
+		ID:      playGameTeamResultUserRel.ID,
+		UserId:  playGameTeamResultUserRel.UserId,
+		PlayId:  playGameTeamResultUserRel.PlayId,
+		Pay:     playGameTeamResultUserRel.Pay,
+		Content: playGameTeamResultUserRel.Content,
+	}, nil
+}
+
+// CreatePlayGameTeamGoalUserRel .
+func (p *PlayGameTeamGoalUserRelRepo) CreatePlayGameTeamGoalUserRel(ctx context.Context, pr *biz.PlayGameTeamGoalUserRel) (*biz.PlayGameTeamGoalUserRel, error) {
+	var playGameTeamGoalUserRel PlayGameTeamGoalUserRel
+	playGameTeamGoalUserRel.UserId = pr.UserId
+	playGameTeamGoalUserRel.PlayId = pr.PlayId
+	playGameTeamGoalUserRel.Pay = pr.Pay
+	playGameTeamGoalUserRel.TeamId = pr.TeamId
+	playGameTeamGoalUserRel.Status = pr.Status
+	playGameTeamGoalUserRel.Goal = pr.Goal
+	playGameTeamGoalUserRel.Type = pr.Type
+	res := p.data.DB(ctx).Table("play_game_team_goal_user_rel").Create(&playGameTeamGoalUserRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_GOAL_REL_ERROR", "玩法比赛进球数竞猜创建失败")
+	}
+
+	return &biz.PlayGameTeamGoalUserRel{
+		ID:     playGameTeamGoalUserRel.ID,
+		UserId: playGameTeamGoalUserRel.UserId,
+		PlayId: playGameTeamGoalUserRel.PlayId,
+		Pay:    playGameTeamGoalUserRel.Pay,
+		Status: playGameTeamGoalUserRel.Status,
+		Goal:   playGameTeamGoalUserRel.Goal,
+		TeamId: playGameTeamGoalUserRel.TeamId,
+		Type:   playGameTeamGoalUserRel.Type,
+	}, nil
+}
+
+// CreatePlayGameTeamSortUserRel .
+func (p *PlayGameTeamSortUserRelRepo) CreatePlayGameTeamSortUserRel(ctx context.Context, pr *biz.PlayGameTeamSortUserRel) (*biz.PlayGameTeamSortUserRel, error) {
+	var playGameTeamSortUserRel PlayGameTeamSortUserRel
+	playGameTeamSortUserRel.UserId = pr.UserId
+	playGameTeamSortUserRel.PlayId = pr.PlayId
+	playGameTeamSortUserRel.Pay = pr.Pay
+	playGameTeamSortUserRel.Status = pr.Status
+	playGameTeamSortUserRel.Content = pr.Content
+	playGameTeamSortUserRel.SortId = pr.SortId
+	res := p.data.DB(ctx).Table("play_game_team_sort_user_rel").Create(&playGameTeamSortUserRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_SORT_REL_ERROR", "玩法比赛排名结果竞猜创建失败")
+	}
+
+	return &biz.PlayGameTeamSortUserRel{
+		ID:      playGameTeamSortUserRel.ID,
+		UserId:  playGameTeamSortUserRel.UserId,
+		PlayId:  playGameTeamSortUserRel.PlayId,
+		Pay:     playGameTeamSortUserRel.Pay,
+		Status:  playGameTeamSortUserRel.Status,
+		Content: playGameTeamSortUserRel.Content,
+		SortId:  playGameTeamSortUserRel.SortId,
 	}, nil
 }

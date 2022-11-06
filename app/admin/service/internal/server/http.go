@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/gorilla/handlers"
 	v1 "goal/api/admin/service/v1"
 	"goal/app/admin/service/internal/conf"
 	"goal/app/admin/service/internal/service"
@@ -16,6 +17,11 @@ func NewHTTPServer(c *conf.Server, playService *service.PlayService, gameService
 		http.Middleware(
 			recovery.Recovery(),
 		),
+		http.Filter(handlers.CORS(
+			handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+			handlers.AllowedOrigins([]string{"*"}),
+		)),
 	}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
