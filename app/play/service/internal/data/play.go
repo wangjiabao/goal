@@ -1,0 +1,416 @@
+package data
+
+import (
+	"context"
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/log"
+	"goal/app/play/service/internal/biz"
+	"time"
+)
+
+type Play struct {
+	ID             int64     `gorm:"primarykey;type:int"`
+	CreateUserId   int64     `gorm:"type:int;not null"`
+	CreateUserType string    `gorm:"type:varchar(45);not null"`
+	Type           string    `gorm:"type:varchar(45);not null"`
+	StartTime      time.Time `gorm:"type:datetime;not null"`
+	EndTime        time.Time `gorm:"type:datetime;not null"`
+	CreatedAt      time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt      time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlayGameRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	GameId    int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlaySortRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	SortId    int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlayRoomRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	RoomId    int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlayGameScoreUserRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	UserId    int64     `gorm:"type:int;not null"`
+	Content   string    `gorm:"type:varchar(45);not null"`
+	Pay       int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlayGameTeamSortUserRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	UserId    int64     `gorm:"type:int;not null"`
+	Content   string    `gorm:"type:varchar(45);not null"`
+	Pay       int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlayGameTeamGoalUserRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	UserId    int64     `gorm:"type:int;not null"`
+	TeamId    int64     `gorm:"type:int;not null"`
+	Goal      int64     `gorm:"type:int;not null"`
+	Type      string    `gorm:"type:varchar(45);not null"`
+	pay       int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlayGameTeamResultUserRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	UserId    int64     `gorm:"type:int;not null"`
+	Content   string    `gorm:"type:varchar(45);not null"`
+	Pay       int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlayRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type PlayGameRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type PlaySortRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type PlayRoomRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type PlayGameTeamGoalUserRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type PlayGameScoreUserRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type PlayGameTeamSortUserRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type PlayGameTeamResultUserRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+func NewPlayRepo(data *Data, logger log.Logger) biz.PlayRepo {
+	return &PlayRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlayGameRelRepo(data *Data, logger log.Logger) biz.PlayGameRelRepo {
+	return &PlayGameRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlaySortRelRepo(data *Data, logger log.Logger) biz.PlaySortRelRepo {
+	return &PlaySortRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlayRoomRelRepo(data *Data, logger log.Logger) biz.PlayRoomRelRepo {
+	return &PlayRoomRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlayGameTeamResultUserRepo(data *Data, logger log.Logger) biz.PlayPlayGameTeamResultUserRepo {
+	return &PlayGameTeamResultUserRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+func NewPlayGameTeamSortUserRelRepo(data *Data, logger log.Logger) biz.PlayGameTeamSortUserRelRepo {
+	return &PlayGameTeamSortUserRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlayGameScoreUserRelRepo(data *Data, logger log.Logger) biz.PlayGameScoreUserRelRepo {
+	return &PlayGameScoreUserRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlayGameTeamGoalUserRelRepo(data *Data, logger log.Logger) biz.PlayGameTeamGoalUserRelRepo {
+	return &PlayGameTeamGoalUserRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func (p *PlayRepo) GetAdminCreatePlayListByType(ctx context.Context, playType string) ([]*biz.Play, error) {
+	var l []*Play
+	if result := p.data.DB(ctx).Table("goal_play").Where(&Play{CreateUserId: 1, CreateUserType: "admin", Type: playType}).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询玩法列表失败")
+	}
+
+	pl := make([]*biz.Play, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.Play{
+			ID:        v.ID,
+			StartTime: v.StartTime,
+			EndTime:   v.EndTime,
+		})
+	}
+	return pl, nil
+}
+
+func (p *PlayRepo) GetAdminCreatePlayList(ctx context.Context) ([]*biz.Play, error) {
+	var l []*Play
+	if result := p.data.DB(ctx).Table("goal_play").Where(&Play{CreateUserId: 1, CreateUserType: "admin"}).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询玩法列表失败")
+	}
+
+	pl := make([]*biz.Play, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.Play{
+			ID:   v.ID,
+			Type: v.Type,
+		})
+	}
+	return pl, nil
+}
+
+func (p *PlayRepo) GetAdminCreatePlayListByIds(ctx context.Context, ids ...int64) ([]*biz.Play, error) {
+	var l []*Play
+	if err := p.data.DB(ctx).Table("goal_play").
+		Where(&Play{CreateUserId: 1, CreateUserType: "admin"}).
+		Where("id IN (?)", ids).Find(&l).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "查询玩法列表失败")
+	}
+
+	pl := make([]*biz.Play, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.Play{
+			ID:        v.ID,
+			Type:      v.Type,
+			StartTime: v.StartTime,
+			EndTime:   v.EndTime,
+		})
+	}
+
+	return pl, nil
+}
+
+func (p *PlayRepo) GetPlayListByIds(ctx context.Context, ids ...int64) ([]*biz.Play, error) {
+	var l []*Play
+	if err := p.data.DB(ctx).Table("goal_play").Where("id IN (?)", ids).Find(&l).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "查询玩法列表失败")
+	}
+
+	pl := make([]*biz.Play, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.Play{
+			ID:        v.ID,
+			Type:      v.Type,
+			StartTime: v.StartTime,
+			EndTime:   v.EndTime,
+		})
+	}
+
+	return pl, nil
+}
+
+func (p *PlayRepo) GetPlayById(ctx context.Context, playId int64) (*biz.Play, error) {
+	var play Play
+	if result := p.data.DB(ctx).Table("goal_play").Where(&Play{ID: playId}).Find(&play); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询比赛失败")
+	}
+
+	return &biz.Play{
+		ID:             play.ID,
+		CreateUserId:   play.CreateUserId,
+		CreateUserType: play.CreateUserType,
+		Type:           play.Type,
+		StartTime:      play.StartTime,
+		EndTime:        play.EndTime,
+	}, nil
+}
+
+func (pgr *PlayGameRelRepo) GetPlayGameRelByGameId(ctx context.Context, gameId int64) ([]*biz.PlayGameRel, error) {
+	var l []*PlayGameRel
+	if result := pgr.data.DB(ctx).Table("goal_play_game_rel").Where(&PlayGameRel{GameId: gameId}).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_REL_ERROR", "查询比赛玩法关系失败")
+	}
+
+	pl := make([]*biz.PlayGameRel, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.PlayGameRel{
+			ID:     v.ID,
+			PlayId: v.PlayId,
+			GameId: v.GameId,
+		})
+	}
+	return pl, nil
+}
+
+func (psr *PlaySortRelRepo) GetPlaySortRelBySortIds(ctx context.Context, sortIds ...int64) ([]*biz.PlaySortRel, error) {
+	var l []*PlaySortRel
+	if result := psr.data.DB(ctx).Table("goal_play_game_sort_rel").Where("sort_id IN (?)", sortIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询排名玩法关系失败")
+	}
+
+	pl := make([]*biz.PlaySortRel, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.PlaySortRel{
+			ID:     v.ID,
+			PlayId: v.PlayId,
+			SortId: v.SortId,
+		})
+	}
+	return pl, nil
+}
+
+func (prr *PlayRoomRelRepo) GetPlayRoomRelByRoomId(ctx context.Context, roomId int64) ([]*biz.PlayRoomRel, error) {
+	var l []*PlayRoomRel
+	if result := prr.data.DB(ctx).Table("goal_play_room_rel").Where(&PlayRoomRel{RoomId: roomId}).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询房间内比赛玩法关系失败")
+	}
+
+	pl := make([]*biz.PlayRoomRel, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.PlayRoomRel{
+			ID:     v.ID,
+			PlayId: v.PlayId,
+			RoomId: v.RoomId,
+		})
+	}
+	return pl, nil
+}
+
+// CreatePlay .
+func (p *PlayRepo) CreatePlay(ctx context.Context, pc *biz.Play) (*biz.Play, error) {
+	var play Play
+	play.CreateUserId = pc.CreateUserId
+	play.CreateUserType = pc.CreateUserType
+	play.Type = pc.Type
+	play.StartTime = pc.StartTime
+	play.EndTime = pc.EndTime
+	res := p.data.DB(ctx).Table("goal_play").Create(&play)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_ERROR", "玩法创建失败")
+	}
+
+	return &biz.Play{
+		ID:             play.ID,
+		CreateUserId:   play.CreateUserId,
+		CreateUserType: play.CreateUserType,
+		Type:           play.Type,
+		StartTime:      play.StartTime,
+		EndTime:        play.EndTime,
+	}, nil
+}
+
+// CreatePlayGameRel .
+func (pgr *PlayGameRelRepo) CreatePlayGameRel(ctx context.Context, rel *biz.PlayGameRel) (*biz.PlayGameRel, error) {
+	var playGameRel PlayGameRel
+	playGameRel.GameId = rel.GameId
+	playGameRel.PlayId = rel.PlayId
+	res := pgr.data.DB(ctx).Table("goal_play_game_rel").Create(&playGameRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_REL_ERROR", "玩法和比赛关系创建失败")
+	}
+
+	return &biz.PlayGameRel{
+		ID:     playGameRel.ID,
+		PlayId: playGameRel.PlayId,
+		GameId: playGameRel.GameId,
+	}, nil
+}
+
+// CreatePlayRoomRel .
+func (prr *PlayRoomRelRepo) CreatePlayRoomRel(ctx context.Context, rel *biz.PlayRoomRel) (*biz.PlayRoomRel, error) {
+	var playRoomRel PlayRoomRel
+	playRoomRel.RoomId = rel.RoomId
+	playRoomRel.PlayId = rel.PlayId
+	res := prr.data.DB(ctx).Table("goal_play_room_rel").Create(&playRoomRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_ROOM_ERROR", "玩法和房间的关系创建失败")
+	}
+
+	return &biz.PlayRoomRel{
+		ID:     playRoomRel.ID,
+		RoomId: playRoomRel.RoomId,
+		PlayId: playRoomRel.PlayId,
+	}, nil
+}
+
+// CreatePlaySortRel .
+func (psr *PlaySortRelRepo) CreatePlaySortRel(ctx context.Context, rel *biz.PlaySortRel) (*biz.PlaySortRel, error) {
+	var playSortRel PlaySortRel
+	playSortRel.SortId = rel.SortId
+	playSortRel.PlayId = rel.PlayId
+	res := psr.data.DB(ctx).Table("goal_play_game_sort_rel").Create(&playSortRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_SORT_REL_ERROR", "玩法和比赛排名关系创建失败")
+	}
+
+	return &biz.PlaySortRel{
+		ID:     playSortRel.ID,
+		PlayId: playSortRel.PlayId,
+		SortId: playSortRel.SortId,
+	}, nil
+}
+
+// CreatePlayGameScoreUserRel .
+func (p *PlayGameScoreUserRelRepo) CreatePlayGameScoreUserRel(ctx context.Context, pr *biz.PlayGameScoreUserRel) (*biz.PlayGameScoreUserRel, error) {
+	var playGameScoreUserRel PlayGameScoreUserRel
+	playGameScoreUserRel.UserId = pr.UserId
+	playGameScoreUserRel.PlayId = pr.PlayId
+	playGameScoreUserRel.Pay = pr.Pay
+	playGameScoreUserRel.Content = pr.Content
+	res := p.data.DB(ctx).Table("play_game_score_user_rel").Create(&playGameScoreUserRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_SORT_REL_ERROR", "玩法比赛比分竞猜创建失败")
+	}
+
+	return &biz.PlayGameScoreUserRel{
+		ID:      playGameScoreUserRel.ID,
+		UserId:  playGameScoreUserRel.UserId,
+		PlayId:  playGameScoreUserRel.PlayId,
+		Pay:     playGameScoreUserRel.Pay,
+		Content: playGameScoreUserRel.Content,
+	}, nil
+}

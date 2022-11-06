@@ -1,0 +1,43 @@
+package data
+
+import (
+	"context"
+	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/log"
+	"goal/app/game/service/internal/biz"
+	"time"
+)
+
+type Team struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	Name      string    `gorm:"type:varchar(45);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type TeamRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+func NewTeamRepo(data *Data, logger log.Logger) biz.TeamRepo {
+	return &TeamRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func (t *TeamRepo) GetTeamByIds(ctx context.Context, ids ...int64) (map[int64]*biz.Team, error) {
+
+	var ts []*Team
+	if err := t.data.DB(ctx).Table("soccer_team").Where("id IN (?)", ids).Find(&ts).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "队伍不存在")
+	}
+
+	res := make(map[int64]*biz.Team)
+	for _, item := range ts {
+		res[item.ID] = &biz.Team{ID: item.ID, Name: item.Name}
+	}
+
+	return res, nil
+}

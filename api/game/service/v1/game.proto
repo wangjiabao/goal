@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package api.game.service.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "goal/api/game/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.game.service.v1";
+
+service Game {
+	rpc DisplayGame (DisplayGameRequest) returns (DisplayGameReply) {
+		option (google.api.http) = {
+			get: "/api/display_game/{type}"
+		};
+	};
+
+	rpc GetGameList (GetGameListRequest) returns (GetGameListReply) {
+		option (google.api.http) = {
+			get: "/api/games"
+		};
+	};
+
+	rpc GetGameSortList (GetGameSortListRequest) returns (GetGameSortListReply) {
+		option (google.api.http) = {
+			get: "/api/game/sorts"
+		};
+	};
+}
+
+message DisplayGameRequest {
+	string type = 1;
+}
+
+message DisplayGameReply {
+	int64 game_id = 1;
+	string name = 2;
+	repeated Team teams = 3;
+	message Team {
+		int64 team_id = 1;
+		string team_name = 2;
+		string team_type = 3;
+	}
+}
+
+message GetGameListRequest {
+}
+
+message GetGameListReply {
+	repeated Item items = 1;
+	message Item {
+
+		int64 game_id = 1;
+		string name = 2;
+		string start_time = 3;
+		string end_time = 4;
+		string up_end_time = 5;
+		string down_start_time = 6;
+
+		repeated Team teams = 7;
+		message Team {
+			int64 team_id = 1;
+			string team_name = 2;
+			string team_type = 3;
+		}
+	}
+}
+
+message GetGameSortListRequest {
+
+}
+
+message GetGameSortListReply {
+	repeated Sort sorts = 1;
+	message Sort {
+		int64  sort_id = 1;
+		string sort_type = 2;
+		string sort_name = 3;
+		string end_time = 4;
+	}
+}

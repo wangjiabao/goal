@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package api.user.service.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "goal/api/user/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.service.v1";
+
+service User {
+	rpc EthAuthorize (EthAuthorizeRequest) returns (EthAuthorizeReply) {
+		option (google.api.http) = {
+			post: "/api/user/eth_authorize"
+			body: "send_body"
+		};
+	};
+
+	rpc GetUser (GetUserRequest) returns (GetUserReply) {
+		option (google.api.http) = {
+			get: "/api/user"
+		};
+	};
+
+	rpc Deposit (DepositRequest) returns (DepositReply) {
+		option (google.api.http) = {
+			post: "/api/user/balance/deposit"
+			body: "send_body"
+		};
+	};
+
+	rpc Withdraw (DepositRequest) returns (DepositReply) {
+		option (google.api.http) = {
+			post: "/api/user/balance/withdraw"
+			body: "send_body"
+		};
+	};
+}
+
+message EthAuthorizeRequest {
+	message SendBody{
+		string address = 1;
+		string code = 2;
+	}
+
+	SendBody send_body = 1;
+}
+message EthAuthorizeReply {
+	string token = 1;
+}
+
+message GetUserRequest {
+
+}
+
+message GetUserReply {
+	string address = 1;
+	int64 balance = 2;
+	string avatar = 3;
+	string my_recommend_code = 4;
+}
+
+message DepositRequest {
+	message SendBody{
+		int64 amount = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message DepositReply {
+	int64 balance = 1;
+}
+
+message WithdrawRequest {
+	message SendBody{
+		int64 amount = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message WithdrawReply {
+	int64 balance = 1;
+}

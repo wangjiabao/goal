@@ -1,0 +1,229 @@
+syntax = "proto3";
+
+package api.play.service.v1;
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+
+option go_package = "goal/api/play/service/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.play.service.v1";
+
+service Play {
+	rpc AllowedPlayList (AllowedPlayListRequest) returns (AllowedPlayListReply){
+		option (google.api.http) = {
+			get: "/api/allowed_play_list/{game_id}"
+		};
+	};
+
+	rpc RoomPlayList (RoomPlayListRequest) returns (RoomPlayListReply){
+		option (google.api.http) = {
+			get: "/api/room_play_list/{room_id}"
+		};
+	};
+
+	rpc CreatePlaySort (CreatePlaySortRequest) returns (CreatePlaySortReply){
+		option (google.api.http) = {
+			post: "/api/play/sort"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlayGame (CreatePlayGameRequest) returns (CreatePlayGameReply){
+		option (google.api.http) = {
+			post: "/api/play/game"
+			body: "send_body"
+		};
+	};
+
+	rpc RoomAccount (RoomAccountRequest) returns (RoomAccountReply){
+		option (google.api.http) = {
+			post: "/api/room/account"
+			body: "send_body"
+		};
+	};
+
+	rpc CreateRoom (CreateRoomRequest) returns (CreateRoomReply){
+		option (google.api.http) = {
+			post: "/api/room"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlayGameScore (CreatePlayGameScoreRequest) returns (CreatePlayGameScoreReply){
+		option (google.api.http) = {
+			post: "/api/play/game_score"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlayGameResult (CreatePlayGameResultRequest) returns (CreatePlayGameResultReply){
+		option (google.api.http) = {
+			post: "/api/play/game_result"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlayGameGoal (CreatePlayGameGoalRequest) returns (CreatePlayGameGoalReply){
+		option (google.api.http) = {
+			post: "/api/play/game_goal"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlayGameSort (CreatePlayGameSortRequest) returns (CreatePlayGameSortReply){
+		option (google.api.http) = {
+			post: "/api/play/game_sort"
+			body: "send_body"
+		};
+	};
+}
+
+message AllowedPlayListRequest {
+	int64 game_id = 1;
+}
+
+message AllowedPlayListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 ID = 1;
+		string Type = 2;
+		string StartTime = 3;
+		string EndTime = 4;
+	}
+}
+
+message RoomPlayListRequest {
+	int64 room_id = 1;
+}
+
+message RoomPlayListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 ID = 1;
+		string Type = 2;
+		string StartTime = 3;
+		string EndTime = 4;
+	}
+}
+
+message CreatePlaySortRequest {
+	message SendBody{
+		string start_time = 1;
+		string end_time = 2;
+		string play_type = 3;
+		int64 sort_id = 4;
+		int64 room_id = 5;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlaySortReply {
+	int64 play_id = 1;
+}
+
+message CreatePlayGameRequest {
+	message SendBody{
+		string start_time = 1;
+		string end_time = 2;
+		string play_type = 3;
+		int64 game_id = 4;
+		int64 room_id = 5;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameReply {
+	int64 play_id = 1;
+}
+
+message RoomAccountRequest {
+	message SendBody{
+		string account = 1 [(validate.rules).string = {min_len: 15, max_len: 45}];
+	}
+
+	SendBody send_body = 1;
+}
+
+message RoomAccountReply {
+	int64 RoomId = 1;
+	string RoomType = 2;
+}
+
+message CreateRoomRequest {
+	message SendBody{
+		string room_type = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreateRoomReply {
+	int64 RoomId = 1;
+	string Account = 2;
+	string RoomType = 3;
+}
+
+message CreatePlayGameScoreRequest {
+	message SendBody{
+		int64 play_id = 1;
+		int64 pay = 2;
+		int64 red_score = 3;
+		int64 blue_score = 4;
+		string play_type = 5;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameScoreReply{
+	int64 play_id = 3;
+}
+
+message CreatePlayGameResultRequest {
+	message SendBody{
+		int64 play_id = 1;
+		int64 pay = 2;
+		int64 result = 3;
+		string play_type = 4;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameResultReply{
+	int64 play_id = 3;
+}
+
+message CreatePlayGameSortRequest {
+	message SendBody{
+		int64 play_id = 1;
+		int64 pay = 2;
+		string content = 3;
+		string play_type = 4;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameSortReply{
+	int64 play_id = 3;
+}
+
+message CreatePlayGameGoalRequest {
+	message SendBody{
+		int64 play_id = 1;
+		int64 pay = 2;
+		string team_type = 3;
+		int64 goal = 4;
+		string play_type = 5;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameGoalReply{
+	int64 play_id = 3;
+}

@@ -1,0 +1,17 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+data:
+  database:
+    driver: mysql
+    source: root:wang111000@tcp(127.0.0.1:3306)/goal?parseTime=true
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+auth:
+  jwt_key: d57993e6ea44bce2f340d5d6cc914064
