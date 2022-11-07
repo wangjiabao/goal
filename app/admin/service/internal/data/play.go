@@ -27,6 +27,14 @@ type PlayGameRel struct {
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
 
+type PlaySortRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	SortId    int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type PlayGameScoreUserRel struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	PlayId    int64     `gorm:"type:int;not null"`
@@ -44,6 +52,11 @@ type PlayRepo struct {
 }
 
 type PlayGameRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type PlaySortRelRepo struct {
 	data *Data
 	log  *log.Helper
 }
@@ -69,6 +82,13 @@ func NewPlayGameScoreUserRelRepo(data *Data, logger log.Logger) biz.PlayGameScor
 
 func NewPlayGameRelRepo(data *Data, logger log.Logger) biz.PlayGameRelRepo {
 	return &PlayGameRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlaySortRelRepo(data *Data, logger log.Logger) biz.PlaySortRelRepo {
+	return &PlaySortRelRepo{
 		data: data,
 		log:  log.NewHelper(logger),
 	}
@@ -140,4 +160,61 @@ func (psr *PlayGameScoreUserRelRepo) SetRewarded(ctx context.Context, userId int
 	}
 
 	return nil
+}
+
+// CreatePlay .
+func (p *PlayRepo) CreatePlay(ctx context.Context, pc *biz.Play) (*biz.Play, error) {
+	var play Play
+	play.CreateUserId = pc.CreateUserId
+	play.CreateUserType = pc.CreateUserType
+	play.Type = pc.Type
+	play.StartTime = pc.StartTime
+	play.EndTime = pc.EndTime
+	res := p.data.DB(ctx).Table("goal_play").Create(&play)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_ERROR", "玩法创建失败")
+	}
+
+	return &biz.Play{
+		ID:             play.ID,
+		CreateUserId:   play.CreateUserId,
+		CreateUserType: play.CreateUserType,
+		Type:           play.Type,
+		StartTime:      play.StartTime,
+		EndTime:        play.EndTime,
+	}, nil
+}
+
+// CreatePlayGameRel .
+func (pgr *PlayGameRelRepo) CreatePlayGameRel(ctx context.Context, rel *biz.PlayGameRel) (*biz.PlayGameRel, error) {
+	var playGameRel PlayGameRel
+	playGameRel.GameId = rel.GameId
+	playGameRel.PlayId = rel.PlayId
+	res := pgr.data.DB(ctx).Table("goal_play_game_rel").Create(&playGameRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_REL_ERROR", "玩法和比赛关系创建失败")
+	}
+
+	return &biz.PlayGameRel{
+		ID:     playGameRel.ID,
+		PlayId: playGameRel.PlayId,
+		GameId: playGameRel.GameId,
+	}, nil
+}
+
+// CreatePlaySortRel .
+func (psr *PlaySortRelRepo) CreatePlaySortRel(ctx context.Context, rel *biz.PlaySortRel) (*biz.PlaySortRel, error) {
+	var playSortRel PlaySortRel
+	playSortRel.SortId = rel.SortId
+	playSortRel.PlayId = rel.PlayId
+	res := psr.data.DB(ctx).Table("goal_play_game_sort_rel").Create(&playSortRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_SORT_REL_ERROR", "玩法和比赛排名关系创建失败")
+	}
+
+	return &biz.PlaySortRel{
+		ID:     playSortRel.ID,
+		PlayId: playSortRel.PlayId,
+		SortId: playSortRel.SortId,
+	}, nil
 }

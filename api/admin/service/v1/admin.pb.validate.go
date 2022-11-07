@@ -1883,6 +1883,476 @@ var _ interface {
 	ErrorName() string
 } = SaveDisplayGameIndexReplyValidationError{}
 
+// Validate checks the field values on CreatePlayGameRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreatePlayGameRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreatePlayGameRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreatePlayGameRequestMultiError, or nil if none found.
+func (m *CreatePlayGameRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreatePlayGameRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreatePlayGameRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreatePlayGameRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreatePlayGameRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CreatePlayGameRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreatePlayGameRequestMultiError is an error wrapping multiple validation
+// errors returned by CreatePlayGameRequest.ValidateAll() if the designated
+// constraints aren't met.
+type CreatePlayGameRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreatePlayGameRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreatePlayGameRequestMultiError) AllErrors() []error { return m }
+
+// CreatePlayGameRequestValidationError is the validation error returned by
+// CreatePlayGameRequest.Validate if the designated constraints aren't met.
+type CreatePlayGameRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreatePlayGameRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreatePlayGameRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreatePlayGameRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreatePlayGameRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreatePlayGameRequestValidationError) ErrorName() string {
+	return "CreatePlayGameRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreatePlayGameRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreatePlayGameRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreatePlayGameRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreatePlayGameRequestValidationError{}
+
+// Validate checks the field values on CreatePlayGameReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreatePlayGameReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreatePlayGameReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreatePlayGameReplyMultiError, or nil if none found.
+func (m *CreatePlayGameReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreatePlayGameReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for PlayId
+
+	if len(errors) > 0 {
+		return CreatePlayGameReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreatePlayGameReplyMultiError is an error wrapping multiple validation
+// errors returned by CreatePlayGameReply.ValidateAll() if the designated
+// constraints aren't met.
+type CreatePlayGameReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreatePlayGameReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreatePlayGameReplyMultiError) AllErrors() []error { return m }
+
+// CreatePlayGameReplyValidationError is the validation error returned by
+// CreatePlayGameReply.Validate if the designated constraints aren't met.
+type CreatePlayGameReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreatePlayGameReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreatePlayGameReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreatePlayGameReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreatePlayGameReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreatePlayGameReplyValidationError) ErrorName() string {
+	return "CreatePlayGameReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreatePlayGameReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreatePlayGameReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreatePlayGameReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreatePlayGameReplyValidationError{}
+
+// Validate checks the field values on CreatePlaySortRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreatePlaySortRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreatePlaySortRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreatePlaySortRequestMultiError, or nil if none found.
+func (m *CreatePlaySortRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreatePlaySortRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreatePlaySortRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreatePlaySortRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreatePlaySortRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CreatePlaySortRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreatePlaySortRequestMultiError is an error wrapping multiple validation
+// errors returned by CreatePlaySortRequest.ValidateAll() if the designated
+// constraints aren't met.
+type CreatePlaySortRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreatePlaySortRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreatePlaySortRequestMultiError) AllErrors() []error { return m }
+
+// CreatePlaySortRequestValidationError is the validation error returned by
+// CreatePlaySortRequest.Validate if the designated constraints aren't met.
+type CreatePlaySortRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreatePlaySortRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreatePlaySortRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreatePlaySortRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreatePlaySortRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreatePlaySortRequestValidationError) ErrorName() string {
+	return "CreatePlaySortRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreatePlaySortRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreatePlaySortRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreatePlaySortRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreatePlaySortRequestValidationError{}
+
+// Validate checks the field values on CreatePlaySortReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreatePlaySortReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreatePlaySortReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreatePlaySortReplyMultiError, or nil if none found.
+func (m *CreatePlaySortReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreatePlaySortReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for PlayId
+
+	if len(errors) > 0 {
+		return CreatePlaySortReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreatePlaySortReplyMultiError is an error wrapping multiple validation
+// errors returned by CreatePlaySortReply.ValidateAll() if the designated
+// constraints aren't met.
+type CreatePlaySortReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreatePlaySortReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreatePlaySortReplyMultiError) AllErrors() []error { return m }
+
+// CreatePlaySortReplyValidationError is the validation error returned by
+// CreatePlaySortReply.Validate if the designated constraints aren't met.
+type CreatePlaySortReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreatePlaySortReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreatePlaySortReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreatePlaySortReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreatePlaySortReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreatePlaySortReplyValidationError) ErrorName() string {
+	return "CreatePlaySortReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreatePlaySortReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreatePlaySortReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreatePlaySortReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreatePlaySortReplyValidationError{}
+
 // Validate checks the field values on GamePlayGrantRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -2564,3 +3034,223 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SaveDisplayGameIndexRequest_SendBodyValidationError{}
+
+// Validate checks the field values on CreatePlayGameRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreatePlayGameRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreatePlayGameRequest_SendBody with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// CreatePlayGameRequest_SendBodyMultiError, or nil if none found.
+func (m *CreatePlayGameRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreatePlayGameRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for StartTime
+
+	// no validation rules for EndTime
+
+	// no validation rules for PlayType
+
+	// no validation rules for GameId
+
+	if len(errors) > 0 {
+		return CreatePlayGameRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreatePlayGameRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by CreatePlayGameRequest_SendBody.ValidateAll()
+// if the designated constraints aren't met.
+type CreatePlayGameRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreatePlayGameRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreatePlayGameRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// CreatePlayGameRequest_SendBodyValidationError is the validation error
+// returned by CreatePlayGameRequest_SendBody.Validate if the designated
+// constraints aren't met.
+type CreatePlayGameRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreatePlayGameRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreatePlayGameRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreatePlayGameRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreatePlayGameRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreatePlayGameRequest_SendBodyValidationError) ErrorName() string {
+	return "CreatePlayGameRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreatePlayGameRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreatePlayGameRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreatePlayGameRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreatePlayGameRequest_SendBodyValidationError{}
+
+// Validate checks the field values on CreatePlaySortRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreatePlaySortRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreatePlaySortRequest_SendBody with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// CreatePlaySortRequest_SendBodyMultiError, or nil if none found.
+func (m *CreatePlaySortRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreatePlaySortRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for StartTime
+
+	// no validation rules for EndTime
+
+	// no validation rules for SortId
+
+	if len(errors) > 0 {
+		return CreatePlaySortRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreatePlaySortRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by CreatePlaySortRequest_SendBody.ValidateAll()
+// if the designated constraints aren't met.
+type CreatePlaySortRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreatePlaySortRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreatePlaySortRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// CreatePlaySortRequest_SendBodyValidationError is the validation error
+// returned by CreatePlaySortRequest_SendBody.Validate if the designated
+// constraints aren't met.
+type CreatePlaySortRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreatePlaySortRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreatePlaySortRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreatePlaySortRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreatePlaySortRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreatePlaySortRequest_SendBodyValidationError) ErrorName() string {
+	return "CreatePlaySortRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreatePlaySortRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreatePlaySortRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreatePlaySortRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreatePlaySortRequest_SendBodyValidationError{}

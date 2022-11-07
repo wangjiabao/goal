@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
-	"goal/app/play/service/internal/biz"
+	"goal/app/admin/service/internal/biz"
 	"gorm.io/gorm"
 	"time"
 )
@@ -45,4 +45,23 @@ func (s *SortRepo) GetGameSortById(ctx context.Context, gameId int64) (*biz.Sort
 		EndTime: sort.EndTime,
 		Type:    sort.Type,
 	}, nil
+}
+
+func (s *SortRepo) GetGameSortList(ctx context.Context) ([]*biz.Sort, error) {
+	var gameSort []*Sort
+	if err := s.data.DB(ctx).Table("soccer_game_team_sort").Find(&gameSort).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "比赛排名不存在")
+	}
+
+	res := make([]*biz.Sort, 0)
+	for _, item := range gameSort {
+		res = append(res, &biz.Sort{
+			ID:       item.ID,
+			SortName: item.SortName,
+			Type:     item.Type,
+			EndTime:  item.EndTime,
+		})
+	}
+
+	return res, nil
 }

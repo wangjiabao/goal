@@ -19,15 +19,21 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationAdminCreatePlayGame = "/api.admin.service.v1.Admin/CreatePlayGame"
+const OperationAdminCreatePlaySort = "/api.admin.service.v1.Admin/CreatePlaySort"
 const OperationAdminGamePlayGrant = "/api.admin.service.v1.Admin/GamePlayGrant"
 
 type AdminHTTPServer interface {
+	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
+	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
 	GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error)
 }
 
 func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/goal_admin/play/game/grant", _Admin_GamePlayGrant0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/play/game", _Admin_CreatePlayGame0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/play/sort", _Admin_CreatePlaySort0_HTTP_Handler(srv))
 }
 
 func _Admin_GamePlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
@@ -52,7 +58,53 @@ func _Admin_GamePlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Conte
 	}
 }
 
+func _Admin_CreatePlayGame0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreatePlayGameRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminCreatePlayGame)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreatePlayGame(ctx, req.(*CreatePlayGameRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreatePlayGameReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Admin_CreatePlaySort0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreatePlaySortRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminCreatePlaySort)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreatePlaySort(ctx, req.(*CreatePlaySortRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreatePlaySortReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AdminHTTPClient interface {
+	CreatePlayGame(ctx context.Context, req *CreatePlayGameRequest, opts ...http.CallOption) (rsp *CreatePlayGameReply, err error)
+	CreatePlaySort(ctx context.Context, req *CreatePlaySortRequest, opts ...http.CallOption) (rsp *CreatePlaySortReply, err error)
 	GamePlayGrant(ctx context.Context, req *GamePlayGrantRequest, opts ...http.CallOption) (rsp *GamePlayGrantReply, err error)
 }
 
@@ -62,6 +114,32 @@ type AdminHTTPClientImpl struct {
 
 func NewAdminHTTPClient(client *http.Client) AdminHTTPClient {
 	return &AdminHTTPClientImpl{client}
+}
+
+func (c *AdminHTTPClientImpl) CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...http.CallOption) (*CreatePlayGameReply, error) {
+	var out CreatePlayGameReply
+	pattern := "/api/goal_admin/play/game"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminCreatePlayGame))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) CreatePlaySort(ctx context.Context, in *CreatePlaySortRequest, opts ...http.CallOption) (*CreatePlaySortReply, error) {
+	var out CreatePlaySortReply
+	pattern := "/api/goal_admin/play/sort"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminCreatePlaySort))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
 }
 
 func (c *AdminHTTPClientImpl) GamePlayGrant(ctx context.Context, in *GamePlayGrantRequest, opts ...http.CallOption) (*GamePlayGrantReply, error) {
@@ -103,7 +181,7 @@ func RegisterGameHTTPServer(s *http.Server, srv GameHTTPServer) {
 	r.GET("/api/goal_admin/game/List", _Game_GetGameList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/display_game/index", _Game_DisplayGameIndex0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/display_game/index", _Game_SaveDisplayGameIndex0_HTTP_Handler(srv))
-	r.GET("/api/game/sorts", _Game_GetGameSortList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/sorts", _Game_GetGameSortList0_HTTP_Handler(srv))
 }
 
 func _Game_CreateGame0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
@@ -323,7 +401,7 @@ func (c *GameHTTPClientImpl) GetGameList(ctx context.Context, in *GetGameListReq
 
 func (c *GameHTTPClientImpl) GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...http.CallOption) (*GetGameSortListReply, error) {
 	var out GetGameSortListReply
-	pattern := "/api/game/sorts"
+	pattern := "/api/goal_admin/sorts"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGameGetGameSortList))
 	opts = append(opts, http.PathTemplate(pattern))

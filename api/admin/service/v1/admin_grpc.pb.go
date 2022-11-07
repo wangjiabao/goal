@@ -23,6 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdminClient interface {
 	GamePlayGrant(ctx context.Context, in *GamePlayGrantRequest, opts ...grpc.CallOption) (*GamePlayGrantReply, error)
+	CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...grpc.CallOption) (*CreatePlayGameReply, error)
+	CreatePlaySort(ctx context.Context, in *CreatePlaySortRequest, opts ...grpc.CallOption) (*CreatePlaySortReply, error)
 }
 
 type adminClient struct {
@@ -42,11 +44,31 @@ func (c *adminClient) GamePlayGrant(ctx context.Context, in *GamePlayGrantReques
 	return out, nil
 }
 
+func (c *adminClient) CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...grpc.CallOption) (*CreatePlayGameReply, error) {
+	out := new(CreatePlayGameReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/CreatePlayGame", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) CreatePlaySort(ctx context.Context, in *CreatePlaySortRequest, opts ...grpc.CallOption) (*CreatePlaySortReply, error) {
+	out := new(CreatePlaySortReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/CreatePlaySort", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServer is the server API for Admin service.
 // All implementations must embed UnimplementedAdminServer
 // for forward compatibility
 type AdminServer interface {
 	GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error)
+	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
+	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
 	mustEmbedUnimplementedAdminServer()
 }
 
@@ -56,6 +78,12 @@ type UnimplementedAdminServer struct {
 
 func (UnimplementedAdminServer) GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GamePlayGrant not implemented")
+}
+func (UnimplementedAdminServer) CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePlayGame not implemented")
+}
+func (UnimplementedAdminServer) CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePlaySort not implemented")
 }
 func (UnimplementedAdminServer) mustEmbedUnimplementedAdminServer() {}
 
@@ -88,6 +116,42 @@ func _Admin_GamePlayGrant_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Admin_CreatePlayGame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlayGameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).CreatePlayGame(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/CreatePlayGame",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).CreatePlayGame(ctx, req.(*CreatePlayGameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_CreatePlaySort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlaySortRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).CreatePlaySort(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/CreatePlaySort",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).CreatePlaySort(ctx, req.(*CreatePlaySortRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Admin_ServiceDesc is the grpc.ServiceDesc for Admin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +162,14 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GamePlayGrant",
 			Handler:    _Admin_GamePlayGrant_Handler,
+		},
+		{
+			MethodName: "CreatePlayGame",
+			Handler:    _Admin_CreatePlayGame_Handler,
+		},
+		{
+			MethodName: "CreatePlaySort",
+			Handler:    _Admin_CreatePlaySort_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

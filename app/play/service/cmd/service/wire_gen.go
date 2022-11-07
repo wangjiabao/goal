@@ -45,7 +45,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logg
 	roomRepo := data.NewRoomRepo(dataData, logger)
 	roomUserRelRepo := data.NewRoomUserRelRepo(dataData, logger)
 	gameRepo := data.NewGameRepo(dataData, logger)
-	sortRepo := data.NewSortGRepo(dataData, logger)
+	sortRepo := data.NewSortRepo(dataData, logger)
 	roomUseCase := biz.NewRoomUseCase(roomRepo, roomUserRelRepo, playRepo, gameRepo, playSortRelRepo, playRoomRelRepo, playGameRelRepo, sortRepo, transaction, logger)
 	playService := service.NewPlayService(playUseCase, roomUseCase, logger)
 	httpServer := server.NewHTTPServer(confServer, auth, playService, logger)

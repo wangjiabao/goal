@@ -16,6 +16,20 @@ service Admin {
 			body: "send_body"
 		};
 	};
+
+	rpc CreatePlayGame (CreatePlayGameRequest) returns (CreatePlayGameReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play/game"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlaySort (CreatePlaySortRequest) returns (CreatePlaySortReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play/sort"
+			body: "send_body"
+		};
+	};
 }
 
 service Game {
@@ -60,7 +74,7 @@ service Game {
 
 	rpc GetGameSortList (GetGameSortListRequest) returns (GetGameSortListReply) {
 		option (google.api.http) = {
-			get: "/api/game/sorts"
+			get: "/api/goal_admin/sorts"
 		};
 	};
 }
@@ -189,4 +203,33 @@ message SaveDisplayGameIndexRequest {
 
 message SaveDisplayGameIndexReply {
 	int64 game_id = 1;
+}
+
+message CreatePlayGameRequest {
+	message SendBody{
+		string start_time = 1;
+		string end_time = 2;
+		string play_type = 3;
+		int64 game_id = 4;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameReply {
+	int64 play_id = 1;
+}
+
+message CreatePlaySortRequest {
+	message SendBody{
+		string start_time = 1;
+		string end_time = 2;
+		int64 sort_id = 4;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlaySortReply {
+	int64 play_id = 1;
 }

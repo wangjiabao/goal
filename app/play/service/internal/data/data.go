@@ -19,7 +19,7 @@ import (
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(NewData, NewDB, NewRedis,
 	NewPlayRepo, NewPlayGameRelRepo, NewPlaySortRelRepo, NewRoomUserRelRepo,
-	NewRoomRepo, NewPlayRoomRelRepo, NewGameRepo, NewSortGRepo,
+	NewRoomRepo, NewPlayRoomRelRepo, NewGameRepo, NewSortRepo,
 	NewPlayGameTeamResultUserRepo, NewPlayGameTeamSortUserRelRepo,
 	NewPlayGameScoreUserRelRepo, NewPlayGameTeamGoalUserRelRepo,
 	NewUserBalanceRepo, NewUserProxyRepo, NewTransaction,
