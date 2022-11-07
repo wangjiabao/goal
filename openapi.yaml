@@ -47,24 +47,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/goal_admin/game/List:
-        get:
-            tags:
-                - Game
-            operationId: Game_GetGameList
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetGameListReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
     /api/goal_admin/game/create:
         post:
             tags:
@@ -132,6 +114,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/GetGameReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/game_List:
+        get:
+            tags:
+                - Game
+            operationId: Game_GetGameList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetGameListReply'
                 default:
                     description: Default error response
                     content:
