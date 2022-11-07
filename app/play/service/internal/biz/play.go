@@ -796,9 +796,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 	if nil != err {
 		return nil, err
 	}
-	if "game_team_goal" != play.Type {
-		return nil, errors.New(500, "PLAY_ERROR", "玩法类型不匹配")
-	}
+
 	if "game_team_goal_all" != req.SendBody.PlayType && "game_team_goal_up" != req.SendBody.PlayType && "game_team_goal_down" != req.SendBody.PlayType {
 		return nil, errors.New(500, "PLAY_ERROR", "玩法类型不匹配")
 	}
