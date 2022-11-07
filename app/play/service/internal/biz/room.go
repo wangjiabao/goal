@@ -114,10 +114,8 @@ func (r *RoomUseCase) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest)
 	if "game_team_goal" != req.SendBody.RoomType && // 验证type类型
 		"game_score" != req.SendBody.RoomType &&
 		"game_team_sort" != req.SendBody.RoomType &&
-		"game_team_result" != req.SendBody.RoomType &&
-		"game_team_goal_up" != req.SendBody.RoomType &&
-		"game_team_goal_down" != req.SendBody.RoomType {
-		return nil, errors.New(500, "TIME_ERROR", "玩法类型输入错误")
+		"game_team_result" != req.SendBody.RoomType {
+		return nil, errors.New(500, "TIME_ERROR", "房间类型输入错误")
 	}
 
 	userId, _, err = getUserFromJwt(ctx) // 获取用户id
