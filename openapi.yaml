@@ -120,7 +120,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/goal_admin/game_List:
+    /api/goal_admin/games:
         get:
             tags:
                 - Game

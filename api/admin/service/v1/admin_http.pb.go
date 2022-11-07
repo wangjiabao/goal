@@ -180,7 +180,7 @@ func RegisterGameHTTPServer(s *http.Server, srv GameHTTPServer) {
 	r.POST("/api/goal_admin/game/create", _Game_CreateGame0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/game/update", _Game_UpdateGame0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/game/{game_id}", _Game_GetGame0_HTTP_Handler(srv))
-	r.GET("/api/goal_admin/game_List", _Game_GetGameList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/games", _Game_GetGameList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/display_game/index", _Game_DisplayGameIndex0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/display_game/index", _Game_SaveDisplayGameIndex0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/sort/create", _Game_CreateSort0_HTTP_Handler(srv))
@@ -427,7 +427,7 @@ func (c *GameHTTPClientImpl) GetGame(ctx context.Context, in *GetGameRequest, op
 
 func (c *GameHTTPClientImpl) GetGameList(ctx context.Context, in *GetGameListRequest, opts ...http.CallOption) (*GetGameListReply, error) {
 	var out GetGameListReply
-	pattern := "/api/goal_admin/game_List"
+	pattern := "/api/goal_admin/games"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGameGetGameList))
 	opts = append(opts, http.PathTemplate(pattern))

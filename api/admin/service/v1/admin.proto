@@ -55,7 +55,7 @@ service Game {
 
 	rpc GetGameList (GetGameListRequest) returns (GetGameListReply) {
 		option (google.api.http) = {
-			get: "/api/goal_admin/game_List"
+			get: "/api/goal_admin/games"
 		};
 	};
 
