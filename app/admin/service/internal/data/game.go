@@ -180,7 +180,7 @@ func (g *GameRepo) CreateDisplayGame(ctx context.Context, gameId int64) (*biz.Di
 	}
 
 	return &biz.DisplayGame{
-		ID: displayGame.ID,
+		GameId: displayGame.GameId,
 	}, nil
 }
 

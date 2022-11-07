@@ -66,6 +66,11 @@ type PlayGameScoreUserRelRepo struct {
 	log  *log.Helper
 }
 
+type PlayGameTeamResultUserRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
 func NewPlayRepo(data *Data, logger log.Logger) biz.PlayRepo {
 	return &PlayRepo{
 		data: data,
@@ -75,6 +80,13 @@ func NewPlayRepo(data *Data, logger log.Logger) biz.PlayRepo {
 
 func NewPlayGameScoreUserRelRepo(data *Data, logger log.Logger) biz.PlayGameScoreUserRelRepo {
 	return &PlayGameScoreUserRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlayGameTeamResultUserRelRepo(data *Data, logger log.Logger) biz.PlayGameTeamResultUserRelRepo {
+	return &PlayGameTeamResultUserRelRepo{
 		data: data,
 		log:  log.NewHelper(logger),
 	}
@@ -156,7 +168,39 @@ func (psr *PlayGameScoreUserRelRepo) SetRewarded(ctx context.Context, userId int
 	if err = psr.data.DB(ctx).Table("play_game_score_user_rel").
 		Where("user_id=?", userId).
 		Update("status", "rewarded").Error; nil != err {
-		return errors.NotFound("user balance err", "user balance not found")
+		return errors.NotFound("play game score rel error", "play game score rel found")
+	}
+
+	return nil
+}
+
+func (pgtR *PlayGameTeamResultUserRelRepo) GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*biz.PlayGameTeamResultUserRel, error) {
+	var l []*PlayGameScoreUserRel
+	if result := pgtR.data.DB(ctx).Table("play_game_team_result_user_rel").Where("play_id IN (?)", playIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_TEAM_RESULT_USER_ERROR", "查询比赛结果玩法用户关系失败")
+	}
+
+	pl := make(map[int64][]*biz.PlayGameTeamResultUserRel, 0)
+	for _, v := range l {
+		pl[v.PlayId] = append(pl[v.PlayId], &biz.PlayGameTeamResultUserRel{
+			ID:      v.ID,
+			PlayId:  v.PlayId,
+			UserId:  v.UserId,
+			Content: v.Content,
+			Pay:     v.Pay,
+			Status:  v.Status,
+		})
+	}
+	return pl, nil
+}
+
+// SetRewarded 在事务中使用
+func (pgtR *PlayGameTeamResultUserRelRepo) SetRewarded(ctx context.Context, userId int64) error {
+	var err error
+	if err = pgtR.data.DB(ctx).Table("play_game_team_result_user_rel").
+		Where("user_id=?", userId).
+		Update("status", "rewarded").Error; nil != err {
+		return errors.NotFound("play game team result rel error", "play game team result rel not found")
 	}
 
 	return nil

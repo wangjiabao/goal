@@ -84,6 +84,19 @@ service Game {
 			get: "/api/goal_admin/sorts"
 		};
 	};
+
+	rpc GetTeamList (GetTeamListRequest) returns (GetTeamListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/team/list"
+		};
+	};
+
+	rpc CreateTeam (CreateTeamRequest) returns (CreateTeamReply) {
+		option (google.api.http) = {
+			post: "/api/goal_admin/team/create"
+			body: "send_body"
+		};
+	};
 }
 
 message GamePlayGrantRequest {
@@ -253,4 +266,28 @@ message CreateSortRequest {
 
 message CreateSortReply {
 	int64 sort_id = 1;
+}
+
+message GetTeamListRequest {
+
+}
+
+message GetTeamListReply {
+	repeated Team teams = 1;
+	message Team {
+		int64  team_id = 1;
+		string team_name = 3;
+	}
+}
+
+message CreateTeamRequest {
+	message SendBody{
+		string name =1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreateTeamReply {
+	int64 team_id = 1;
 }

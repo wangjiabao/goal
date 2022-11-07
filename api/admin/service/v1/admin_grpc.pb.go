@@ -188,6 +188,8 @@ type GameClient interface {
 	SaveDisplayGameIndex(ctx context.Context, in *SaveDisplayGameIndexRequest, opts ...grpc.CallOption) (*SaveDisplayGameIndexReply, error)
 	CreateSort(ctx context.Context, in *CreateSortRequest, opts ...grpc.CallOption) (*CreateSortReply, error)
 	GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error)
+	GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...grpc.CallOption) (*GetTeamListReply, error)
+	CreateTeam(ctx context.Context, in *CreateTeamRequest, opts ...grpc.CallOption) (*CreateTeamReply, error)
 }
 
 type gameClient struct {
@@ -270,6 +272,24 @@ func (c *gameClient) GetGameSortList(ctx context.Context, in *GetGameSortListReq
 	return out, nil
 }
 
+func (c *gameClient) GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...grpc.CallOption) (*GetTeamListReply, error) {
+	out := new(GetTeamListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/GetTeamList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameClient) CreateTeam(ctx context.Context, in *CreateTeamRequest, opts ...grpc.CallOption) (*CreateTeamReply, error) {
+	out := new(CreateTeamReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/CreateTeam", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServer is the server API for Game service.
 // All implementations must embed UnimplementedGameServer
 // for forward compatibility
@@ -282,6 +302,8 @@ type GameServer interface {
 	SaveDisplayGameIndex(context.Context, *SaveDisplayGameIndexRequest) (*SaveDisplayGameIndexReply, error)
 	CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error)
 	GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error)
+	GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error)
+	CreateTeam(context.Context, *CreateTeamRequest) (*CreateTeamReply, error)
 	mustEmbedUnimplementedGameServer()
 }
 
@@ -312,6 +334,12 @@ func (UnimplementedGameServer) CreateSort(context.Context, *CreateSortRequest) (
 }
 func (UnimplementedGameServer) GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGameSortList not implemented")
+}
+func (UnimplementedGameServer) GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTeamList not implemented")
+}
+func (UnimplementedGameServer) CreateTeam(context.Context, *CreateTeamRequest) (*CreateTeamReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTeam not implemented")
 }
 func (UnimplementedGameServer) mustEmbedUnimplementedGameServer() {}
 
@@ -470,6 +498,42 @@ func _Game_GetGameSortList_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Game_GetTeamList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTeamListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).GetTeamList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Game/GetTeamList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).GetTeamList(ctx, req.(*GetTeamListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Game_CreateTeam_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTeamRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).CreateTeam(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Game/CreateTeam",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).CreateTeam(ctx, req.(*CreateTeamRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Game_ServiceDesc is the grpc.ServiceDesc for Game service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -508,6 +572,14 @@ var Game_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetGameSortList",
 			Handler:    _Game_GetGameSortList_Handler,
+		},
+		{
+			MethodName: "GetTeamList",
+			Handler:    _Game_GetTeamList_Handler,
+		},
+		{
+			MethodName: "CreateTeam",
+			Handler:    _Game_CreateTeam_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

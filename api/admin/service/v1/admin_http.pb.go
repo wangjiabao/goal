@@ -157,20 +157,24 @@ func (c *AdminHTTPClientImpl) GamePlayGrant(ctx context.Context, in *GamePlayGra
 
 const OperationGameCreateGame = "/api.admin.service.v1.Game/CreateGame"
 const OperationGameCreateSort = "/api.admin.service.v1.Game/CreateSort"
+const OperationGameCreateTeam = "/api.admin.service.v1.Game/CreateTeam"
 const OperationGameDisplayGameIndex = "/api.admin.service.v1.Game/DisplayGameIndex"
 const OperationGameGetGame = "/api.admin.service.v1.Game/GetGame"
 const OperationGameGetGameList = "/api.admin.service.v1.Game/GetGameList"
 const OperationGameGetGameSortList = "/api.admin.service.v1.Game/GetGameSortList"
+const OperationGameGetTeamList = "/api.admin.service.v1.Game/GetTeamList"
 const OperationGameSaveDisplayGameIndex = "/api.admin.service.v1.Game/SaveDisplayGameIndex"
 const OperationGameUpdateGame = "/api.admin.service.v1.Game/UpdateGame"
 
 type GameHTTPServer interface {
 	CreateGame(context.Context, *CreateGameRequest) (*CreateGameReply, error)
 	CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error)
+	CreateTeam(context.Context, *CreateTeamRequest) (*CreateTeamReply, error)
 	DisplayGameIndex(context.Context, *DisplayGameIndexRequest) (*DisplayGameIndexReply, error)
 	GetGame(context.Context, *GetGameRequest) (*GetGameReply, error)
 	GetGameList(context.Context, *GetGameListRequest) (*GetGameListReply, error)
 	GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error)
+	GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error)
 	SaveDisplayGameIndex(context.Context, *SaveDisplayGameIndexRequest) (*SaveDisplayGameIndexReply, error)
 	UpdateGame(context.Context, *UpdateGameRequest) (*UpdateGameReply, error)
 }
@@ -185,6 +189,8 @@ func RegisterGameHTTPServer(s *http.Server, srv GameHTTPServer) {
 	r.POST("/api/goal_admin/display_game/index", _Game_SaveDisplayGameIndex0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/sort/create", _Game_CreateSort0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/sorts", _Game_GetGameSortList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/team/list", _Game_GetTeamList0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/team/create", _Game_CreateTeam0_HTTP_Handler(srv))
 }
 
 func _Game_CreateGame0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
@@ -354,13 +360,56 @@ func _Game_GetGameSortList0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Conte
 	}
 }
 
+func _Game_GetTeamList0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetTeamListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGameGetTeamList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetTeamList(ctx, req.(*GetTeamListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetTeamListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Game_CreateTeam0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateTeamRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGameCreateTeam)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateTeam(ctx, req.(*CreateTeamRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateTeamReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type GameHTTPClient interface {
 	CreateGame(ctx context.Context, req *CreateGameRequest, opts ...http.CallOption) (rsp *CreateGameReply, err error)
 	CreateSort(ctx context.Context, req *CreateSortRequest, opts ...http.CallOption) (rsp *CreateSortReply, err error)
+	CreateTeam(ctx context.Context, req *CreateTeamRequest, opts ...http.CallOption) (rsp *CreateTeamReply, err error)
 	DisplayGameIndex(ctx context.Context, req *DisplayGameIndexRequest, opts ...http.CallOption) (rsp *DisplayGameIndexReply, err error)
 	GetGame(ctx context.Context, req *GetGameRequest, opts ...http.CallOption) (rsp *GetGameReply, err error)
 	GetGameList(ctx context.Context, req *GetGameListRequest, opts ...http.CallOption) (rsp *GetGameListReply, err error)
 	GetGameSortList(ctx context.Context, req *GetGameSortListRequest, opts ...http.CallOption) (rsp *GetGameSortListReply, err error)
+	GetTeamList(ctx context.Context, req *GetTeamListRequest, opts ...http.CallOption) (rsp *GetTeamListReply, err error)
 	SaveDisplayGameIndex(ctx context.Context, req *SaveDisplayGameIndexRequest, opts ...http.CallOption) (rsp *SaveDisplayGameIndexReply, err error)
 	UpdateGame(ctx context.Context, req *UpdateGameRequest, opts ...http.CallOption) (rsp *UpdateGameReply, err error)
 }
@@ -391,6 +440,19 @@ func (c *GameHTTPClientImpl) CreateSort(ctx context.Context, in *CreateSortReque
 	pattern := "/api/goal_admin/sort/create"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationGameCreateSort))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *GameHTTPClientImpl) CreateTeam(ctx context.Context, in *CreateTeamRequest, opts ...http.CallOption) (*CreateTeamReply, error) {
+	var out CreateTeamReply
+	pattern := "/api/goal_admin/team/create"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationGameCreateTeam))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
@@ -443,6 +505,19 @@ func (c *GameHTTPClientImpl) GetGameSortList(ctx context.Context, in *GetGameSor
 	pattern := "/api/goal_admin/sorts"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGameGetGameSortList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *GameHTTPClientImpl) GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...http.CallOption) (*GetTeamListReply, error) {
+	var out GetTeamListReply
+	pattern := "/api/goal_admin/team/list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationGameGetTeamList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -252,6 +252,48 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/goal_admin/team/create:
+        post:
+            tags:
+                - Game
+            operationId: Game_CreateTeam
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateTeamRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateTeamReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/team/list:
+        get:
+            tags:
+                - Game
+            operationId: Game_GetTeamList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetTeamListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
     schemas:
         CreateGameReply:
@@ -327,6 +369,17 @@ components:
                 type:
                     type: string
                 endTime:
+                    type: string
+        CreateTeamReply:
+            type: object
+            properties:
+                teamId:
+                    type: integer
+                    format: int64
+        CreateTeamRequest_SendBody:
+            type: object
+            properties:
+                name:
                     type: string
         DisplayGameIndexReply:
             type: object
@@ -427,6 +480,21 @@ components:
                 sortName:
                     type: string
                 endTime:
+                    type: string
+        GetTeamListReply:
+            type: object
+            properties:
+                teams:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetTeamListReply_Team'
+        GetTeamListReply_Team:
+            type: object
+            properties:
+                teamId:
+                    type: integer
+                    format: int64
+                teamName:
                     type: string
         GoogleProtobufAny:
             type: object

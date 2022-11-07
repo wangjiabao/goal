@@ -481,6 +481,7 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		}
 
 		fee := pay / feeRate // 扣除手续费
+		pay -= fee
 		for _, uv := range upUserProxy {
 			var uvFee int64
 			if 0 >= uv.Rate {

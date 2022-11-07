@@ -12,12 +12,13 @@ type GameService struct {
 
 	uc  *biz.GameUseCase
 	suc *biz.SortUseCase
+	tc  *biz.TeamUseCase
 	log *log.Helper
 }
 
 // NewGameService new a game service.
-func NewGameService(uc *biz.GameUseCase, suc *biz.SortUseCase, logger log.Logger) *GameService {
-	return &GameService{uc: uc, suc: suc, log: log.NewHelper(logger)}
+func NewGameService(uc *biz.GameUseCase, tc *biz.TeamUseCase, suc *biz.SortUseCase, logger log.Logger) *GameService {
+	return &GameService{uc: uc, suc: suc, tc: tc, log: log.NewHelper(logger)}
 }
 
 func (g *GameService) CreateGame(ctx context.Context, req *v1.CreateGameRequest) (*v1.CreateGameReply, error) {
@@ -50,4 +51,12 @@ func (g *GameService) GetGameSortList(ctx context.Context, req *v1.GetGameSortLi
 
 func (g *GameService) CreateSort(ctx context.Context, req *v1.CreateSortRequest) (*v1.CreateSortReply, error) {
 	return g.suc.CreateSort(ctx, req)
+}
+
+func (g *GameService) GetTeamList(ctx context.Context, req *v1.GetTeamListRequest) (*v1.GetTeamListReply, error) {
+	return g.tc.GetTeamList(ctx)
+}
+
+func (g *GameService) CreateTeam(ctx context.Context, req *v1.CreateTeamRequest) (*v1.CreateTeamReply, error) {
+	return g.tc.CreateTeam(ctx, req)
 }
