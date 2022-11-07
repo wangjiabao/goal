@@ -46,6 +46,30 @@ type PlayGameScoreUserRel struct {
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
 
+type PlayGameTeamResultUserRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	UserId    int64     `gorm:"type:int;not null"`
+	Pay       int64     `gorm:"type:int;not null"`
+	Content   string    `gorm:"type:varchar(45);not null"`
+	Status    string    `gorm:"type:varchar(45);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type PlayGameTeamGoalUserRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	PlayId    int64     `gorm:"type:int;not null"`
+	UserId    int64     `gorm:"type:int;not null"`
+	TeamId    int64     `gorm:"type:int;not null"`
+	Goal      int64     `gorm:"type:int;not null"`
+	Type      string    `gorm:"type:varchar(45);not null"`
+	Pay       int64     `gorm:"type:int;not null"`
+	Status    string    `gorm:"type:varchar(45);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type PlayRepo struct {
 	data *Data
 	log  *log.Helper
@@ -71,6 +95,11 @@ type PlayGameTeamResultUserRelRepo struct {
 	log  *log.Helper
 }
 
+type PlayGameTeamGoalUserRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
 func NewPlayRepo(data *Data, logger log.Logger) biz.PlayRepo {
 	return &PlayRepo{
 		data: data,
@@ -87,6 +116,13 @@ func NewPlayGameScoreUserRelRepo(data *Data, logger log.Logger) biz.PlayGameScor
 
 func NewPlayGameTeamResultUserRelRepo(data *Data, logger log.Logger) biz.PlayGameTeamResultUserRelRepo {
 	return &PlayGameTeamResultUserRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewPlayGameTeamGoalUserRelRepo(data *Data, logger log.Logger) biz.PlayGameTeamGoalUserRelRepo {
+	return &PlayGameTeamGoalUserRelRepo{
 		data: data,
 		log:  log.NewHelper(logger),
 	}
@@ -163,10 +199,10 @@ func (psr *PlayGameScoreUserRelRepo) GetPlayGameScoreUserRelByPlayIds(ctx contex
 }
 
 // SetRewarded 在事务中使用
-func (psr *PlayGameScoreUserRelRepo) SetRewarded(ctx context.Context, userId int64) error {
+func (psr *PlayGameScoreUserRelRepo) SetRewarded(ctx context.Context, id int64) error {
 	var err error
 	if err = psr.data.DB(ctx).Table("play_game_score_user_rel").
-		Where("user_id=?", userId).
+		Where("id=?", id).
 		Update("status", "rewarded").Error; nil != err {
 		return errors.NotFound("play game score rel error", "play game score rel found")
 	}
@@ -174,8 +210,8 @@ func (psr *PlayGameScoreUserRelRepo) SetRewarded(ctx context.Context, userId int
 	return nil
 }
 
-func (pgtR *PlayGameTeamResultUserRelRepo) GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*biz.PlayGameTeamResultUserRel, error) {
-	var l []*PlayGameScoreUserRel
+func (pgtR *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*biz.PlayGameTeamResultUserRel, error) {
+	var l []*PlayGameTeamResultUserRel
 	if result := pgtR.data.DB(ctx).Table("play_game_team_result_user_rel").Where("play_id IN (?)", playIds).Find(&l); result.Error != nil {
 		return nil, errors.InternalServer("SELECT_PLAY_GAME_TEAM_RESULT_USER_ERROR", "查询比赛结果玩法用户关系失败")
 	}
@@ -195,12 +231,46 @@ func (pgtR *PlayGameTeamResultUserRelRepo) GetPlayGameScoreUserRelByPlayIds(ctx 
 }
 
 // SetRewarded 在事务中使用
-func (pgtR *PlayGameTeamResultUserRelRepo) SetRewarded(ctx context.Context, userId int64) error {
+func (pgtR *PlayGameTeamResultUserRelRepo) SetRewarded(ctx context.Context, id int64) error {
 	var err error
 	if err = pgtR.data.DB(ctx).Table("play_game_team_result_user_rel").
-		Where("user_id=?", userId).
+		Where("id=?", id).
 		Update("status", "rewarded").Error; nil != err {
 		return errors.NotFound("play game team result rel error", "play game team result rel not found")
+	}
+
+	return nil
+}
+
+func (pgtG *PlayGameTeamGoalUserRelRepo) GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*biz.PlayGameTeamGoalUserRel, error) {
+	var l []*PlayGameTeamGoalUserRel
+	if result := pgtG.data.DB(ctx).Table("play_game_team_goal_user_rel").Where("play_id IN (?)", playIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_TEAM_GOAL_USER_ERROR", "查询比赛进球数玩法用户关系失败")
+	}
+
+	pl := make(map[int64][]*biz.PlayGameTeamGoalUserRel, 0)
+	for _, v := range l {
+		pl[v.PlayId] = append(pl[v.PlayId], &biz.PlayGameTeamGoalUserRel{
+			ID:     v.ID,
+			PlayId: v.PlayId,
+			UserId: v.UserId,
+			TeamId: v.TeamId,
+			Goal:   v.Goal,
+			Type:   v.Type,
+			Pay:    v.Pay,
+			Status: v.Status,
+		})
+	}
+	return pl, nil
+}
+
+// SetRewarded 在事务中使用
+func (pgtG *PlayGameTeamGoalUserRelRepo) SetRewarded(ctx context.Context, id int64) error {
+	var err error
+	if err = pgtG.data.DB(ctx).Table("play_game_team_goal_user_rel").
+		Where("id=?", id).
+		Update("status", "rewarded").Error; nil != err {
+		return errors.NotFound("play game team result rel error", "play game team goal rel not found")
 	}
 
 	return nil
