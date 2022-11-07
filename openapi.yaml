@@ -210,6 +210,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/goal_admin/sort/create:
+        post:
+            tags:
+                - Game
+            operationId: Game_CreateSort
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateSortRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateSortReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/goal_admin/sorts:
         get:
             tags:
@@ -289,6 +313,21 @@ components:
                 sortId:
                     type: integer
                     format: int64
+        CreateSortReply:
+            type: object
+            properties:
+                sortId:
+                    type: integer
+                    format: int64
+        CreateSortRequest_SendBody:
+            type: object
+            properties:
+                sortName:
+                    type: string
+                type:
+                    type: string
+                endTime:
+                    type: string
         DisplayGameIndexReply:
             type: object
             properties:

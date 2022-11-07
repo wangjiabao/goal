@@ -47,3 +47,7 @@ func (g *GameService) SaveDisplayGameIndex(ctx context.Context, req *v1.SaveDisp
 func (g *GameService) GetGameSortList(ctx context.Context, req *v1.GetGameSortListRequest) (*v1.GetGameSortListReply, error) {
 	return g.suc.GetGameSortList(ctx)
 }
+
+func (g *GameService) CreateSort(ctx context.Context, req *v1.CreateSortRequest) (*v1.CreateSortReply, error) {
+	return g.suc.CreateSort(ctx, req)
+}

@@ -17,6 +17,7 @@ type Sort struct {
 type SortRepo interface {
 	GetGameSortById(ctx context.Context, gameId int64) (*Sort, error)
 	GetGameSortList(ctx context.Context) ([]*Sort, error)
+	CreateSort(ctx context.Context, sc *Sort) (*Sort, error)
 }
 
 type SortUseCase struct {
@@ -53,4 +54,27 @@ func (s *SortUseCase) GetGameSortList(ctx context.Context) (*v1.GetGameSortListR
 	}
 
 	return res, nil
+}
+
+func (s *SortUseCase) CreateSort(ctx context.Context, req *v1.CreateSortRequest) (*v1.CreateSortReply, error) {
+	var (
+		err     error
+		sort    *Sort
+		endTime time.Time
+	)
+
+	endTime, err = time.Parse("2006-01-02 15:04:05", req.SendBody.EndTime) // 时间进行格式校验
+	if nil != err {
+		return nil, err
+	}
+
+	if sort, err = s.sortRepo.CreateSort(ctx, &Sort{
+		SortName: req.SendBody.SortName, // todo 参数校验
+		Type:     req.SendBody.Type,
+		EndTime:  endTime,
+	}); nil != err {
+		return nil, err
+	}
+
+	return &v1.CreateSortReply{SortId: sort.ID}, nil
 }

@@ -186,6 +186,7 @@ type GameClient interface {
 	GetGameList(ctx context.Context, in *GetGameListRequest, opts ...grpc.CallOption) (*GetGameListReply, error)
 	DisplayGameIndex(ctx context.Context, in *DisplayGameIndexRequest, opts ...grpc.CallOption) (*DisplayGameIndexReply, error)
 	SaveDisplayGameIndex(ctx context.Context, in *SaveDisplayGameIndexRequest, opts ...grpc.CallOption) (*SaveDisplayGameIndexReply, error)
+	CreateSort(ctx context.Context, in *CreateSortRequest, opts ...grpc.CallOption) (*CreateSortReply, error)
 	GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error)
 }
 
@@ -251,6 +252,15 @@ func (c *gameClient) SaveDisplayGameIndex(ctx context.Context, in *SaveDisplayGa
 	return out, nil
 }
 
+func (c *gameClient) CreateSort(ctx context.Context, in *CreateSortRequest, opts ...grpc.CallOption) (*CreateSortReply, error) {
+	out := new(CreateSortReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/CreateSort", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gameClient) GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error) {
 	out := new(GetGameSortListReply)
 	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/GetGameSortList", in, out, opts...)
@@ -270,6 +280,7 @@ type GameServer interface {
 	GetGameList(context.Context, *GetGameListRequest) (*GetGameListReply, error)
 	DisplayGameIndex(context.Context, *DisplayGameIndexRequest) (*DisplayGameIndexReply, error)
 	SaveDisplayGameIndex(context.Context, *SaveDisplayGameIndexRequest) (*SaveDisplayGameIndexReply, error)
+	CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error)
 	GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error)
 	mustEmbedUnimplementedGameServer()
 }
@@ -295,6 +306,9 @@ func (UnimplementedGameServer) DisplayGameIndex(context.Context, *DisplayGameInd
 }
 func (UnimplementedGameServer) SaveDisplayGameIndex(context.Context, *SaveDisplayGameIndexRequest) (*SaveDisplayGameIndexReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveDisplayGameIndex not implemented")
+}
+func (UnimplementedGameServer) CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateSort not implemented")
 }
 func (UnimplementedGameServer) GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGameSortList not implemented")
@@ -420,6 +434,24 @@ func _Game_SaveDisplayGameIndex_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Game_CreateSort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateSortRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).CreateSort(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Game/CreateSort",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).CreateSort(ctx, req.(*CreateSortRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Game_GetGameSortList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetGameSortListRequest)
 	if err := dec(in); err != nil {
@@ -468,6 +500,10 @@ var Game_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveDisplayGameIndex",
 			Handler:    _Game_SaveDisplayGameIndex_Handler,
+		},
+		{
+			MethodName: "CreateSort",
+			Handler:    _Game_CreateSort_Handler,
 		},
 		{
 			MethodName: "GetGameSortList",

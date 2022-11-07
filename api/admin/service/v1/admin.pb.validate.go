@@ -2353,6 +2353,239 @@ var _ interface {
 	ErrorName() string
 } = CreatePlaySortReplyValidationError{}
 
+// Validate checks the field values on CreateSortRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *CreateSortRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateSortRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreateSortRequestMultiError, or nil if none found.
+func (m *CreateSortRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateSortRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateSortRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreateSortRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateSortRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CreateSortRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateSortRequestMultiError is an error wrapping multiple validation errors
+// returned by CreateSortRequest.ValidateAll() if the designated constraints
+// aren't met.
+type CreateSortRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateSortRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateSortRequestMultiError) AllErrors() []error { return m }
+
+// CreateSortRequestValidationError is the validation error returned by
+// CreateSortRequest.Validate if the designated constraints aren't met.
+type CreateSortRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateSortRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateSortRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateSortRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateSortRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateSortRequestValidationError) ErrorName() string {
+	return "CreateSortRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateSortRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateSortRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateSortRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateSortRequestValidationError{}
+
+// Validate checks the field values on CreateSortReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *CreateSortReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateSortReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreateSortReplyMultiError, or nil if none found.
+func (m *CreateSortReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateSortReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for SortId
+
+	if len(errors) > 0 {
+		return CreateSortReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateSortReplyMultiError is an error wrapping multiple validation errors
+// returned by CreateSortReply.ValidateAll() if the designated constraints
+// aren't met.
+type CreateSortReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateSortReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateSortReplyMultiError) AllErrors() []error { return m }
+
+// CreateSortReplyValidationError is the validation error returned by
+// CreateSortReply.Validate if the designated constraints aren't met.
+type CreateSortReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateSortReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateSortReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateSortReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateSortReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateSortReplyValidationError) ErrorName() string { return "CreateSortReplyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CreateSortReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateSortReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateSortReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateSortReplyValidationError{}
+
 // Validate checks the field values on GamePlayGrantRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -3254,3 +3487,111 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CreatePlaySortRequest_SendBodyValidationError{}
+
+// Validate checks the field values on CreateSortRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreateSortRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateSortRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreateSortRequest_SendBodyMultiError, or nil if none found.
+func (m *CreateSortRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateSortRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for SortName
+
+	// no validation rules for Type
+
+	// no validation rules for EndTime
+
+	if len(errors) > 0 {
+		return CreateSortRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateSortRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by CreateSortRequest_SendBody.ValidateAll() if
+// the designated constraints aren't met.
+type CreateSortRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateSortRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateSortRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// CreateSortRequest_SendBodyValidationError is the validation error returned
+// by CreateSortRequest_SendBody.Validate if the designated constraints aren't met.
+type CreateSortRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateSortRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateSortRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateSortRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateSortRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateSortRequest_SendBodyValidationError) ErrorName() string {
+	return "CreateSortRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateSortRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateSortRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateSortRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateSortRequest_SendBodyValidationError{}

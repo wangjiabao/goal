@@ -65,3 +65,19 @@ func (s *SortRepo) GetGameSortList(ctx context.Context) ([]*biz.Sort, error) {
 
 	return res, nil
 }
+
+// CreateSort .
+func (s *SortRepo) CreateSort(ctx context.Context, sc *biz.Sort) (*biz.Sort, error) {
+	var sort Sort
+	sort.EndTime = sc.EndTime
+	sort.SortName = sc.SortName
+	sort.Type = sc.Type
+	res := s.data.DB(ctx).Table("soccer_game_team_sort").Create(&sort)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_SORT_ERROR", "创建排名失败")
+	}
+
+	return &biz.Sort{
+		ID: sort.ID,
+	}, nil
+}
