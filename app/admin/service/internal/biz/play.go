@@ -303,7 +303,7 @@ func (p *PlayUseCase) CreatePlayGame(ctx context.Context, req *v1.CreatePlayGame
 		return nil, errors.New(500, "TIME_ERROR", "时间输入错误")
 	}
 
-	if "game_team_goal" != req.SendBody.PlayType && // 验证type类型
+	if "game_team_goal_all" != req.SendBody.PlayType && // 验证type类型
 		"game_score" != req.SendBody.PlayType &&
 		"game_team_result" != req.SendBody.PlayType &&
 		"game_team_goal_up" != req.SendBody.PlayType &&
