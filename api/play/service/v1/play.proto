@@ -90,6 +90,11 @@ service Play {
 		};
 	};
 
+	rpc GameUserList (GameUserListRequest) returns (GameUserListReply){
+		option (google.api.http) = {
+			get: "/api/game/{game_id}/user_list"
+		};
+	};
 }
 
 message AllowedPlayListRequest {
@@ -117,6 +122,17 @@ message RoomPlayListReply {
 		string Type = 2;
 		string StartTime = 3;
 		string EndTime = 4;
+	}
+}
+
+message GameUserListRequest {
+	int64 game_id = 1;
+}
+
+message GameUserListReply {
+	repeated Item items = 1;
+	message Item {
+		string Address = 1;
 	}
 }
 

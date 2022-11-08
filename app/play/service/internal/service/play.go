@@ -87,3 +87,8 @@ func (p *PlayService) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 func (p *PlayService) GetUserPlayList(ctx context.Context, req *v1.GetUserPlayListRequest) (*v1.GetUserPlayListReply, error) {
 	return p.uc.GetUserPlayList(ctx)
 }
+
+func (p *PlayService) GameUserList(ctx context.Context, req *v1.GameUserListRequest) (*v1.GameUserListReply, error) {
+	sortIds := []int64{1, 2, 3} // 简单点，提前入库的三个排名规则
+	return p.uc.GetAdminCreateGameAndSortPlayUserList(ctx, req.GameId, sortIds...)
+}

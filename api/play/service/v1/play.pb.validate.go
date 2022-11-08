@@ -515,6 +515,246 @@ var _ interface {
 	ErrorName() string
 } = RoomPlayListReplyValidationError{}
 
+// Validate checks the field values on GameUserListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GameUserListRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GameUserListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GameUserListRequestMultiError, or nil if none found.
+func (m *GameUserListRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GameUserListRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for GameId
+
+	if len(errors) > 0 {
+		return GameUserListRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GameUserListRequestMultiError is an error wrapping multiple validation
+// errors returned by GameUserListRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GameUserListRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GameUserListRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GameUserListRequestMultiError) AllErrors() []error { return m }
+
+// GameUserListRequestValidationError is the validation error returned by
+// GameUserListRequest.Validate if the designated constraints aren't met.
+type GameUserListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GameUserListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GameUserListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GameUserListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GameUserListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GameUserListRequestValidationError) ErrorName() string {
+	return "GameUserListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GameUserListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGameUserListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GameUserListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GameUserListRequestValidationError{}
+
+// Validate checks the field values on GameUserListReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *GameUserListReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GameUserListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GameUserListReplyMultiError, or nil if none found.
+func (m *GameUserListReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GameUserListReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GameUserListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GameUserListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GameUserListReplyValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GameUserListReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// GameUserListReplyMultiError is an error wrapping multiple validation errors
+// returned by GameUserListReply.ValidateAll() if the designated constraints
+// aren't met.
+type GameUserListReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GameUserListReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GameUserListReplyMultiError) AllErrors() []error { return m }
+
+// GameUserListReplyValidationError is the validation error returned by
+// GameUserListReply.Validate if the designated constraints aren't met.
+type GameUserListReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GameUserListReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GameUserListReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GameUserListReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GameUserListReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GameUserListReplyValidationError) ErrorName() string {
+	return "GameUserListReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GameUserListReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGameUserListReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GameUserListReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GameUserListReplyValidationError{}
+
 // Validate checks the field values on CreatePlaySortRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -3093,6 +3333,110 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = RoomPlayListReply_ItemValidationError{}
+
+// Validate checks the field values on GameUserListReply_Item with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GameUserListReply_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GameUserListReply_Item with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GameUserListReply_ItemMultiError, or nil if none found.
+func (m *GameUserListReply_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GameUserListReply_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Address
+
+	if len(errors) > 0 {
+		return GameUserListReply_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// GameUserListReply_ItemMultiError is an error wrapping multiple validation
+// errors returned by GameUserListReply_Item.ValidateAll() if the designated
+// constraints aren't met.
+type GameUserListReply_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GameUserListReply_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GameUserListReply_ItemMultiError) AllErrors() []error { return m }
+
+// GameUserListReply_ItemValidationError is the validation error returned by
+// GameUserListReply_Item.Validate if the designated constraints aren't met.
+type GameUserListReply_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GameUserListReply_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GameUserListReply_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GameUserListReply_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GameUserListReply_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GameUserListReply_ItemValidationError) ErrorName() string {
+	return "GameUserListReply_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GameUserListReply_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGameUserListReply_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GameUserListReply_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GameUserListReply_ItemValidationError{}
 
 // Validate checks the field values on CreatePlaySortRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are

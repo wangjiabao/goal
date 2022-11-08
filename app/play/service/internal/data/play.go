@@ -443,6 +443,74 @@ func (p *PlayGameScoreUserRelRepo) GetPlayGameScoreUserRelByUserId(ctx context.C
 	return pl, nil
 }
 
+func (p *PlayGameScoreUserRelRepo) GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*biz.PlayGameScoreUserRel, error) {
+	var l []*PlayGameScoreUserRel
+	if result := p.data.DB(ctx).Table("play_game_score_user_rel").Where("play_id IN(?)", playIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SCORE_REL_ERROR", "查询比赛比分竞猜失败")
+	}
+
+	pl := make([]*biz.PlayGameScoreUserRel, 0)
+	for _, playGameScoreUserRel := range l {
+		pl = append(pl, &biz.PlayGameScoreUserRel{
+			ID:        playGameScoreUserRel.ID,
+			UserId:    playGameScoreUserRel.UserId,
+			CreatedAt: playGameScoreUserRel.CreatedAt,
+		})
+	}
+	return pl, nil
+}
+
+func (p *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*biz.PlayGameTeamResultUserRel, error) {
+	var l []*PlayGameTeamResultUserRel
+	if result := p.data.DB(ctx).Table("play_game_team_result_user_rel").Where("play_id IN(?)", playIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SCORE_REL_ERROR", "查询比赛结果竞猜失败")
+	}
+
+	pl := make([]*biz.PlayGameTeamResultUserRel, 0)
+	for _, playGameScoreUserRel := range l {
+		pl = append(pl, &biz.PlayGameTeamResultUserRel{
+			ID:        playGameScoreUserRel.ID,
+			UserId:    playGameScoreUserRel.UserId,
+			CreatedAt: playGameScoreUserRel.CreatedAt,
+		})
+	}
+	return pl, nil
+}
+
+func (p *PlayGameTeamGoalUserRelRepo) GetPlayGameTeamGoalUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*biz.PlayGameTeamGoalUserRel, error) {
+	var l []*PlayGameTeamGoalUserRel
+	if result := p.data.DB(ctx).Table("play_game_team_goal_user_rel").Where("play_id IN(?)", playIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SCORE_REL_ERROR", "查询比赛进球数竞猜失败")
+	}
+
+	pl := make([]*biz.PlayGameTeamGoalUserRel, 0)
+	for _, playGameScoreUserRel := range l {
+		pl = append(pl, &biz.PlayGameTeamGoalUserRel{
+			ID:        playGameScoreUserRel.ID,
+			UserId:    playGameScoreUserRel.UserId,
+			CreatedAt: playGameScoreUserRel.CreatedAt,
+		})
+	}
+	return pl, nil
+}
+
+func (p *PlayGameTeamSortUserRelRepo) GetPlayGameTeamScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*biz.PlayGameTeamSortUserRel, error) {
+	var l []*PlayGameTeamSortUserRel
+	if result := p.data.DB(ctx).Table("play_game_team_sort_user_rel").Where("play_id IN(?)", playIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SCORE_REL_ERROR", "查询比赛结果竞猜失败")
+	}
+
+	pl := make([]*biz.PlayGameTeamSortUserRel, 0)
+	for _, playGameScoreUserRel := range l {
+		pl = append(pl, &biz.PlayGameTeamSortUserRel{
+			ID:        playGameScoreUserRel.ID,
+			UserId:    playGameScoreUserRel.UserId,
+			CreatedAt: playGameScoreUserRel.CreatedAt,
+		})
+	}
+	return pl, nil
+}
+
 // CreatePlayGameTeamResultUserRel .
 func (p *PlayGameTeamResultUserRelRepo) CreatePlayGameTeamResultUserRel(ctx context.Context, pr *biz.PlayGameTeamResultUserRel) (*biz.PlayGameTeamResultUserRel, error) {
 	var playGameTeamResultUserRel PlayGameTeamResultUserRel
@@ -578,6 +646,22 @@ func (p *PlayGameTeamSortUserRelRepo) GetPlayGameTeamSortUserRelByUserId(ctx con
 			Content:   playGameTeamSortUserRel.Content,
 			SortId:    playGameTeamSortUserRel.SortId,
 			CreatedAt: playGameTeamSortUserRel.CreatedAt,
+		})
+	}
+	return pl, nil
+}
+
+func (p *PlayRepo) GetUserByUserIds(ctx context.Context, userIds ...int64) ([]*biz.User, error) {
+	var l []*User
+	if result := p.data.DB(ctx).Table("user").Where("ID IN(?)", userIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SCORE_REL_ERROR", "查询比赛结果竞猜失败")
+	}
+
+	pl := make([]*biz.User, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.User{
+			ID:      v.ID,
+			Address: v.Address,
 		})
 	}
 	return pl, nil

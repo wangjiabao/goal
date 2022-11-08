@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/play/service/v1"
@@ -115,6 +116,7 @@ type PlayRepo interface {
 	CreatePlay(ctx context.Context, pc *Play) (*Play, error)
 	GetAdminCreatePlayListByType(ctx context.Context, playType string) ([]*Play, error)
 	GetPlayById(ctx context.Context, playId int64) (*Play, error)
+	GetUserByUserIds(ctx context.Context, ids ...int64) ([]*User, error)
 }
 
 type PlayGameRelRepo interface {
@@ -145,21 +147,25 @@ type UserProxyRepo interface {
 type PlayGameTeamResultUserRelRepo interface {
 	GetPlayGameTeamResultUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamResultUserRel, error)
 	CreatePlayGameTeamResultUserRel(ctx context.Context, pr *PlayGameTeamResultUserRel) (*PlayGameTeamResultUserRel, error)
+	GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamResultUserRel, error)
 }
 
 type PlayGameTeamGoalUserRelRepo interface {
 	GetPlayGameTeamGoalUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamGoalUserRel, error)
 	CreatePlayGameTeamGoalUserRel(ctx context.Context, pr *PlayGameTeamGoalUserRel) (*PlayGameTeamGoalUserRel, error)
+	GetPlayGameTeamGoalUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamGoalUserRel, error)
 }
 
 type PlayGameTeamSortUserRelRepo interface {
 	GetPlayGameTeamSortUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamSortUserRel, error)
 	CreatePlayGameTeamSortUserRel(ctx context.Context, pr *PlayGameTeamSortUserRel) (*PlayGameTeamSortUserRel, error)
+	GetPlayGameTeamScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamSortUserRel, error)
 }
 
 type PlayGameScoreUserRelRepo interface {
 	CreatePlayGameScoreUserRel(ctx context.Context, pr *PlayGameScoreUserRel) (*PlayGameScoreUserRel, error)
 	GetPlayGameScoreUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameScoreUserRel, error)
+	GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameScoreUserRel, error)
 }
 
 type PlayUseCase struct {
@@ -241,6 +247,104 @@ func (p *PlayUseCase) GetAdminCreateGameAndSortPlayList(ctx context.Context, gam
 			StartTime: v.StartTime.Format("2006-01-02 15:04:05"),
 			EndTime:   v.EndTime.Format("2006-01-02 15:04:05"),
 		})
+	}
+
+	return rep, nil
+}
+
+// GetAdminCreateGameAndSortPlayUserList .
+func (p *PlayUseCase) GetAdminCreateGameAndSortPlayUserList(ctx context.Context, gameId int64, sortIds ...int64) (*v1.GameUserListReply, error) {
+	var (
+		playIds                   []int64 // todo 根据业务情况切片可能过大，不知道查询时会不会有问题，暂时这么处理
+		adminCreatePlayIds        []int64
+		plays                     []*Play
+		playGameRel               []*PlayGameRel
+		playSortRel               []*PlaySortRel
+		playGameScoreUserRel      []*PlayGameScoreUserRel
+		playGameTeamResultUserRel []*PlayGameTeamResultUserRel
+		playGameTeamGoalUserRel   []*PlayGameTeamGoalUserRel
+		playGameTeamSortUserRel   []*PlayGameTeamSortUserRel
+		users                     []*User
+		err                       error
+	)
+
+	playGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameId(ctx, gameId) // 获取比赛的玩法记录
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range playGameRel {
+		playIds = append(playIds, v.PlayId)
+	}
+
+	playSortRel, err = p.playSortRelRepo.GetPlaySortRelBySortIds(ctx, sortIds...) // 获取排名的玩法记录
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range playSortRel {
+		playIds = append(playIds, v.PlayId)
+	}
+
+	plays, err = p.playRepo.GetAdminCreatePlayListByIds(ctx, playIds...) // 获取admin创建的玩法
+	for _, v := range plays {
+		adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+	}
+	rep := &v1.GameUserListReply{
+		Items: []*v1.GameUserListReply_Item{},
+	}
+
+	playGameScoreUserRel, err = p.playGameScoreUserRelRepo.GetPlayGameScoreUserRelByPlayIds(ctx, adminCreatePlayIds...)
+	if nil == err {
+		var scoreUserIds []int64
+		for _, v := range playGameScoreUserRel {
+			fmt.Println(v.UserId)
+			scoreUserIds = append(scoreUserIds, v.UserId)
+		}
+
+		// 防止in过大
+		users, err = p.playRepo.GetUserByUserIds(ctx, scoreUserIds...)
+		for _, v := range users {
+			rep.Items = append(rep.Items, &v1.GameUserListReply_Item{Address: v.Address})
+		}
+	}
+
+	playGameTeamResultUserRel, err = p.playGameTeamResultUserRelRepo.GetPlayGameTeamResultUserRelByPlayIds(ctx, adminCreatePlayIds...)
+	if nil == err {
+		var resultUserIds []int64
+		for _, v := range playGameTeamResultUserRel {
+			resultUserIds = append(resultUserIds, v.UserId)
+		}
+		// 防止in过大
+		users, err = p.playRepo.GetUserByUserIds(ctx, resultUserIds...)
+		for _, v := range users {
+			rep.Items = append(rep.Items, &v1.GameUserListReply_Item{Address: v.Address})
+		}
+
+	}
+
+	playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIds(ctx, adminCreatePlayIds...)
+	if nil == err {
+		var goalUserIds []int64
+		for _, v := range playGameTeamGoalUserRel {
+			goalUserIds = append(goalUserIds, v.UserId)
+		}
+		// 防止in过大
+		users, err = p.playRepo.GetUserByUserIds(ctx, goalUserIds...)
+		for _, v := range users {
+			rep.Items = append(rep.Items, &v1.GameUserListReply_Item{Address: v.Address})
+		}
+	}
+
+	playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.GetPlayGameTeamScoreUserRelByPlayIds(ctx, adminCreatePlayIds...)
+	if nil == err {
+		var sortUserIds []int64
+		for _, v := range playGameTeamSortUserRel {
+			sortUserIds = append(sortUserIds, v.UserId)
+		}
+		// 防止in过大
+		users, err = p.playRepo.GetUserByUserIds(ctx, sortUserIds...)
+		for _, v := range users {
+			rep.Items = append(rep.Items, &v1.GameUserListReply_Item{Address: v.Address})
+		}
 	}
 
 	return rep, nil
