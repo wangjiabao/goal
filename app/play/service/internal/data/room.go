@@ -84,6 +84,39 @@ func (r *RoomUserRelRepo) GetRoomUserRelByRoomId(ctx context.Context, roomId int
 	return pl, nil
 }
 
+func (r *RoomUserRelRepo) GetRoomUsers(ctx context.Context, roomId int64) ([]*biz.RoomUserRel, error) {
+	var l []*RoomUserRel
+	if result := r.data.DB(ctx).Table("room_user_rel").Where(&PlayRoomRel{RoomId: roomId}).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("ROOM_USER_REL_NOT_FOUND", "查询房间内用户关系失败")
+	}
+
+	pl := make([]*biz.RoomUserRel, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.RoomUserRel{
+			ID:     v.ID,
+			UserId: v.UserId,
+			RoomId: v.RoomId,
+		})
+	}
+	return pl, nil
+}
+
+func (r *RoomRepo) GetUserByUseIds(ctx context.Context, userIds ...int64) (map[int64]*biz.User, error) {
+	var l []*User
+	if result := r.data.DB(ctx).Table("user").Where("id IN(?)", userIds).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("ROOM_USER_REL_NOT_FOUND", "查询房间内用户失败")
+	}
+
+	pl := make(map[int64]*biz.User)
+	for _, v := range l {
+		pl[v.ID] = &biz.User{
+			ID:      v.ID,
+			Address: v.Address,
+		}
+	}
+	return pl, nil
+}
+
 func (r *RoomRepo) GetRoomByAccount(ctx context.Context, account string) (*biz.Room, error) {
 	var room Room
 	if err := r.data.DB(ctx).Where(&Room{Account: account}).Table("room").First(&room).Error; err != nil {
@@ -111,8 +144,9 @@ func (r *RoomRepo) GetRoomByID(ctx context.Context, roomId int64) (*biz.Room, er
 	}
 
 	return &biz.Room{
-		ID:   room.ID,
-		Type: room.Type,
+		ID:           room.ID,
+		Type:         room.Type,
+		CreateUserId: room.CreateUserId,
 	}, nil
 }
 

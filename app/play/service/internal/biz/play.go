@@ -641,18 +641,19 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePlayGameResultRequest) (*v1.CreatePlayGameResultReply, error) {
 
 	var (
-		userId                    int64
-		playGameTeamResultUserRel *PlayGameTeamResultUserRel
-		play                      *Play
-		pay                       int64
-		gameResult                string
-		userBalance               *UserBalance
-		upUserProxy               []*UserProxy
-		downUserProxy             map[int64][]*UserProxy
-		err                       error
-		feeRate                   int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
-		base                      int64 = 100000 // 基础精度0.00001 todo 加配置文件
-		payLimit                  int64 = 100    // 限额 todo 后台可以设置
+		userId                        int64
+		playGameTeamResultUserRel     *PlayGameTeamResultUserRel
+		playGameTeamResultUserRelList []*PlayGameTeamResultUserRel
+		play                          *Play
+		pay                           int64
+		gameResult                    string
+		userBalance                   *UserBalance
+		upUserProxy                   []*UserProxy
+		downUserProxy                 map[int64][]*UserProxy
+		err                           error
+		feeRate                       int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
+		base                          int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		payLimit                      int64 = 100    // 限额 todo 后台可以设置
 	)
 
 	if strings.EqualFold("red", req.SendBody.Result) {
@@ -665,7 +666,13 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		return nil, errors.New(500, "RESULT_ERROR", "比赛结果不匹配")
 	}
 
-	// todo 限制只能参加一次 todo 参数真实验证，房间人员验证
+	//  todo 参数真实验证，房间人员验证
+	playGameTeamResultUserRelList, err = p.playGameTeamResultUserRelRepo.GetPlayGameTeamResultUserRelByUserId(ctx, userId)
+	for _, v := range playGameTeamResultUserRelList {
+		if req.SendBody.PlayId == v.PlayId {
+			return nil, errors.New(500, "RESULT_ERROR", "已经参加过本次玩法了")
+		}
+	}
 
 	play, err = p.playRepo.GetPlayById(ctx, req.SendBody.PlayId) // 查玩法
 	if nil != err {

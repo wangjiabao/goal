@@ -9,6 +9,15 @@ import (
 	"time"
 )
 
+type User struct {
+	ID                  int64     `gorm:"primarykey;type:int"`
+	Address             string    `gorm:"type:varchar(45)"`
+	ToAddress           string    `gorm:"type:varchar(45)"`
+	ToAddressPrivateKey string    `gorm:"type:varchar(100)"`
+	CreatedAt           time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt           time.Time `gorm:"type:datetime;not null"`
+}
+
 type UserBalance struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	UserId    int64     `gorm:"type:int;not null"`

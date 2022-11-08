@@ -34,6 +34,15 @@ func (p *PlayService) RoomPlayList(ctx context.Context, req *v1.RoomPlayListRequ
 	return p.uc.GetRoomGameAndSortPlayList(ctx, req.RoomId)
 }
 
+func (p *PlayService) RoomInfo(ctx context.Context, req *v1.RoomInfoRequest) (*v1.RoomInfoReply, error) {
+	_, err := p.ruc.GetRoomUserRel(ctx, req.RoomId) // 检查用户是否在房间
+	if err != nil {
+		return nil, err
+	}
+
+	return p.ruc.RoomInfo(ctx, req)
+}
+
 // CreatePlayGame 创建房间和比赛玩法
 func (p *PlayService) CreatePlayGame(ctx context.Context, req *v1.CreatePlayGameRequest) (*v1.CreatePlayGameReply, error) {
 	return p.ruc.CreatePlayGame(ctx, req)

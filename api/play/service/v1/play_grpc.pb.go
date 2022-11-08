@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type PlayClient interface {
 	AllowedPlayList(ctx context.Context, in *AllowedPlayListRequest, opts ...grpc.CallOption) (*AllowedPlayListReply, error)
 	RoomPlayList(ctx context.Context, in *RoomPlayListRequest, opts ...grpc.CallOption) (*RoomPlayListReply, error)
+	RoomInfo(ctx context.Context, in *RoomInfoRequest, opts ...grpc.CallOption) (*RoomInfoReply, error)
 	CreatePlaySort(ctx context.Context, in *CreatePlaySortRequest, opts ...grpc.CallOption) (*CreatePlaySortReply, error)
 	CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...grpc.CallOption) (*CreatePlayGameReply, error)
 	RoomAccount(ctx context.Context, in *RoomAccountRequest, opts ...grpc.CallOption) (*RoomAccountReply, error)
@@ -55,6 +56,15 @@ func (c *playClient) AllowedPlayList(ctx context.Context, in *AllowedPlayListReq
 func (c *playClient) RoomPlayList(ctx context.Context, in *RoomPlayListRequest, opts ...grpc.CallOption) (*RoomPlayListReply, error) {
 	out := new(RoomPlayListReply)
 	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/RoomPlayList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playClient) RoomInfo(ctx context.Context, in *RoomInfoRequest, opts ...grpc.CallOption) (*RoomInfoReply, error) {
+	out := new(RoomInfoReply)
+	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/RoomInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -148,6 +158,7 @@ func (c *playClient) GetUserPlayList(ctx context.Context, in *GetUserPlayListReq
 type PlayServer interface {
 	AllowedPlayList(context.Context, *AllowedPlayListRequest) (*AllowedPlayListReply, error)
 	RoomPlayList(context.Context, *RoomPlayListRequest) (*RoomPlayListReply, error)
+	RoomInfo(context.Context, *RoomInfoRequest) (*RoomInfoReply, error)
 	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
 	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
 	RoomAccount(context.Context, *RoomAccountRequest) (*RoomAccountReply, error)
@@ -169,6 +180,9 @@ func (UnimplementedPlayServer) AllowedPlayList(context.Context, *AllowedPlayList
 }
 func (UnimplementedPlayServer) RoomPlayList(context.Context, *RoomPlayListRequest) (*RoomPlayListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RoomPlayList not implemented")
+}
+func (UnimplementedPlayServer) RoomInfo(context.Context, *RoomInfoRequest) (*RoomInfoReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RoomInfo not implemented")
 }
 func (UnimplementedPlayServer) CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePlaySort not implemented")
@@ -242,6 +256,24 @@ func _Play_RoomPlayList_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlayServer).RoomPlayList(ctx, req.(*RoomPlayListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Play_RoomInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RoomInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayServer).RoomInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.play.service.v1.Play/RoomInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayServer).RoomInfo(ctx, req.(*RoomInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -422,6 +454,10 @@ var Play_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RoomPlayList",
 			Handler:    _Play_RoomPlayList_Handler,
+		},
+		{
+			MethodName: "RoomInfo",
+			Handler:    _Play_RoomInfo_Handler,
 		},
 		{
 			MethodName: "CreatePlaySort",

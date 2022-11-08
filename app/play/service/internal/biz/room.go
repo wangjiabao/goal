@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+type User struct {
+	ID                  int64
+	Address             string
+	ToAddress           string
+	ToAddressPrivateKey string
+}
+
 type Room struct {
 	ID           int64
 	CreateUserId int64
@@ -25,12 +32,14 @@ type RoomRepo interface {
 	GetRoomByAccount(ctx context.Context, account string) (*Room, error)
 	GetRoomByID(ctx context.Context, roomId int64) (*Room, error)
 	CreateRoom(ctx context.Context, rc *Room) (*Room, error)
+	GetUserByUseIds(ctx context.Context, userIds ...int64) (map[int64]*User, error)
 }
 
 type RoomUserRelRepo interface {
 	GetRoomUserRel(ctx context.Context, userId int64, roomId int64) (*RoomUserRel, error)
 	GetRoomUserRelByRoomId(ctx context.Context, roomId int64) (map[int64]*RoomUserRel, error)
 	CreateRoomUserRel(ctx context.Context, userId int64, roomId int64) (*RoomUserRel, error)
+	GetRoomUsers(ctx context.Context, roomId int64) ([]*RoomUserRel, error)
 }
 
 type RoomUseCase struct {
@@ -146,4 +155,57 @@ func (r *RoomUseCase) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest)
 		RoomId:   room.ID,
 		RoomType: room.Type,
 	}, err
+}
+
+// RoomInfo 房间内信息
+func (r *RoomUseCase) RoomInfo(ctx context.Context, req *v1.RoomInfoRequest) (*v1.RoomInfoReply, error) {
+	var (
+		room           *Room
+		roomUserRel    []*RoomUserRel
+		createRoomUser bool = false
+		userIds        []int64
+		users          map[int64]*User
+	)
+
+	userId, _, err := getUserFromJwt(ctx) // 获取用户id
+	if nil != err {
+		return nil, err
+	}
+
+	room, err = r.roomRepo.GetRoomByID(ctx, req.RoomId)
+	if nil != err {
+		return nil, errors.New(500, "ROOM_USER_ERROR", "房间信息错误")
+	}
+
+	roomUserRel, err = r.roomUserRelRepo.GetRoomUsers(ctx, room.ID)
+	if nil != err {
+		return nil, errors.New(500, "ROOM_USER_ERROR", "房间信息错误")
+	}
+
+	for _, v := range roomUserRel {
+		userIds = append(userIds, v.UserId)
+	}
+
+	users, _ = r.roomRepo.GetUserByUseIds(ctx, userIds...)
+
+	if room.CreateUserId == userId {
+		createRoomUser = true
+	}
+
+	res := &v1.RoomInfoReply{
+		CreatedRoomUser: createRoomUser,
+		Users:           make([]*v1.RoomInfoReply_User, 0),
+	}
+
+	for _, v := range roomUserRel {
+		tmpAddress := ""
+		if tmpUser, ok := users[v.UserId]; ok {
+			tmpAddress = tmpUser.Address
+		}
+		res.Users = append(res.Users, &v1.RoomInfoReply_User{
+			Address: tmpAddress,
+		})
+	}
+
+	return res, nil
 }

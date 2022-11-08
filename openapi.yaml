@@ -3,55 +3,44 @@
 
 openapi: 3.0.3
 info:
-    title: User API
+    title: Play API
     version: 0.0.1
 paths:
-    /api/deposit/list:
+    /api/allowed_play_list/{gameId}:
         get:
             tags:
-                - User
-            operationId: User_GetUserDepositList
+                - Play
+            operationId: Play_AllowedPlayList
+            parameters:
+                - name: gameId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetUserDepositListReply'
+                                $ref: '#/components/schemas/AllowedPlayListReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user:
-        get:
-            tags:
-                - User
-            operationId: User_GetUser
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetUserReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/user/balance/deposit:
+    /api/play/game:
         post:
             tags:
-                - User
-            operationId: User_Deposit
+                - Play
+            operationId: Play_CreatePlayGame
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/DepositRequest_SendBody'
+                            $ref: '#/components/schemas/CreatePlayGameRequest_SendBody'
                 required: true
             responses:
                 "200":
@@ -59,23 +48,23 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/DepositReply'
+                                $ref: '#/components/schemas/CreatePlayGameReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/balance/withdraw:
+    /api/play/game_goal:
         post:
             tags:
-                - User
-            operationId: User_Withdraw
+                - Play
+            operationId: Play_CreatePlayGameGoal
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/WithdrawRequest_SendBody'
+                            $ref: '#/components/schemas/CreatePlayGameGoalRequest_SendBody'
                 required: true
             responses:
                 "200":
@@ -83,23 +72,23 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/WithdrawReply'
+                                $ref: '#/components/schemas/CreatePlayGameGoalReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/eth_authorize:
+    /api/play/game_result:
         post:
             tags:
-                - User
-            operationId: User_EthAuthorize
+                - Play
+            operationId: Play_CreatePlayGameResult
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/EthAuthorizeRequest_SendBody'
+                            $ref: '#/components/schemas/CreatePlayGameResultRequest_SendBody'
                 required: true
             responses:
                 "200":
@@ -107,23 +96,23 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/EthAuthorizeReply'
+                                $ref: '#/components/schemas/CreatePlayGameResultReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/proxy/create:
+    /api/play/game_score:
         post:
             tags:
-                - User
-            operationId: User_CreateProxy
+                - Play
+            operationId: Play_CreatePlayGameScore
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateProxyRequest_SendBody'
+                            $ref: '#/components/schemas/CreatePlayGameScoreRequest_SendBody'
                 required: true
             responses:
                 "200":
@@ -131,23 +120,23 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/CreateProxyReply'
+                                $ref: '#/components/schemas/CreatePlayGameScoreReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/proxy/down/create:
+    /api/play/game_sort:
         post:
             tags:
-                - User
-            operationId: User_CreateDownProxy
+                - Play
+            operationId: Play_CreatePlayGameSort
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateDownProxyRequest_SendBody'
+                            $ref: '#/components/schemas/CreatePlayGameSortRequest_SendBody'
                 required: true
             responses:
                 "200":
@@ -155,61 +144,147 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/CreateDownProxyReply'
+                                $ref: '#/components/schemas/CreatePlayGameSortReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user_proxy/list:
+    /api/play/sort:
+        post:
+            tags:
+                - Play
+            operationId: Play_CreatePlaySort
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlaySortRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlaySortReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/play/user/list:
         get:
             tags:
-                - User
-            operationId: User_GetUserProxyList
+                - Play
+            operationId: Play_GetUserPlayList
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetUserProxyListReply'
+                                $ref: '#/components/schemas/GetUserPlayListReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user_recommend/list:
-        get:
+    /api/room:
+        post:
             tags:
-                - User
-            operationId: User_GetUserRecommendList
+                - Play
+            operationId: Play_CreateRoom
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateRoomRequest_SendBody'
+                required: true
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetUserRecommendListReply'
+                                $ref: '#/components/schemas/CreateRoomReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/withdraw/list:
-        get:
+    /api/room/account:
+        post:
             tags:
-                - User
-            operationId: User_GetUserWithdrawList
+                - Play
+            operationId: Play_RoomAccount
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/RoomAccountRequest_SendBody'
+                required: true
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetUserWithdrawListReply'
+                                $ref: '#/components/schemas/RoomAccountReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/room_info/{roomId}:
+        get:
+            tags:
+                - Play
+            operationId: Play_RoomInfo
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RoomInfoReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/room_play_list/{roomId}:
+        get:
+            tags:
+                - Play
+            operationId: Play_RoomPlayList
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RoomPlayListReply'
                 default:
                     description: Default error response
                     content:
@@ -218,152 +293,189 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        CreateDownProxyReply:
+        AllowedPlayListReply:
             type: object
             properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AllowedPlayListReply_Item'
+        AllowedPlayListReply_Item:
+            type: object
+            properties:
+                ID:
+                    type: integer
+                    format: int64
+                Type:
+                    type: string
+                StartTime:
+                    type: string
+                EndTime:
+                    type: string
+        CreatePlayGameGoalReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameGoalRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+                teamId:
+                    type: integer
+                    format: int64
+                goal:
+                    type: integer
+                    format: int64
+                playType:
+                    type: string
+        CreatePlayGameReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameRequest_SendBody:
+            type: object
+            properties:
+                startTime:
+                    type: string
+                endTime:
+                    type: string
+                playType:
+                    type: string
+                gameId:
+                    type: integer
+                    format: int64
+                roomId:
+                    type: integer
+                    format: int64
+        CreatePlayGameResultReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameResultRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
                 result:
                     type: string
-        CreateDownProxyRequest_SendBody:
+                playType:
+                    type: string
+        CreatePlayGameScoreReply:
             type: object
             properties:
-                address:
-                    type: string
-                rate:
+                playId:
                     type: integer
                     format: int64
-        CreateProxyReply:
+        CreatePlayGameScoreRequest_SendBody:
             type: object
             properties:
-                result:
-                    type: string
-        CreateProxyRequest_SendBody:
-            type: object
-            properties:
-                amount:
+                playId:
                     type: integer
                     format: int64
-        DepositReply:
-            type: object
-            properties:
-                balance:
+                pay:
                     type: integer
                     format: int64
-        DepositRequest_SendBody:
-            type: object
-            properties:
-                amount:
+                redScore:
                     type: integer
                     format: int64
-        EthAuthorizeReply:
+                blueScore:
+                    type: integer
+                    format: int64
+                playType:
+                    type: string
+        CreatePlayGameSortReply:
             type: object
             properties:
-                token:
-                    type: string
-        EthAuthorizeRequest_SendBody:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameSortRequest_SendBody:
             type: object
             properties:
-                address:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+                content:
                     type: string
-                code:
-                    type: string
-        GetUserDepositListReply:
+                sortId:
+                    type: integer
+                    format: int64
+        CreatePlaySortReply:
             type: object
             properties:
-                records:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlaySortRequest_SendBody:
+            type: object
+            properties:
+                startTime:
+                    type: string
+                endTime:
+                    type: string
+                playType:
+                    type: string
+                sortId:
+                    type: integer
+                    format: int64
+                roomId:
+                    type: integer
+                    format: int64
+        CreateRoomReply:
+            type: object
+            properties:
+                RoomId:
+                    type: integer
+                    format: int64
+                Account:
+                    type: string
+                RoomType:
+                    type: string
+        CreateRoomRequest_SendBody:
+            type: object
+            properties:
+                roomType:
+                    type: string
+        GetUserPlayListReply:
+            type: object
+            properties:
+                items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/GetUserDepositListReply_Record'
-        GetUserDepositListReply_Record:
+                        $ref: '#/components/schemas/GetUserPlayListReply_Item'
+        GetUserPlayListReply_Item:
             type: object
             properties:
-                amount:
+                ID:
                     type: integer
                     format: int64
-                createdAt:
-                    type: string
-        GetUserProxyListReply:
-            type: object
-            properties:
-                rate:
+                PlayId:
                     type: integer
                     format: int64
-                rewardCount:
+                Pay:
                     type: integer
                     format: int64
-                records:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/GetUserProxyListReply_Record'
-        GetUserProxyListReply_Record:
-            type: object
-            properties:
-                amount:
-                    type: integer
-                    format: int64
-                createdAt:
+                Status:
                     type: string
-        GetUserRecommendListReply:
-            type: object
-            properties:
-                userCount:
-                    type: integer
-                    format: int64
-                rewardCount:
-                    type: integer
-                    format: int64
-                records:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/GetUserRecommendListReply_Record'
-                userInfos:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/GetUserRecommendListReply_UserInfo'
-        GetUserRecommendListReply_Record:
-            type: object
-            properties:
-                amount:
-                    type: integer
-                    format: int64
-                createdAt:
-                    type: string
-        GetUserRecommendListReply_UserInfo:
-            type: object
-            properties:
-                name:
-                    type: string
-                address:
-                    type: string
-        GetUserReply:
-            type: object
-            properties:
-                address:
-                    type: string
-                balance:
-                    type: integer
-                    format: int64
-                avatar:
-                    type: string
-                myRecommendCode:
-                    type: string
-                toAddress:
-                    type: string
-        GetUserWithdrawListReply:
-            type: object
-            properties:
-                records:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/GetUserWithdrawListReply_Record'
-        GetUserWithdrawListReply_Record:
-            type: object
-            properties:
-                amount:
-                    type: integer
-                    format: int64
-                status:
-                    type: string
-                createdAt:
+                CreatedAt:
                     type: string
         GoogleProtobufAny:
             type: object
@@ -373,6 +485,55 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        RoomAccountReply:
+            type: object
+            properties:
+                RoomId:
+                    type: integer
+                    format: int64
+                RoomType:
+                    type: string
+        RoomAccountRequest_SendBody:
+            type: object
+            properties:
+                account:
+                    type: string
+        RoomInfoReply:
+            type: object
+            properties:
+                CreatedRoomUser:
+                    type: boolean
+                users:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RoomInfoReply_User'
+        RoomInfoReply_User:
+            type: object
+            properties:
+                ID:
+                    type: integer
+                    format: int64
+                Address:
+                    type: string
+        RoomPlayListReply:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RoomPlayListReply_Item'
+        RoomPlayListReply_Item:
+            type: object
+            properties:
+                ID:
+                    type: integer
+                    format: int64
+                Type:
+                    type: string
+                StartTime:
+                    type: string
+                EndTime:
+                    type: string
         Status:
             type: object
             properties:
@@ -389,16 +550,5 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        WithdrawReply:
-            type: object
-            properties:
-                result:
-                    type: string
-        WithdrawRequest_SendBody:
-            type: object
-            properties:
-                amount:
-                    type: integer
-                    format: int64
 tags:
-    - name: User
+    - name: Play

@@ -22,6 +22,12 @@ service Play {
 		};
 	};
 
+	rpc RoomInfo (RoomInfoRequest) returns (RoomInfoReply){
+		option (google.api.http) = {
+			get: "/api/room_info/{room_id}"
+		};
+	};
+
 	rpc CreatePlaySort (CreatePlaySortRequest) returns (CreatePlaySortReply){
 		option (google.api.http) = {
 			post: "/api/play/sort"
@@ -246,5 +252,18 @@ message GetUserPlayListReply {
 		int64 Pay = 3;
 		string Status = 4;
 		string CreatedAt = 5;
+	}
+}
+
+message RoomInfoRequest {
+	int64 room_id = 1;
+}
+
+message RoomInfoReply {
+	bool CreatedRoomUser = 1;
+	repeated User users = 2;
+	message User {
+		int64 ID = 1;
+		string Address = 2;
 	}
 }
