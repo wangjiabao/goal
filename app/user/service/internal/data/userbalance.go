@@ -105,3 +105,28 @@ func (ub *UserBalanceRepo) Deposit(ctx context.Context, userId int64, amount int
 		Balance: userBalance.Balance,
 	}, nil
 }
+
+func (ub *UserBalanceRepo) GetUserBalanceRecordByUserId(ctx context.Context, userId int64, recordType string, reason string) ([]*biz.UserBalanceRecord, error) {
+	var userBalanceRecord []*UserBalanceRecord
+	if err := ub.data.DB(ctx).Table("user_balance_record").
+		Where("user_id=?", userId).
+		Where("type=?", recordType).
+		Where("reason=?", reason).
+		Order("created_at desc").Find(&userBalanceRecord).Error; err != nil {
+		return nil, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "未查到记录不存在")
+	}
+
+	res := make([]*biz.UserBalanceRecord, 0)
+	for _, item := range userBalanceRecord {
+		res = append(res, &biz.UserBalanceRecord{
+			ID:        item.ID,
+			UserId:    item.UserId,
+			Type:      item.Type,
+			Reason:    item.Reason,
+			Amount:    item.Amount,
+			CreatedAt: item.CreatedAt,
+		})
+	}
+
+	return res, nil
+}

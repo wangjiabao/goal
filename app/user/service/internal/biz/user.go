@@ -32,6 +32,7 @@ type UserInfoRepo interface {
 	GetUserInfoByUserId(ctx context.Context, userId int64) (*UserInfo, error)
 	CreateUserInfo(ctx context.Context, u *User, recommendCode string) (*UserInfo, error)
 	GetUserInfoByMyRecommendCode(ctx context.Context, myRecommendCode string) (*UserInfo, error)
+	GetUserInfoListByRecommendCode(ctx context.Context, recommendCode string) ([]*UserInfo, error)
 }
 
 type UserUseCase struct {
@@ -151,4 +152,44 @@ func (uc *UserUseCase) Deposit(ctx context.Context, u *User, req *v1.DepositRequ
 	return &v1.DepositReply{
 		Balance: userBalance.Balance / base,
 	}, nil
+}
+
+func (uc *UserUseCase) GetUserRecommendList(ctx context.Context, u *User, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {
+	var (
+		userInfo          *UserInfo
+		recommendUserInfo []*UserInfo
+		userBalanceRecord []*UserBalanceRecord
+		base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		err               error
+	)
+
+	userInfo, err = uc.uiRepo.GetUserInfoByUserId(ctx, u.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	recommendUserInfo, _ = uc.uiRepo.GetUserInfoListByRecommendCode(ctx, userInfo.MyRecommendCode)
+	userBalanceRecord, _ = uc.ubRepo.GetUserBalanceRecordByUserId(ctx, u.ID, "transfer_into", "recommend_user_goal_reward")
+
+	res := &v1.GetUserRecommendListReply{
+		Records: make([]*v1.GetUserRecommendListReply_Record, 0),
+	}
+
+	for _, v := range userBalanceRecord {
+		tmpAmount := v.Amount / base
+		res.RewardCount += tmpAmount
+		res.Records = append(res.Records, &v1.GetUserRecommendListReply_Record{
+			Amount:    tmpAmount,
+			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	for _, v := range recommendUserInfo {
+		res.UserCount += 1
+		res.UserInfos = append(res.UserInfos, &v1.GetUserRecommendListReply_UserInfo{
+			Name: v.Name,
+		})
+	}
+
+	return res, nil
 }

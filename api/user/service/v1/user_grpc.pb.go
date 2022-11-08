@@ -25,6 +25,8 @@ type UserClient interface {
 	EthAuthorize(ctx context.Context, in *EthAuthorizeRequest, opts ...grpc.CallOption) (*EthAuthorizeReply, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error)
 	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
+	Withdraw(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
+	GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...grpc.CallOption) (*GetUserRecommendListReply, error)
 }
 
 type userClient struct {
@@ -62,6 +64,24 @@ func (c *userClient) Deposit(ctx context.Context, in *DepositRequest, opts ...gr
 	return out, nil
 }
 
+func (c *userClient) Withdraw(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
+	out := new(DepositReply)
+	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/Withdraw", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...grpc.CallOption) (*GetUserRecommendListReply, error) {
+	out := new(GetUserRecommendListReply)
+	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/GetUserRecommendList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
@@ -69,6 +89,8 @@ type UserServer interface {
 	EthAuthorize(context.Context, *EthAuthorizeRequest) (*EthAuthorizeReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
+	Withdraw(context.Context, *DepositRequest) (*DepositReply, error)
+	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -84,6 +106,12 @@ func (UnimplementedUserServer) GetUser(context.Context, *GetUserRequest) (*GetUs
 }
 func (UnimplementedUserServer) Deposit(context.Context, *DepositRequest) (*DepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit not implemented")
+}
+func (UnimplementedUserServer) Withdraw(context.Context, *DepositRequest) (*DepositReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Withdraw not implemented")
+}
+func (UnimplementedUserServer) GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserRecommendList not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -152,6 +180,42 @@ func _User_Deposit_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_Withdraw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).Withdraw(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.user.service.v1.User/Withdraw",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).Withdraw(ctx, req.(*DepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUserRecommendList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRecommendListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserRecommendList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.user.service.v1.User/GetUserRecommendList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserRecommendList(ctx, req.(*GetUserRecommendListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +234,14 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Deposit",
 			Handler:    _User_Deposit_Handler,
+		},
+		{
+			MethodName: "Withdraw",
+			Handler:    _User_Withdraw_Handler,
+		},
+		{
+			MethodName: "GetUserRecommendList",
+			Handler:    _User_GetUserRecommendList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

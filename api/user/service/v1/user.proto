@@ -35,6 +35,12 @@ service User {
 			body: "send_body"
 		};
 	};
+
+	rpc GetUserRecommendList (GetUserRecommendListRequest) returns (GetUserRecommendListReply) {
+		option (google.api.http) = {
+			get: "/api/user_recommend/list"
+		};
+	};
 }
 
 message EthAuthorizeRequest {
@@ -82,4 +88,22 @@ message WithdrawRequest {
 
 message WithdrawReply {
 	int64 balance = 1;
+}
+
+message GetUserRecommendListRequest {
+
+}
+
+message GetUserRecommendListReply {
+	int64 user_count = 1;
+	int64 reward_count = 2;
+	repeated Record records = 3;
+	message Record {
+		int64  amount = 1;
+		string CreatedAt = 2;
+	}
+	repeated UserInfo userInfos = 4;
+	message UserInfo {
+		string name = 1;
+	}
 }

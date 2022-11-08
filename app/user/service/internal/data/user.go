@@ -162,3 +162,26 @@ func (ui *UserInfoRepo) CreateUserInfo(ctx context.Context, u *biz.User, recomme
 		UserId: userInfo.UserId,
 	}, nil
 }
+
+func (ui *UserInfoRepo) GetUserInfoListByRecommendCode(ctx context.Context, recommendCode string) ([]*biz.UserInfo, error) {
+	var userInfo []*UserInfo
+	if err := ui.data.DB(ctx).
+		Table("user_info").
+		Where("recommend_code Like ?", recommendCode+"%").
+		Find(&userInfo).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "用户信息不存在")
+	}
+
+	res := make([]*biz.UserInfo, 0)
+	for _, item := range userInfo {
+		res = append(res, &biz.UserInfo{
+			ID:              item.ID,
+			Name:            item.Name,
+			Avatar:          item.Avatar,
+			UserId:          item.UserId,
+			MyRecommendCode: item.MyRecommendCode,
+		})
+	}
+
+	return res, nil
+}

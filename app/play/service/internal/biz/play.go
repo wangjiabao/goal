@@ -286,6 +286,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 		playGameTeamResultUserRel []*PlayGameTeamResultUserRel
 		playGameTeamSortUserRel   []*PlayGameTeamSortUserRel
 		playAllTypeUserRel        PlayAllTypeUserRelSlice
+		base                      int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		userId                    int64
 		err                       error
 	)
@@ -348,7 +349,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 		rep.Items = append(rep.Items, &v1.GetUserPlayListReply_Item{
 			ID:        v.ID,
 			Status:    v.Status,
-			Pay:       v.Pay,
+			Pay:       v.Pay / base, // 展示余额是除以系统金额基数返回
 			PlayId:    v.PlayId,
 			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
 		})

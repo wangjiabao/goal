@@ -94,3 +94,19 @@ func (u *UserService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.
 		ID: userId,
 	}, req)
 }
+
+func (u *UserService) GetUserRecommendList(ctx context.Context, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {
+	// 在上下文 context 中取出 claims 对象
+	var userId int64
+	if claims, ok := jwt.FromContext(ctx); ok {
+		c := claims.(jwt2.MapClaims)
+		if c["UserId"] == nil {
+			return nil, errors.New(500, "ERROR_TOKEN", "无效TOKEN")
+		}
+		userId = int64(c["UserId"].(float64))
+	}
+
+	return u.uc.GetUserRecommendList(ctx, &biz.User{
+		ID: userId,
+	}, req)
+}

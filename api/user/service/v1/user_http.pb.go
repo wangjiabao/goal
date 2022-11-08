@@ -22,11 +22,15 @@ const _ = http.SupportPackageIsVersion1
 const OperationUserDeposit = "/api.user.service.v1.User/Deposit"
 const OperationUserEthAuthorize = "/api.user.service.v1.User/EthAuthorize"
 const OperationUserGetUser = "/api.user.service.v1.User/GetUser"
+const OperationUserGetUserRecommendList = "/api.user.service.v1.User/GetUserRecommendList"
+const OperationUserWithdraw = "/api.user.service.v1.User/Withdraw"
 
 type UserHTTPServer interface {
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
 	EthAuthorize(context.Context, *EthAuthorizeRequest) (*EthAuthorizeReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
+	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
+	Withdraw(context.Context, *DepositRequest) (*DepositReply, error)
 }
 
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
@@ -34,6 +38,8 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r.POST("/api/user/eth_authorize", _User_EthAuthorize0_HTTP_Handler(srv))
 	r.GET("/api/user", _User_GetUser0_HTTP_Handler(srv))
 	r.POST("/api/user/balance/deposit", _User_Deposit0_HTTP_Handler(srv))
+	r.POST("/api/user/balance/withdraw", _User_Withdraw0_HTTP_Handler(srv))
+	r.GET("/api/user_recommend/list", _User_GetUserRecommendList0_HTTP_Handler(srv))
 }
 
 func _User_EthAuthorize0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -99,10 +105,53 @@ func _User_Deposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) erro
 	}
 }
 
+func _User_Withdraw0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DepositRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserWithdraw)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Withdraw(ctx, req.(*DepositRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DepositReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _User_GetUserRecommendList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserRecommendListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserGetUserRecommendList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserRecommendList(ctx, req.(*GetUserRecommendListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserRecommendListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserHTTPClient interface {
 	Deposit(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	EthAuthorize(ctx context.Context, req *EthAuthorizeRequest, opts ...http.CallOption) (rsp *EthAuthorizeReply, err error)
 	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserReply, err error)
+	GetUserRecommendList(ctx context.Context, req *GetUserRecommendListRequest, opts ...http.CallOption) (rsp *GetUserRecommendListReply, err error)
+	Withdraw(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 }
 
 type UserHTTPClientImpl struct {
@@ -146,6 +195,32 @@ func (c *UserHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequest, op
 	opts = append(opts, http.Operation(OperationUserGetUser))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...http.CallOption) (*GetUserRecommendListReply, error) {
+	var out GetUserRecommendListReply
+	pattern := "/api/user_recommend/list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserGetUserRecommendList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) Withdraw(ctx context.Context, in *DepositRequest, opts ...http.CallOption) (*DepositReply, error) {
+	var out DepositReply
+	pattern := "/api/user/balance/withdraw"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserWithdraw))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

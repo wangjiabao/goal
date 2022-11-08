@@ -55,7 +55,7 @@ func (g *GameRepo) GetGameById(ctx context.Context, gameId int64) (*biz.Game, er
 func (g *GameRepo) GetGameList(ctx context.Context) ([]*biz.Game, error) {
 	var game []*Game
 	if err := g.data.DB(ctx).Table("soccer_game").Find(&game).Error; err != nil {
-		return nil, errors.NotFound("TEAMS_NOT_FOUND", "比赛不存在")
+		return nil, errors.NotFound("GAME_NOT_FOUND", "比赛不存在")
 	}
 
 	res := make([]*biz.Game, 0)
