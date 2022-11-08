@@ -25,8 +25,13 @@ type UserClient interface {
 	EthAuthorize(ctx context.Context, in *EthAuthorizeRequest, opts ...grpc.CallOption) (*EthAuthorizeReply, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error)
 	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
-	Withdraw(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
+	Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error)
 	GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...grpc.CallOption) (*GetUserRecommendListReply, error)
+	GetUserDepositList(ctx context.Context, in *GetUserDepositListRequest, opts ...grpc.CallOption) (*GetUserDepositListReply, error)
+	GetUserWithdrawList(ctx context.Context, in *GetUserWithdrawListRequest, opts ...grpc.CallOption) (*GetUserWithdrawListReply, error)
+	CreateProxy(ctx context.Context, in *CreateProxyRequest, opts ...grpc.CallOption) (*CreateProxyReply, error)
+	CreateDownProxy(ctx context.Context, in *CreateDownProxyRequest, opts ...grpc.CallOption) (*CreateDownProxyReply, error)
+	GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error)
 }
 
 type userClient struct {
@@ -64,8 +69,8 @@ func (c *userClient) Deposit(ctx context.Context, in *DepositRequest, opts ...gr
 	return out, nil
 }
 
-func (c *userClient) Withdraw(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
-	out := new(DepositReply)
+func (c *userClient) Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error) {
+	out := new(WithdrawReply)
 	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/Withdraw", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -82,6 +87,51 @@ func (c *userClient) GetUserRecommendList(ctx context.Context, in *GetUserRecomm
 	return out, nil
 }
 
+func (c *userClient) GetUserDepositList(ctx context.Context, in *GetUserDepositListRequest, opts ...grpc.CallOption) (*GetUserDepositListReply, error) {
+	out := new(GetUserDepositListReply)
+	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/GetUserDepositList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) GetUserWithdrawList(ctx context.Context, in *GetUserWithdrawListRequest, opts ...grpc.CallOption) (*GetUserWithdrawListReply, error) {
+	out := new(GetUserWithdrawListReply)
+	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/GetUserWithdrawList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) CreateProxy(ctx context.Context, in *CreateProxyRequest, opts ...grpc.CallOption) (*CreateProxyReply, error) {
+	out := new(CreateProxyReply)
+	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/CreateProxy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) CreateDownProxy(ctx context.Context, in *CreateDownProxyRequest, opts ...grpc.CallOption) (*CreateDownProxyReply, error) {
+	out := new(CreateDownProxyReply)
+	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/CreateDownProxy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error) {
+	out := new(GetUserProxyListReply)
+	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/GetUserProxyList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
@@ -89,8 +139,13 @@ type UserServer interface {
 	EthAuthorize(context.Context, *EthAuthorizeRequest) (*EthAuthorizeReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
-	Withdraw(context.Context, *DepositRequest) (*DepositReply, error)
+	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
+	GetUserDepositList(context.Context, *GetUserDepositListRequest) (*GetUserDepositListReply, error)
+	GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error)
+	CreateProxy(context.Context, *CreateProxyRequest) (*CreateProxyReply, error)
+	CreateDownProxy(context.Context, *CreateDownProxyRequest) (*CreateDownProxyReply, error)
+	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -107,11 +162,26 @@ func (UnimplementedUserServer) GetUser(context.Context, *GetUserRequest) (*GetUs
 func (UnimplementedUserServer) Deposit(context.Context, *DepositRequest) (*DepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit not implemented")
 }
-func (UnimplementedUserServer) Withdraw(context.Context, *DepositRequest) (*DepositReply, error) {
+func (UnimplementedUserServer) Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Withdraw not implemented")
 }
 func (UnimplementedUserServer) GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserRecommendList not implemented")
+}
+func (UnimplementedUserServer) GetUserDepositList(context.Context, *GetUserDepositListRequest) (*GetUserDepositListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserDepositList not implemented")
+}
+func (UnimplementedUserServer) GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserWithdrawList not implemented")
+}
+func (UnimplementedUserServer) CreateProxy(context.Context, *CreateProxyRequest) (*CreateProxyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateProxy not implemented")
+}
+func (UnimplementedUserServer) CreateDownProxy(context.Context, *CreateDownProxyRequest) (*CreateDownProxyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDownProxy not implemented")
+}
+func (UnimplementedUserServer) GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserProxyList not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -181,7 +251,7 @@ func _User_Deposit_Handler(srv interface{}, ctx context.Context, dec func(interf
 }
 
 func _User_Withdraw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DepositRequest)
+	in := new(WithdrawRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -193,7 +263,7 @@ func _User_Withdraw_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: "/api.user.service.v1.User/Withdraw",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).Withdraw(ctx, req.(*DepositRequest))
+		return srv.(UserServer).Withdraw(ctx, req.(*WithdrawRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -212,6 +282,96 @@ func _User_GetUserRecommendList_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServer).GetUserRecommendList(ctx, req.(*GetUserRecommendListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUserDepositList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserDepositListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserDepositList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.user.service.v1.User/GetUserDepositList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserDepositList(ctx, req.(*GetUserDepositListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUserWithdrawList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserWithdrawListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserWithdrawList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.user.service.v1.User/GetUserWithdrawList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserWithdrawList(ctx, req.(*GetUserWithdrawListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_CreateProxy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateProxyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).CreateProxy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.user.service.v1.User/CreateProxy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).CreateProxy(ctx, req.(*CreateProxyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_CreateDownProxy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDownProxyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).CreateDownProxy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.user.service.v1.User/CreateDownProxy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).CreateDownProxy(ctx, req.(*CreateDownProxyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUserProxyList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserProxyListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserProxyList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.user.service.v1.User/GetUserProxyList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserProxyList(ctx, req.(*GetUserProxyListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -242,6 +402,26 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserRecommendList",
 			Handler:    _User_GetUserRecommendList_Handler,
+		},
+		{
+			MethodName: "GetUserDepositList",
+			Handler:    _User_GetUserDepositList_Handler,
+		},
+		{
+			MethodName: "GetUserWithdrawList",
+			Handler:    _User_GetUserWithdrawList_Handler,
+		},
+		{
+			MethodName: "CreateProxy",
+			Handler:    _User_CreateProxy_Handler,
+		},
+		{
+			MethodName: "CreateDownProxy",
+			Handler:    _User_CreateDownProxy_Handler,
+		},
+		{
+			MethodName: "GetUserProxyList",
+			Handler:    _User_GetUserProxyList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

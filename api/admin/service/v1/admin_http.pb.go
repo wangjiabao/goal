@@ -155,6 +155,64 @@ func (c *AdminHTTPClientImpl) GamePlayGrant(ctx context.Context, in *GamePlayGra
 	return &out, err
 }
 
+const OperationUserUserDeposit = "/api.admin.service.v1.User/UserDeposit"
+
+type UserHTTPServer interface {
+	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
+}
+
+func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
+	r := s.Route("/")
+	r.POST("/api/goal_admin/user/deposit", _User_UserDeposit0_HTTP_Handler(srv))
+}
+
+func _User_UserDeposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UserDepositRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserUserDeposit)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UserDeposit(ctx, req.(*UserDepositRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UserDepositReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+type UserHTTPClient interface {
+	UserDeposit(ctx context.Context, req *UserDepositRequest, opts ...http.CallOption) (rsp *UserDepositReply, err error)
+}
+
+type UserHTTPClientImpl struct {
+	cc *http.Client
+}
+
+func NewUserHTTPClient(client *http.Client) UserHTTPClient {
+	return &UserHTTPClientImpl{client}
+}
+
+func (c *UserHTTPClientImpl) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...http.CallOption) (*UserDepositReply, error) {
+	var out UserDepositReply
+	pattern := "/api/goal_admin/user/deposit"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserUserDeposit))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
 const OperationGameCreateGame = "/api.admin.service.v1.Game/CreateGame"
 const OperationGameCreateSort = "/api.admin.service.v1.Game/CreateSort"
 const OperationGameCreateTeam = "/api.admin.service.v1.Game/CreateTeam"

@@ -32,6 +32,15 @@ service Admin {
 	};
 }
 
+service User {
+	rpc UserDeposit (UserDepositRequest) returns (UserDepositReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/user/deposit"
+			body: "send_body"
+		};
+	};
+}
+
 service Game {
 	rpc CreateGame (CreateGameRequest) returns (CreateGameReply){
 		option (google.api.http) = {
@@ -290,4 +299,15 @@ message CreateTeamRequest {
 
 message CreateTeamReply {
 	int64 team_id = 1;
+}
+
+message UserDepositRequest {
+	message SendBody{
+	}
+
+	SendBody send_body = 1;
+}
+
+message UserDepositReply {
+	string result = 1;
 }

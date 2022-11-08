@@ -3055,6 +3055,239 @@ var _ interface {
 	ErrorName() string
 } = CreateTeamReplyValidationError{}
 
+// Validate checks the field values on UserDepositRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UserDepositRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UserDepositRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserDepositRequestMultiError, or nil if none found.
+func (m *UserDepositRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UserDepositRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UserDepositRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UserDepositRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UserDepositRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UserDepositRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UserDepositRequestMultiError is an error wrapping multiple validation errors
+// returned by UserDepositRequest.ValidateAll() if the designated constraints
+// aren't met.
+type UserDepositRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UserDepositRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UserDepositRequestMultiError) AllErrors() []error { return m }
+
+// UserDepositRequestValidationError is the validation error returned by
+// UserDepositRequest.Validate if the designated constraints aren't met.
+type UserDepositRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UserDepositRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UserDepositRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UserDepositRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UserDepositRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UserDepositRequestValidationError) ErrorName() string {
+	return "UserDepositRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UserDepositRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUserDepositRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UserDepositRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UserDepositRequestValidationError{}
+
+// Validate checks the field values on UserDepositReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UserDepositReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UserDepositReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserDepositReplyMultiError, or nil if none found.
+func (m *UserDepositReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UserDepositReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Result
+
+	if len(errors) > 0 {
+		return UserDepositReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// UserDepositReplyMultiError is an error wrapping multiple validation errors
+// returned by UserDepositReply.ValidateAll() if the designated constraints
+// aren't met.
+type UserDepositReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UserDepositReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UserDepositReplyMultiError) AllErrors() []error { return m }
+
+// UserDepositReplyValidationError is the validation error returned by
+// UserDepositReply.Validate if the designated constraints aren't met.
+type UserDepositReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UserDepositReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UserDepositReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UserDepositReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UserDepositReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UserDepositReplyValidationError) ErrorName() string { return "UserDepositReplyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e UserDepositReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUserDepositReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UserDepositReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UserDepositReplyValidationError{}
+
 // Validate checks the field values on GamePlayGrantRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -4274,3 +4507,106 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CreateTeamRequest_SendBodyValidationError{}
+
+// Validate checks the field values on UserDepositRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UserDepositRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UserDepositRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserDepositRequest_SendBodyMultiError, or nil if none found.
+func (m *UserDepositRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UserDepositRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return UserDepositRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// UserDepositRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by UserDepositRequest_SendBody.ValidateAll() if
+// the designated constraints aren't met.
+type UserDepositRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UserDepositRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UserDepositRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// UserDepositRequest_SendBodyValidationError is the validation error returned
+// by UserDepositRequest_SendBody.Validate if the designated constraints
+// aren't met.
+type UserDepositRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UserDepositRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UserDepositRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UserDepositRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UserDepositRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UserDepositRequest_SendBodyValidationError) ErrorName() string {
+	return "UserDepositRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UserDepositRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUserDepositRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UserDepositRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UserDepositRequest_SendBodyValidationError{}

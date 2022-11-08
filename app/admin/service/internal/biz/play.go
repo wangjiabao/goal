@@ -116,6 +116,9 @@ type UserBalanceRepo interface {
 	TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
 	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) error
+	GetAddressEthBalanceByAddress(ctx context.Context, address string) (*AddressEthBalance, error)
+	Deposit(ctx context.Context, userId int64, amount int64) (*UserBalance, error)
+	UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error)
 }
 
 type UserProxyRepo interface {

@@ -20,7 +20,7 @@ import (
 var ProviderSet = wire.NewSet(NewData, NewDB, NewRedis,
 	NewPlayRepo, NewPlayGameRelRepo, NewPlaySortRelRepo, NewGameRepo, NewPlayGameTeamResultUserRelRepo,
 	NewPlayGameScoreUserRelRepo, NewPlayGameTeamGoalUserRelRepo, NewUserBalanceRepo,
-	NewUserProxyRepo, NewUserInfoRepo, NewSortRepo, NewTeamRepo, NewTransaction)
+	NewUserProxyRepo, NewUserInfoRepo, NewSortRepo, NewTeamRepo, NewTransaction, NewUserRepo)
 
 type Data struct {
 	db  *gorm.DB

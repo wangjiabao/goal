@@ -157,7 +157,7 @@ func (ub *UserBalanceRepo) TransferIntoUserPlayProxyReward(ctx context.Context, 
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "transfer_into"
 	userBalanceRecode.Amount = amount
-	userBalanceRecode.Reason = "proxy_use_play_reward"
+	userBalanceRecode.Reason = "proxy_user_play_reward"
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
 		return err

@@ -29,7 +29,7 @@ service User {
 		};
 	};
 
-	rpc Withdraw (DepositRequest) returns (DepositReply) {
+	rpc Withdraw (WithdrawRequest) returns (WithdrawReply) {
 		option (google.api.http) = {
 			post: "/api/user/balance/withdraw"
 			body: "send_body"
@@ -39,6 +39,38 @@ service User {
 	rpc GetUserRecommendList (GetUserRecommendListRequest) returns (GetUserRecommendListReply) {
 		option (google.api.http) = {
 			get: "/api/user_recommend/list"
+		};
+	};
+
+	rpc GetUserDepositList (GetUserDepositListRequest) returns (GetUserDepositListReply) {
+		option (google.api.http) = {
+			get: "/api/deposit/list"
+		};
+	};
+
+	rpc GetUserWithdrawList (GetUserWithdrawListRequest) returns (GetUserWithdrawListReply) {
+		option (google.api.http) = {
+			get: "/api/withdraw/list"
+		};
+	};
+
+	rpc CreateProxy (CreateProxyRequest) returns (CreateProxyReply) {
+		option (google.api.http) = {
+			post: "/api/user/proxy/create"
+			body: "send_body"
+		};
+	};
+
+	rpc CreateDownProxy (CreateDownProxyRequest) returns (CreateDownProxyReply) {
+		option (google.api.http) = {
+			post: "/api/user/proxy/down/create"
+			body: "send_body"
+		};
+	};
+
+	rpc GetUserProxyList (GetUserProxyListRequest) returns (GetUserProxyListReply) {
+		option (google.api.http) = {
+			get: "/api/user_proxy/list"
 		};
 	};
 }
@@ -64,6 +96,7 @@ message GetUserReply {
 	int64 balance = 2;
 	string avatar = 3;
 	string my_recommend_code = 4;
+	string to_address = 5;
 }
 
 message DepositRequest {
@@ -78,6 +111,7 @@ message DepositReply {
 	int64 balance = 1;
 }
 
+
 message WithdrawRequest {
 	message SendBody{
 		int64 amount = 1;
@@ -87,7 +121,7 @@ message WithdrawRequest {
 }
 
 message WithdrawReply {
-	int64 balance = 1;
+	string result = 1;
 }
 
 message GetUserRecommendListRequest {
@@ -100,10 +134,75 @@ message GetUserRecommendListReply {
 	repeated Record records = 3;
 	message Record {
 		int64  amount = 1;
-		string CreatedAt = 2;
+		string created_at = 2;
 	}
 	repeated UserInfo userInfos = 4;
 	message UserInfo {
 		string name = 1;
+		string address = 2;
+	}
+}
+
+message GetUserWithdrawListRequest {
+
+}
+
+message GetUserWithdrawListReply {
+	repeated Record records = 1;
+	message Record {
+		int64  amount = 1;
+		string status = 2;
+		string created_at = 3;
+	}
+}
+
+message GetUserDepositListRequest {
+
+}
+
+message GetUserDepositListReply {
+	repeated Record records = 1;
+	message Record {
+		int64  amount = 1;
+		string created_at = 3;
+	}
+}
+
+message CreateProxyRequest {
+	message SendBody{
+		int64 amount = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreateProxyReply {
+	string result = 1;
+}
+
+message CreateDownProxyRequest {
+	message SendBody{
+		string address = 1;
+		int64 rate = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreateDownProxyReply {
+	string result = 1;
+}
+
+message GetUserProxyListRequest {
+
+}
+
+message GetUserProxyListReply {
+	int64 rate = 1;
+	int64 reward_count = 2;
+	repeated Record records = 3;
+	message Record {
+		int64  amount = 1;
+		string created_at = 2;
 	}
 }
