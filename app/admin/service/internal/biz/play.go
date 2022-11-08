@@ -113,8 +113,9 @@ type PlayGameTeamGoalUserRelRepo interface {
 }
 
 type UserBalanceRepo interface {
-	TransferInto(ctx context.Context, userId int64, amount int64) error
+	TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
+	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) error
 }
 
 type UserProxyRepo interface {
@@ -287,25 +288,25 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 					var tmpPerAmount int64
 					if 0 == k {
 						tmpPerAmount = perAmount * 2 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 1 == k {
 						tmpPerAmount = perAmount * 3 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 2 == k {
 						tmpPerAmount = perAmount * 5 / 1000
 						tmpPerAmount += perAmount * 10 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					}
 					perAmount -= tmpPerAmount
 				}
 
-				if res := p.userBalanceRepo.TransferInto(ctx, winV.UserId, perAmount); nil != res {
+				if res := p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != res {
 					return res
 				}
 
@@ -398,18 +399,18 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 					var tmpPerAmount int64
 					if 0 == k {
 						tmpPerAmount = perAmount * 2 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 1 == k {
 						tmpPerAmount = perAmount * 3 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 2 == k {
 						tmpPerAmount = perAmount * 5 / 1000
 						tmpPerAmount += perAmount * 10 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					}
@@ -417,7 +418,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 				}
 
 				perAmount += winV.Pay // 押注的钱原路返回
-				if res := p.userBalanceRepo.TransferInto(ctx, winV.UserId, perAmount); nil != res {
+				if res := p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != res {
 					return res
 				}
 
@@ -538,25 +539,25 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 					var tmpPerAmount int64
 					if 0 == k {
 						tmpPerAmount = perAmount * 2 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 1 == k {
 						tmpPerAmount = perAmount * 3 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 2 == k {
 						tmpPerAmount = perAmount * 5 / 1000
 						tmpPerAmount += perAmount * 10 / 1000
-						if res := p.userBalanceRepo.TransferInto(ctx, recommendUserId, tmpPerAmount); nil != res {
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					}
 					perAmount -= tmpPerAmount
 				}
 
-				if res := p.userBalanceRepo.TransferInto(ctx, winV.UserId, perAmount); nil != res {
+				if res := p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != res {
 					return res
 				}
 

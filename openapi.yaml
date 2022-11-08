@@ -3,103 +3,14 @@
 
 openapi: 3.0.3
 info:
-    title: ""
+    title: Play API
     version: 0.0.1
 paths:
-    /api/goal_admin/display_game/index:
+    /api/allowed_play_list/{gameId}:
         get:
             tags:
-                - Game
-            operationId: Game_DisplayGameIndex
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/DisplayGameIndexReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-        post:
-            tags:
-                - Game
-            operationId: Game_SaveDisplayGameIndex
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/SaveDisplayGameIndexRequest_SendBody'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/SaveDisplayGameIndexReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/goal_admin/game/create:
-        post:
-            tags:
-                - Game
-            operationId: Game_CreateGame
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/CreateGameRequest_SendBody'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/CreateGameReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/goal_admin/game/update:
-        post:
-            tags:
-                - Game
-            operationId: Game_UpdateGame
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UpdateGameRequest_SendBody'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/UpdateGameReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/goal_admin/game/{gameId}:
-        get:
-            tags:
-                - Game
-            operationId: Game_GetGame
+                - Play
+            operationId: Play_AllowedPlayList
             parameters:
                 - name: gameId
                   in: path
@@ -113,36 +24,18 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetGameReply'
+                                $ref: '#/components/schemas/AllowedPlayListReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/goal_admin/games:
-        get:
-            tags:
-                - Game
-            operationId: Game_GetGameList
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetGameListReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/goal_admin/play/game:
+    /api/play/game:
         post:
             tags:
-                - Admin
-            operationId: Admin_CreatePlayGame
+                - Play
+            operationId: Play_CreatePlayGame
             requestBody:
                 content:
                     application/json:
@@ -162,16 +55,16 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/goal_admin/play/game/grant:
+    /api/play/game_goal:
         post:
             tags:
-                - Admin
-            operationId: Admin_GamePlayGrant
+                - Play
+            operationId: Play_CreatePlayGameGoal
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/GamePlayGrantRequest_SendBody'
+                            $ref: '#/components/schemas/CreatePlayGameGoalRequest_SendBody'
                 required: true
             responses:
                 "200":
@@ -179,18 +72,90 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GamePlayGrantReply'
+                                $ref: '#/components/schemas/CreatePlayGameGoalReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/goal_admin/play/sort:
+    /api/play/game_result:
         post:
             tags:
-                - Admin
-            operationId: Admin_CreatePlaySort
+                - Play
+            operationId: Play_CreatePlayGameResult
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlayGameResultRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlayGameResultReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/play/game_score:
+        post:
+            tags:
+                - Play
+            operationId: Play_CreatePlayGameScore
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlayGameScoreRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlayGameScoreReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/play/game_sort:
+        post:
+            tags:
+                - Play
+            operationId: Play_CreatePlayGameSort
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlayGameSortRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlayGameSortReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/play/sort:
+        post:
+            tags:
+                - Play
+            operationId: Play_CreatePlaySort
             requestBody:
                 content:
                     application/json:
@@ -210,16 +175,34 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/goal_admin/sort/create:
+    /api/play/user/list:
+        get:
+            tags:
+                - Play
+            operationId: Play_GetUserPlayList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserPlayListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/room:
         post:
             tags:
-                - Game
-            operationId: Game_CreateSort
+                - Play
+            operationId: Play_CreateRoom
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateSortRequest_SendBody'
+                            $ref: '#/components/schemas/CreateRoomRequest_SendBody'
                 required: true
             responses:
                 "200":
@@ -227,41 +210,23 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/CreateSortReply'
+                                $ref: '#/components/schemas/CreateRoomReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/goal_admin/sorts:
-        get:
-            tags:
-                - Game
-            operationId: Game_GetGameSortList
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/GetGameSortListReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
-    /api/goal_admin/team/create:
+    /api/room/account:
         post:
             tags:
-                - Game
-            operationId: Game_CreateTeam
+                - Play
+            operationId: Play_RoomAccount
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateTeamRequest_SendBody'
+                            $ref: '#/components/schemas/RoomAccountRequest_SendBody'
                 required: true
             responses:
                 "200":
@@ -269,25 +234,32 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/CreateTeamReply'
+                                $ref: '#/components/schemas/RoomAccountReply'
                 default:
                     description: Default error response
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/goal_admin/team/list:
+    /api/room_play_list/{roomId}:
         get:
             tags:
-                - Game
-            operationId: Game_GetTeamList
+                - Play
+            operationId: Play_RoomPlayList
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: integer
+                    format: int64
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetTeamListReply'
+                                $ref: '#/components/schemas/RoomPlayListReply'
                 default:
                     description: Default error response
                     content:
@@ -296,30 +268,47 @@ paths:
                                 $ref: '#/components/schemas/Status'
 components:
     schemas:
-        CreateGameReply:
+        AllowedPlayListReply:
             type: object
             properties:
-                gameId:
-                    type: integer
-                    format: int64
-        CreateGameRequest_SendBody:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AllowedPlayListReply_Item'
+        AllowedPlayListReply_Item:
             type: object
             properties:
-                redTeamId:
+                ID:
                     type: integer
                     format: int64
-                blueTeamId:
+                Type:
+                    type: string
+                StartTime:
+                    type: string
+                EndTime:
+                    type: string
+        CreatePlayGameGoalReply:
+            type: object
+            properties:
+                playId:
                     type: integer
                     format: int64
-                startTime:
-                    type: string
-                endTime:
-                    type: string
-                upEndTime:
-                    type: string
-                downStartTime:
-                    type: string
-                name:
+        CreatePlayGameGoalRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+                teamId:
+                    type: integer
+                    format: int64
+                goal:
+                    type: integer
+                    format: int64
+                playType:
                     type: string
         CreatePlayGameReply:
             type: object
@@ -339,6 +328,71 @@ components:
                 gameId:
                     type: integer
                     format: int64
+                roomId:
+                    type: integer
+                    format: int64
+        CreatePlayGameResultReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameResultRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+                result:
+                    type: string
+                playType:
+                    type: string
+        CreatePlayGameScoreReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameScoreRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+                redScore:
+                    type: integer
+                    format: int64
+                blueScore:
+                    type: integer
+                    format: int64
+                playType:
+                    type: string
+        CreatePlayGameSortReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameSortRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+                content:
+                    type: string
+                sortId:
+                    type: integer
+                    format: int64
         CreatePlaySortReply:
             type: object
             properties:
@@ -352,149 +406,51 @@ components:
                     type: string
                 endTime:
                     type: string
+                playType:
+                    type: string
                 sortId:
                     type: integer
                     format: int64
-        CreateSortReply:
-            type: object
-            properties:
-                sortId:
+                roomId:
                     type: integer
                     format: int64
-        CreateSortRequest_SendBody:
+        CreateRoomReply:
             type: object
             properties:
-                sortName:
-                    type: string
-                type:
-                    type: string
-                endTime:
-                    type: string
-        CreateTeamReply:
-            type: object
-            properties:
-                teamId:
+                RoomId:
                     type: integer
                     format: int64
-        CreateTeamRequest_SendBody:
-            type: object
-            properties:
-                name:
+                Account:
                     type: string
-        DisplayGameIndexReply:
-            type: object
-            properties:
-                gameId:
-                    type: integer
-                    format: int64
-        GamePlayGrantReply:
-            type: object
-            properties:
-                result:
+                RoomType:
                     type: string
-        GamePlayGrantRequest_SendBody:
+        CreateRoomRequest_SendBody:
             type: object
             properties:
-                gameId:
-                    type: integer
-                    format: int64
-        GetGameListReply:
+                roomType:
+                    type: string
+        GetUserPlayListReply:
             type: object
             properties:
                 items:
                     type: array
                     items:
-                        $ref: '#/components/schemas/GetGameListReply_Item'
-        GetGameListReply_Item:
+                        $ref: '#/components/schemas/GetUserPlayListReply_Item'
+        GetUserPlayListReply_Item:
             type: object
             properties:
-                gameId:
+                ID:
                     type: integer
                     format: int64
-                name:
-                    type: string
-                startTime:
-                    type: string
-                endTime:
-                    type: string
-                upEndTime:
-                    type: string
-                downStartTime:
-                    type: string
-        GetGameReply:
-            type: object
-            properties:
-                redTeamId:
+                PlayId:
                     type: integer
                     format: int64
-                blueTeamId:
+                Pay:
                     type: integer
                     format: int64
-                startTime:
+                Status:
                     type: string
-                endTime:
-                    type: string
-                upEndTime:
-                    type: string
-                downStartTime:
-                    type: string
-                gameId:
-                    type: integer
-                    format: int64
-                status:
-                    type: string
-                redTeamUpGoal:
-                    type: integer
-                    format: int64
-                blueTeamUpGoal:
-                    type: integer
-                    format: int64
-                redTeamDownGoal:
-                    type: integer
-                    format: int64
-                blueTeamDownGoal:
-                    type: integer
-                    format: int64
-                winTeamId:
-                    type: integer
-                    format: int64
-                name:
-                    type: string
-                result:
-                    type: string
-        GetGameSortListReply:
-            type: object
-            properties:
-                sorts:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/GetGameSortListReply_Sort'
-        GetGameSortListReply_Sort:
-            type: object
-            properties:
-                sortId:
-                    type: integer
-                    format: int64
-                sortType:
-                    type: string
-                sortName:
-                    type: string
-                endTime:
-                    type: string
-        GetTeamListReply:
-            type: object
-            properties:
-                teams:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/GetTeamListReply_Team'
-        GetTeamListReply_Team:
-            type: object
-            properties:
-                teamId:
-                    type: integer
-                    format: int64
-                teamName:
+                CreatedAt:
                     type: string
         GoogleProtobufAny:
             type: object
@@ -504,18 +460,38 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        SaveDisplayGameIndexReply:
+        RoomAccountReply:
             type: object
             properties:
-                gameId:
+                RoomId:
                     type: integer
                     format: int64
-        SaveDisplayGameIndexRequest_SendBody:
+                RoomType:
+                    type: string
+        RoomAccountRequest_SendBody:
             type: object
             properties:
-                gameId:
+                account:
+                    type: string
+        RoomPlayListReply:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RoomPlayListReply_Item'
+        RoomPlayListReply_Item:
+            type: object
+            properties:
+                ID:
                     type: integer
                     format: int64
+                Type:
+                    type: string
+                StartTime:
+                    type: string
+                EndTime:
+                    type: string
         Status:
             type: object
             properties:
@@ -532,51 +508,5 @@ components:
                         $ref: '#/components/schemas/GoogleProtobufAny'
                     description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
             description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        UpdateGameReply:
-            type: object
-            properties:
-                gameId:
-                    type: integer
-                    format: int64
-        UpdateGameRequest_SendBody:
-            type: object
-            properties:
-                redTeamId:
-                    type: integer
-                    format: int64
-                blueTeamId:
-                    type: integer
-                    format: int64
-                startTime:
-                    type: string
-                endTime:
-                    type: string
-                upEndTime:
-                    type: string
-                downStartTime:
-                    type: string
-                gameId:
-                    type: integer
-                    format: int64
-                status:
-                    type: string
-                redTeamUpGoal:
-                    type: integer
-                    format: int64
-                blueTeamUpGoal:
-                    type: integer
-                    format: int64
-                redTeamDownGoal:
-                    type: integer
-                    format: int64
-                blueTeamDownGoal:
-                    type: integer
-                    format: int64
-                winTeamId:
-                    type: integer
-                    format: int64
-                name:
-                    type: string
 tags:
-    - name: Admin
-    - name: Game
+    - name: Play

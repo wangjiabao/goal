@@ -23,6 +23,7 @@ type UserBalanceRecord struct {
 	Balance   int64     `gorm:"type:int;not null"`
 	Type      string    `gorm:"type:varchar(45);not null"`
 	Amount    int64     `gorm:"type:int;not null"`
+	Reason    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -92,6 +93,7 @@ func (ub *UserBalanceRepo) Deposit(ctx context.Context, userId int64, amount int
 	userBalanceRecode.Balance = userBalance.Balance
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "deposit"
+	userBalanceRecode.Reason = "user_deposit"
 	userBalanceRecode.Amount = amount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {

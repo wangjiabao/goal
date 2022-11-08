@@ -23,6 +23,7 @@ type UserBalanceRecord struct {
 	Balance   int64     `gorm:"type:int;not null"`
 	Type      string    `gorm:"type:varchar(45);not null"`
 	Amount    int64     `gorm:"type:int;not null"`
+	Reason    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -125,6 +126,7 @@ func (ub *UserBalanceRepo) Pay(ctx context.Context, userId int64, pay int64) err
 	userBalanceRecode.Balance = userBalance.Balance
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "pay"
+	userBalanceRecode.Reason = "user_play_pay"
 	userBalanceRecode.Amount = pay
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
@@ -134,8 +136,8 @@ func (ub *UserBalanceRepo) Pay(ctx context.Context, userId int64, pay int64) err
 	return nil
 }
 
-// TransferInto 在事务中使用
-func (ub *UserBalanceRepo) TransferInto(ctx context.Context, userId int64, amount int64) error {
+// TransferIntoUserPlayProxyReward 在事务中使用
+func (ub *UserBalanceRepo) TransferIntoUserPlayProxyReward(ctx context.Context, userId int64, amount int64) error {
 	var err error
 	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
@@ -155,6 +157,7 @@ func (ub *UserBalanceRepo) TransferInto(ctx context.Context, userId int64, amoun
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "transfer_into"
 	userBalanceRecode.Amount = amount
+	userBalanceRecode.Reason = "proxy_use_play_reward"
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
 		return err

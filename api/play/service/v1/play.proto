@@ -77,6 +77,13 @@ service Play {
 			body: "send_body"
 		};
 	};
+
+	rpc GetUserPlayList (GetUserPlayListRequest) returns (GetUserPlayListReply){
+		option (google.api.http) = {
+			get: "/api/play/user/list"
+		};
+	};
+
 }
 
 message AllowedPlayListRequest {
@@ -226,4 +233,18 @@ message CreatePlayGameGoalRequest {
 
 message CreatePlayGameGoalReply{
 	int64 play_id = 3;
+}
+
+message GetUserPlayListRequest {
+}
+
+message GetUserPlayListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 ID = 1;
+		int64 PlayId = 2;
+		int64 Pay = 3;
+		string Status = 4;
+		string CreatedAt = 5;
+	}
 }

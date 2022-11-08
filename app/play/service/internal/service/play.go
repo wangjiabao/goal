@@ -73,3 +73,8 @@ func (p *PlayService) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 func (p *PlayService) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlayGameSortRequest) (*v1.CreatePlayGameSortReply, error) {
 	return p.uc.CreatePlayGameSort(ctx, req)
 }
+
+// GetUserPlayList 获取用户参与玩法记录
+func (p *PlayService) GetUserPlayList(ctx context.Context, req *v1.GetUserPlayListRequest) (*v1.GetUserPlayListReply, error) {
+	return p.uc.GetUserPlayList(ctx)
+}

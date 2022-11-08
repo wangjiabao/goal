@@ -2398,6 +2398,244 @@ var _ interface {
 	ErrorName() string
 } = CreatePlayGameGoalReplyValidationError{}
 
+// Validate checks the field values on GetUserPlayListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetUserPlayListRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetUserPlayListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetUserPlayListRequestMultiError, or nil if none found.
+func (m *GetUserPlayListRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetUserPlayListRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetUserPlayListRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetUserPlayListRequestMultiError is an error wrapping multiple validation
+// errors returned by GetUserPlayListRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetUserPlayListRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetUserPlayListRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetUserPlayListRequestMultiError) AllErrors() []error { return m }
+
+// GetUserPlayListRequestValidationError is the validation error returned by
+// GetUserPlayListRequest.Validate if the designated constraints aren't met.
+type GetUserPlayListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserPlayListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserPlayListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserPlayListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserPlayListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserPlayListRequestValidationError) ErrorName() string {
+	return "GetUserPlayListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetUserPlayListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserPlayListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserPlayListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserPlayListRequestValidationError{}
+
+// Validate checks the field values on GetUserPlayListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetUserPlayListReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetUserPlayListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetUserPlayListReplyMultiError, or nil if none found.
+func (m *GetUserPlayListReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetUserPlayListReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetUserPlayListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetUserPlayListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetUserPlayListReplyValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetUserPlayListReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetUserPlayListReplyMultiError is an error wrapping multiple validation
+// errors returned by GetUserPlayListReply.ValidateAll() if the designated
+// constraints aren't met.
+type GetUserPlayListReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetUserPlayListReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetUserPlayListReplyMultiError) AllErrors() []error { return m }
+
+// GetUserPlayListReplyValidationError is the validation error returned by
+// GetUserPlayListReply.Validate if the designated constraints aren't met.
+type GetUserPlayListReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserPlayListReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserPlayListReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserPlayListReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserPlayListReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserPlayListReplyValidationError) ErrorName() string {
+	return "GetUserPlayListReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetUserPlayListReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserPlayListReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserPlayListReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserPlayListReplyValidationError{}
+
 // Validate checks the field values on AllowedPlayListReply_Item with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -3517,3 +3755,115 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CreatePlayGameGoalRequest_SendBodyValidationError{}
+
+// Validate checks the field values on GetUserPlayListReply_Item with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetUserPlayListReply_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetUserPlayListReply_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetUserPlayListReply_ItemMultiError, or nil if none found.
+func (m *GetUserPlayListReply_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetUserPlayListReply_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ID
+
+	// no validation rules for PlayId
+
+	// no validation rules for Pay
+
+	// no validation rules for Status
+
+	// no validation rules for CreatedAt
+
+	if len(errors) > 0 {
+		return GetUserPlayListReply_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetUserPlayListReply_ItemMultiError is an error wrapping multiple validation
+// errors returned by GetUserPlayListReply_Item.ValidateAll() if the
+// designated constraints aren't met.
+type GetUserPlayListReply_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetUserPlayListReply_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetUserPlayListReply_ItemMultiError) AllErrors() []error { return m }
+
+// GetUserPlayListReply_ItemValidationError is the validation error returned by
+// GetUserPlayListReply_Item.Validate if the designated constraints aren't met.
+type GetUserPlayListReply_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserPlayListReply_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserPlayListReply_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserPlayListReply_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserPlayListReply_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserPlayListReply_ItemValidationError) ErrorName() string {
+	return "GetUserPlayListReply_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetUserPlayListReply_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserPlayListReply_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserPlayListReply_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserPlayListReply_ItemValidationError{}

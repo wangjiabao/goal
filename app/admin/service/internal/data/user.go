@@ -22,6 +22,7 @@ type UserBalanceRecord struct {
 	UserId    int64     `gorm:"type:int;not null"`
 	Balance   int64     `gorm:"type:int;not null"`
 	Type      string    `gorm:"type:varchar(45);not null"`
+	Reason    string    `gorm:"type:varchar(45);not null"`
 	Amount    int64     `gorm:"type:int;not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
@@ -130,8 +131,8 @@ func (ub *UserBalanceRepo) GetUserBalance(ctx context.Context, userId int64) (*b
 	}, nil
 }
 
-// TransferInto 在事务中使用
-func (ub *UserBalanceRepo) TransferInto(ctx context.Context, userId int64, amount int64) error {
+// TransferIntoUserGoalReward 在事务中使用，中奖
+func (ub *UserBalanceRepo) TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) error {
 	var err error
 	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
@@ -150,6 +151,37 @@ func (ub *UserBalanceRepo) TransferInto(ctx context.Context, userId int64, amoun
 	userBalanceRecode.Balance = userBalance.Balance
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "transfer_into"
+	userBalanceRecode.Reason = "user_goal_reward"
+	userBalanceRecode.Amount = amount
+	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// TransferIntoUserGoalRecommendReward 在事务中使用
+func (ub *UserBalanceRepo) TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) error {
+	var err error
+	if err = ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		// UpdateColumn("balance", gorm.Expr("balance + ?", pay))
+		Updates(map[string]interface{}{"balance": gorm.Expr("balance + ?", amount)}).Error; nil != err {
+		return errors.NotFound("user balance err", "user balance not found")
+	}
+
+	var userBalance UserBalance
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	if err != nil {
+		return err
+	}
+
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = userBalance.Balance
+	userBalanceRecode.UserId = userBalance.UserId
+	userBalanceRecode.Type = "transfer_into"
+	userBalanceRecode.Reason = "recommend_user_goal_reward"
 	userBalanceRecode.Amount = amount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {

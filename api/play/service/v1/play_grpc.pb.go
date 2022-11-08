@@ -32,6 +32,7 @@ type PlayClient interface {
 	CreatePlayGameResult(ctx context.Context, in *CreatePlayGameResultRequest, opts ...grpc.CallOption) (*CreatePlayGameResultReply, error)
 	CreatePlayGameGoal(ctx context.Context, in *CreatePlayGameGoalRequest, opts ...grpc.CallOption) (*CreatePlayGameGoalReply, error)
 	CreatePlayGameSort(ctx context.Context, in *CreatePlayGameSortRequest, opts ...grpc.CallOption) (*CreatePlayGameSortReply, error)
+	GetUserPlayList(ctx context.Context, in *GetUserPlayListRequest, opts ...grpc.CallOption) (*GetUserPlayListReply, error)
 }
 
 type playClient struct {
@@ -132,6 +133,15 @@ func (c *playClient) CreatePlayGameSort(ctx context.Context, in *CreatePlayGameS
 	return out, nil
 }
 
+func (c *playClient) GetUserPlayList(ctx context.Context, in *GetUserPlayListRequest, opts ...grpc.CallOption) (*GetUserPlayListReply, error) {
+	out := new(GetUserPlayListReply)
+	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/GetUserPlayList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlayServer is the server API for Play service.
 // All implementations must embed UnimplementedPlayServer
 // for forward compatibility
@@ -146,6 +156,7 @@ type PlayServer interface {
 	CreatePlayGameResult(context.Context, *CreatePlayGameResultRequest) (*CreatePlayGameResultReply, error)
 	CreatePlayGameGoal(context.Context, *CreatePlayGameGoalRequest) (*CreatePlayGameGoalReply, error)
 	CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error)
+	GetUserPlayList(context.Context, *GetUserPlayListRequest) (*GetUserPlayListReply, error)
 	mustEmbedUnimplementedPlayServer()
 }
 
@@ -182,6 +193,9 @@ func (UnimplementedPlayServer) CreatePlayGameGoal(context.Context, *CreatePlayGa
 }
 func (UnimplementedPlayServer) CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePlayGameSort not implemented")
+}
+func (UnimplementedPlayServer) GetUserPlayList(context.Context, *GetUserPlayListRequest) (*GetUserPlayListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserPlayList not implemented")
 }
 func (UnimplementedPlayServer) mustEmbedUnimplementedPlayServer() {}
 
@@ -376,6 +390,24 @@ func _Play_CreatePlayGameSort_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Play_GetUserPlayList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserPlayListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayServer).GetUserPlayList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.play.service.v1.Play/GetUserPlayList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayServer).GetUserPlayList(ctx, req.(*GetUserPlayListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Play_ServiceDesc is the grpc.ServiceDesc for Play service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -422,6 +454,10 @@ var Play_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreatePlayGameSort",
 			Handler:    _Play_CreatePlayGameSort_Handler,
+		},
+		{
+			MethodName: "GetUserPlayList",
+			Handler:    _Play_GetUserPlayList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
