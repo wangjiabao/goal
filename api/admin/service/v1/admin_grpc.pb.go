@@ -23,8 +23,13 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdminClient interface {
 	GamePlayGrant(ctx context.Context, in *GamePlayGrantRequest, opts ...grpc.CallOption) (*GamePlayGrantReply, error)
+	SortPlayGrant(ctx context.Context, in *SortPlayGrantRequest, opts ...grpc.CallOption) (*SortPlayGrantReply, error)
 	CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...grpc.CallOption) (*CreatePlayGameReply, error)
 	CreatePlaySort(ctx context.Context, in *CreatePlaySortRequest, opts ...grpc.CallOption) (*CreatePlaySortReply, error)
+	GetPlayList(ctx context.Context, in *GetPlayListRequest, opts ...grpc.CallOption) (*GetPlayListReply, error)
+	GetPlayRelList(ctx context.Context, in *GetPlayRelListRequest, opts ...grpc.CallOption) (*GetPlayRelListReply, error)
+	GetRoomList(ctx context.Context, in *GetRoomListRequest, opts ...grpc.CallOption) (*GetRoomListReply, error)
+	GetRoomPlayList(ctx context.Context, in *GetRoomPlayListRequest, opts ...grpc.CallOption) (*GetRoomPlayListReply, error)
 }
 
 type adminClient struct {
@@ -38,6 +43,15 @@ func NewAdminClient(cc grpc.ClientConnInterface) AdminClient {
 func (c *adminClient) GamePlayGrant(ctx context.Context, in *GamePlayGrantRequest, opts ...grpc.CallOption) (*GamePlayGrantReply, error) {
 	out := new(GamePlayGrantReply)
 	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/GamePlayGrant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) SortPlayGrant(ctx context.Context, in *SortPlayGrantRequest, opts ...grpc.CallOption) (*SortPlayGrantReply, error) {
+	out := new(SortPlayGrantReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/SortPlayGrant", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +76,54 @@ func (c *adminClient) CreatePlaySort(ctx context.Context, in *CreatePlaySortRequ
 	return out, nil
 }
 
+func (c *adminClient) GetPlayList(ctx context.Context, in *GetPlayListRequest, opts ...grpc.CallOption) (*GetPlayListReply, error) {
+	out := new(GetPlayListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/GetPlayList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) GetPlayRelList(ctx context.Context, in *GetPlayRelListRequest, opts ...grpc.CallOption) (*GetPlayRelListReply, error) {
+	out := new(GetPlayRelListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/GetPlayRelList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) GetRoomList(ctx context.Context, in *GetRoomListRequest, opts ...grpc.CallOption) (*GetRoomListReply, error) {
+	out := new(GetRoomListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/GetRoomList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) GetRoomPlayList(ctx context.Context, in *GetRoomPlayListRequest, opts ...grpc.CallOption) (*GetRoomPlayListReply, error) {
+	out := new(GetRoomPlayListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/GetRoomPlayList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServer is the server API for Admin service.
 // All implementations must embed UnimplementedAdminServer
 // for forward compatibility
 type AdminServer interface {
 	GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error)
+	SortPlayGrant(context.Context, *SortPlayGrantRequest) (*SortPlayGrantReply, error)
 	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
 	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
+	GetPlayList(context.Context, *GetPlayListRequest) (*GetPlayListReply, error)
+	GetPlayRelList(context.Context, *GetPlayRelListRequest) (*GetPlayRelListReply, error)
+	GetRoomList(context.Context, *GetRoomListRequest) (*GetRoomListReply, error)
+	GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error)
 	mustEmbedUnimplementedAdminServer()
 }
 
@@ -79,11 +134,26 @@ type UnimplementedAdminServer struct {
 func (UnimplementedAdminServer) GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GamePlayGrant not implemented")
 }
+func (UnimplementedAdminServer) SortPlayGrant(context.Context, *SortPlayGrantRequest) (*SortPlayGrantReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SortPlayGrant not implemented")
+}
 func (UnimplementedAdminServer) CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePlayGame not implemented")
 }
 func (UnimplementedAdminServer) CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePlaySort not implemented")
+}
+func (UnimplementedAdminServer) GetPlayList(context.Context, *GetPlayListRequest) (*GetPlayListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlayList not implemented")
+}
+func (UnimplementedAdminServer) GetPlayRelList(context.Context, *GetPlayRelListRequest) (*GetPlayRelListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlayRelList not implemented")
+}
+func (UnimplementedAdminServer) GetRoomList(context.Context, *GetRoomListRequest) (*GetRoomListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRoomList not implemented")
+}
+func (UnimplementedAdminServer) GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRoomPlayList not implemented")
 }
 func (UnimplementedAdminServer) mustEmbedUnimplementedAdminServer() {}
 
@@ -112,6 +182,24 @@ func _Admin_GamePlayGrant_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AdminServer).GamePlayGrant(ctx, req.(*GamePlayGrantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_SortPlayGrant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SortPlayGrantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).SortPlayGrant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/SortPlayGrant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).SortPlayGrant(ctx, req.(*SortPlayGrantRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -152,6 +240,78 @@ func _Admin_CreatePlaySort_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Admin_GetPlayList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlayListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetPlayList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/GetPlayList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetPlayList(ctx, req.(*GetPlayListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_GetPlayRelList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlayRelListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetPlayRelList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/GetPlayRelList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetPlayRelList(ctx, req.(*GetPlayRelListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_GetRoomList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRoomListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetRoomList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/GetRoomList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetRoomList(ctx, req.(*GetRoomListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_GetRoomPlayList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRoomPlayListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetRoomPlayList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/GetRoomPlayList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetRoomPlayList(ctx, req.(*GetRoomPlayListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Admin_ServiceDesc is the grpc.ServiceDesc for Admin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -164,12 +324,32 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Admin_GamePlayGrant_Handler,
 		},
 		{
+			MethodName: "SortPlayGrant",
+			Handler:    _Admin_SortPlayGrant_Handler,
+		},
+		{
 			MethodName: "CreatePlayGame",
 			Handler:    _Admin_CreatePlayGame_Handler,
 		},
 		{
 			MethodName: "CreatePlaySort",
 			Handler:    _Admin_CreatePlaySort_Handler,
+		},
+		{
+			MethodName: "GetPlayList",
+			Handler:    _Admin_GetPlayList_Handler,
+		},
+		{
+			MethodName: "GetPlayRelList",
+			Handler:    _Admin_GetPlayRelList_Handler,
+		},
+		{
+			MethodName: "GetRoomList",
+			Handler:    _Admin_GetRoomList_Handler,
+		},
+		{
+			MethodName: "GetRoomPlayList",
+			Handler:    _Admin_GetRoomPlayList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -181,6 +361,11 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {
 	UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...grpc.CallOption) (*UserDepositReply, error)
+	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListReply, error)
+	GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error)
+	GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...grpc.CallOption) (*GetUserRecommendListReply, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error)
+	GetUserBalanceRecord(ctx context.Context, in *GetUserBalanceRecordRequest, opts ...grpc.CallOption) (*GetUserBalanceRecordReply, error)
 }
 
 type userClient struct {
@@ -200,11 +385,61 @@ func (c *userClient) UserDeposit(ctx context.Context, in *UserDepositRequest, op
 	return out, nil
 }
 
+func (c *userClient) GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListReply, error) {
+	out := new(GetUserListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/GetUserList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error) {
+	out := new(GetUserProxyListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/GetUserProxyList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...grpc.CallOption) (*GetUserRecommendListReply, error) {
+	out := new(GetUserRecommendListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/GetUserRecommendList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error) {
+	out := new(GetUserReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/GetUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) GetUserBalanceRecord(ctx context.Context, in *GetUserBalanceRecordRequest, opts ...grpc.CallOption) (*GetUserBalanceRecordReply, error) {
+	out := new(GetUserBalanceRecordReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/GetUserBalanceRecord", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
 type UserServer interface {
 	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
+	GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error)
+	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
+	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
+	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
+	GetUserBalanceRecord(context.Context, *GetUserBalanceRecordRequest) (*GetUserBalanceRecordReply, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -214,6 +449,21 @@ type UnimplementedUserServer struct {
 
 func (UnimplementedUserServer) UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserDeposit not implemented")
+}
+func (UnimplementedUserServer) GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserList not implemented")
+}
+func (UnimplementedUserServer) GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserProxyList not implemented")
+}
+func (UnimplementedUserServer) GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserRecommendList not implemented")
+}
+func (UnimplementedUserServer) GetUser(context.Context, *GetUserRequest) (*GetUserReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedUserServer) GetUserBalanceRecord(context.Context, *GetUserBalanceRecordRequest) (*GetUserBalanceRecordReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserBalanceRecord not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -246,6 +496,96 @@ func _User_UserDeposit_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_GetUserList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/GetUserList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserList(ctx, req.(*GetUserListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUserProxyList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserProxyListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserProxyList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/GetUserProxyList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserProxyList(ctx, req.(*GetUserProxyListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUserRecommendList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRecommendListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserRecommendList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/GetUserRecommendList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserRecommendList(ctx, req.(*GetUserRecommendListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/GetUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUser(ctx, req.(*GetUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUserBalanceRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserBalanceRecordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserBalanceRecord(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/GetUserBalanceRecord",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserBalanceRecord(ctx, req.(*GetUserBalanceRecordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -256,6 +596,26 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserDeposit",
 			Handler:    _User_UserDeposit_Handler,
+		},
+		{
+			MethodName: "GetUserList",
+			Handler:    _User_GetUserList_Handler,
+		},
+		{
+			MethodName: "GetUserProxyList",
+			Handler:    _User_GetUserProxyList_Handler,
+		},
+		{
+			MethodName: "GetUserRecommendList",
+			Handler:    _User_GetUserRecommendList_Handler,
+		},
+		{
+			MethodName: "GetUser",
+			Handler:    _User_GetUser_Handler,
+		},
+		{
+			MethodName: "GetUserBalanceRecord",
+			Handler:    _User_GetUserBalanceRecord_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

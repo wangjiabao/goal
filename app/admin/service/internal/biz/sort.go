@@ -11,6 +11,8 @@ type Sort struct {
 	ID       int64
 	SortName string
 	Type     string
+	Content  string
+	Status   string
 	EndTime  time.Time
 }
 

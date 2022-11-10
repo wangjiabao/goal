@@ -22,18 +22,33 @@ const _ = http.SupportPackageIsVersion1
 const OperationAdminCreatePlayGame = "/api.admin.service.v1.Admin/CreatePlayGame"
 const OperationAdminCreatePlaySort = "/api.admin.service.v1.Admin/CreatePlaySort"
 const OperationAdminGamePlayGrant = "/api.admin.service.v1.Admin/GamePlayGrant"
+const OperationAdminGetPlayList = "/api.admin.service.v1.Admin/GetPlayList"
+const OperationAdminGetPlayRelList = "/api.admin.service.v1.Admin/GetPlayRelList"
+const OperationAdminGetRoomList = "/api.admin.service.v1.Admin/GetRoomList"
+const OperationAdminGetRoomPlayList = "/api.admin.service.v1.Admin/GetRoomPlayList"
+const OperationAdminSortPlayGrant = "/api.admin.service.v1.Admin/SortPlayGrant"
 
 type AdminHTTPServer interface {
 	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
 	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
 	GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error)
+	GetPlayList(context.Context, *GetPlayListRequest) (*GetPlayListReply, error)
+	GetPlayRelList(context.Context, *GetPlayRelListRequest) (*GetPlayRelListReply, error)
+	GetRoomList(context.Context, *GetRoomListRequest) (*GetRoomListReply, error)
+	GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error)
+	SortPlayGrant(context.Context, *SortPlayGrantRequest) (*SortPlayGrantReply, error)
 }
 
 func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/goal_admin/play/game/grant", _Admin_GamePlayGrant0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/play/sort/grant", _Admin_SortPlayGrant0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play/game", _Admin_CreatePlayGame0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play/sort", _Admin_CreatePlaySort0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/game/{game_id}/play", _Admin_GetPlayList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/play/{play_id}/play_rel", _Admin_GetPlayRelList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/room_list", _Admin_GetRoomList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/room/{room_id}/play_list", _Admin_GetRoomPlayList0_HTTP_Handler(srv))
 }
 
 func _Admin_GamePlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
@@ -54,6 +69,28 @@ func _Admin_GamePlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Conte
 			return err
 		}
 		reply := out.(*GamePlayGrantReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Admin_SortPlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SortPlayGrantRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminSortPlayGrant)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SortPlayGrant(ctx, req.(*SortPlayGrantRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SortPlayGrantReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -102,10 +139,100 @@ func _Admin_CreatePlaySort0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Cont
 	}
 }
 
+func _Admin_GetPlayList0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPlayListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminGetPlayList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPlayList(ctx, req.(*GetPlayListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetPlayListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Admin_GetPlayRelList0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPlayRelListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminGetPlayRelList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPlayRelList(ctx, req.(*GetPlayRelListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetPlayRelListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Admin_GetRoomList0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetRoomListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminGetRoomList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetRoomList(ctx, req.(*GetRoomListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetRoomListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Admin_GetRoomPlayList0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetRoomPlayListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminGetRoomPlayList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetRoomPlayList(ctx, req.(*GetRoomPlayListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetRoomPlayListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AdminHTTPClient interface {
 	CreatePlayGame(ctx context.Context, req *CreatePlayGameRequest, opts ...http.CallOption) (rsp *CreatePlayGameReply, err error)
 	CreatePlaySort(ctx context.Context, req *CreatePlaySortRequest, opts ...http.CallOption) (rsp *CreatePlaySortReply, err error)
 	GamePlayGrant(ctx context.Context, req *GamePlayGrantRequest, opts ...http.CallOption) (rsp *GamePlayGrantReply, err error)
+	GetPlayList(ctx context.Context, req *GetPlayListRequest, opts ...http.CallOption) (rsp *GetPlayListReply, err error)
+	GetPlayRelList(ctx context.Context, req *GetPlayRelListRequest, opts ...http.CallOption) (rsp *GetPlayRelListReply, err error)
+	GetRoomList(ctx context.Context, req *GetRoomListRequest, opts ...http.CallOption) (rsp *GetRoomListReply, err error)
+	GetRoomPlayList(ctx context.Context, req *GetRoomPlayListRequest, opts ...http.CallOption) (rsp *GetRoomPlayListReply, err error)
+	SortPlayGrant(ctx context.Context, req *SortPlayGrantRequest, opts ...http.CallOption) (rsp *SortPlayGrantReply, err error)
 }
 
 type AdminHTTPClientImpl struct {
@@ -155,15 +282,95 @@ func (c *AdminHTTPClientImpl) GamePlayGrant(ctx context.Context, in *GamePlayGra
 	return &out, err
 }
 
+func (c *AdminHTTPClientImpl) GetPlayList(ctx context.Context, in *GetPlayListRequest, opts ...http.CallOption) (*GetPlayListReply, error) {
+	var out GetPlayListReply
+	pattern := "/api/goal_admin/game/{game_id}/play"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminGetPlayList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) GetPlayRelList(ctx context.Context, in *GetPlayRelListRequest, opts ...http.CallOption) (*GetPlayRelListReply, error) {
+	var out GetPlayRelListReply
+	pattern := "/api/goal_admin/play/{play_id}/play_rel"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminGetPlayRelList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) GetRoomList(ctx context.Context, in *GetRoomListRequest, opts ...http.CallOption) (*GetRoomListReply, error) {
+	var out GetRoomListReply
+	pattern := "/api/goal_admin/room_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminGetRoomList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) GetRoomPlayList(ctx context.Context, in *GetRoomPlayListRequest, opts ...http.CallOption) (*GetRoomPlayListReply, error) {
+	var out GetRoomPlayListReply
+	pattern := "/api/goal_admin/room/{room_id}/play_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminGetRoomPlayList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) SortPlayGrant(ctx context.Context, in *SortPlayGrantRequest, opts ...http.CallOption) (*SortPlayGrantReply, error) {
+	var out SortPlayGrantReply
+	pattern := "/api/goal_admin/play/sort/grant"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminSortPlayGrant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+const OperationUserGetUser = "/api.admin.service.v1.User/GetUser"
+const OperationUserGetUserBalanceRecord = "/api.admin.service.v1.User/GetUserBalanceRecord"
+const OperationUserGetUserList = "/api.admin.service.v1.User/GetUserList"
+const OperationUserGetUserProxyList = "/api.admin.service.v1.User/GetUserProxyList"
+const OperationUserGetUserRecommendList = "/api.admin.service.v1.User/GetUserRecommendList"
 const OperationUserUserDeposit = "/api.admin.service.v1.User/UserDeposit"
 
 type UserHTTPServer interface {
+	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
+	GetUserBalanceRecord(context.Context, *GetUserBalanceRecordRequest) (*GetUserBalanceRecordReply, error)
+	GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error)
+	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
+	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
 	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 }
 
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/goal_admin/user/deposit", _User_UserDeposit0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/user_list", _User_GetUserList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/user_proxy_list", _User_GetUserProxyList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/user/{user_id}/recommend_user_list", _User_GetUserRecommendList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/user/{user_id}", _User_GetUser0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/user_balance_record", _User_GetUserBalanceRecord0_HTTP_Handler(srv))
 }
 
 func _User_UserDeposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -188,7 +395,113 @@ func _User_UserDeposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) 
 	}
 }
 
+func _User_GetUserList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserGetUserList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserList(ctx, req.(*GetUserListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _User_GetUserProxyList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserProxyListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserGetUserProxyList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserProxyList(ctx, req.(*GetUserProxyListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserProxyListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _User_GetUserRecommendList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserRecommendListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserGetUserRecommendList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserRecommendList(ctx, req.(*GetUserRecommendListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserRecommendListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _User_GetUser0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserGetUser)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUser(ctx, req.(*GetUserRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _User_GetUserBalanceRecord0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserBalanceRecordRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserGetUserBalanceRecord)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserBalanceRecord(ctx, req.(*GetUserBalanceRecordRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserBalanceRecordReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserHTTPClient interface {
+	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserReply, err error)
+	GetUserBalanceRecord(ctx context.Context, req *GetUserBalanceRecordRequest, opts ...http.CallOption) (rsp *GetUserBalanceRecordReply, err error)
+	GetUserList(ctx context.Context, req *GetUserListRequest, opts ...http.CallOption) (rsp *GetUserListReply, err error)
+	GetUserProxyList(ctx context.Context, req *GetUserProxyListRequest, opts ...http.CallOption) (rsp *GetUserProxyListReply, err error)
+	GetUserRecommendList(ctx context.Context, req *GetUserRecommendListRequest, opts ...http.CallOption) (rsp *GetUserRecommendListReply, err error)
 	UserDeposit(ctx context.Context, req *UserDepositRequest, opts ...http.CallOption) (rsp *UserDepositReply, err error)
 }
 
@@ -198,6 +511,71 @@ type UserHTTPClientImpl struct {
 
 func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 	return &UserHTTPClientImpl{client}
+}
+
+func (c *UserHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequest, opts ...http.CallOption) (*GetUserReply, error) {
+	var out GetUserReply
+	pattern := "/api/goal_admin/user/{user_id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserGetUser))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) GetUserBalanceRecord(ctx context.Context, in *GetUserBalanceRecordRequest, opts ...http.CallOption) (*GetUserBalanceRecordReply, error) {
+	var out GetUserBalanceRecordReply
+	pattern := "/api/goal_admin/user_balance_record"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserGetUserBalanceRecord))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) GetUserList(ctx context.Context, in *GetUserListRequest, opts ...http.CallOption) (*GetUserListReply, error) {
+	var out GetUserListReply
+	pattern := "/api/goal_admin/user_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserGetUserList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...http.CallOption) (*GetUserProxyListReply, error) {
+	var out GetUserProxyListReply
+	pattern := "/api/goal_admin/user_proxy_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserGetUserProxyList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...http.CallOption) (*GetUserRecommendListReply, error) {
+	var out GetUserRecommendListReply
+	pattern := "/api/goal_admin/user/{user_id}/recommend_user_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserGetUserRecommendList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
 }
 
 func (c *UserHTTPClientImpl) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...http.CallOption) (*UserDepositReply, error) {

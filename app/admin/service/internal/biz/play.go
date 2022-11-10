@@ -26,6 +26,12 @@ type PlayGameRel struct {
 	GameId int64
 }
 
+type PlayRoomRel struct {
+	ID     int64
+	PlayId int64
+	RoomId int64
+}
+
 type PlaySortRel struct {
 	ID     int64
 	PlayId int64
@@ -61,17 +67,45 @@ type PlayGameTeamGoalUserRel struct {
 	Status string
 }
 
+type PlayGameTeamSortUserRel struct {
+	ID      int64
+	UserId  int64
+	PlayId  int64
+	Content string
+	SortId  int64
+	Pay     int64
+	Status  string
+}
+
 type UserBalance struct {
 	ID      int64
 	UserId  int64
 	Balance int64
 }
 
+type UserBalanceRecord struct {
+	ID        int64
+	UserId    int64
+	Balance   int64
+	Type      string
+	Amount    int64
+	Reason    string
+	CreatedAt time.Time
+}
+
 type UserProxy struct {
-	ID       int64
-	UserId   int64
-	UpUserId int64
-	Rate     int64
+	ID        int64
+	UserId    int64
+	UpUserId  int64
+	Rate      int64
+	CreatedAt time.Time
+}
+
+type Room struct {
+	ID        int64
+	Account   string
+	Type      string
+	CreatedAt time.Time
 }
 
 type UserInfo struct {
@@ -82,10 +116,16 @@ type UserInfo struct {
 	RecommendCode   string
 	MyRecommendCode string
 	Code            string
+	CreatedAt       time.Time
+}
+
+type RoomRepo interface {
+	GetRoomList(ctx context.Context) ([]*Room, error)
 }
 
 type PlayRepo interface {
 	GetPlayListByIds(ctx context.Context, ids ...int64) ([]*Play, error)
+	GetPlayById(ctx context.Context, id int64) (*Play, error)
 	CreatePlay(ctx context.Context, pc *Play) (*Play, error)
 }
 
@@ -94,10 +134,17 @@ type PlayGameRelRepo interface {
 	CreatePlayGameRel(ctx context.Context, rel *PlayGameRel) (*PlayGameRel, error)
 }
 
+type PlayRoomRelRepo interface {
+	GetPlayRoomRelByRoomId(ctx context.Context, roomId int64) ([]*PlayRoomRel, error)
+}
+
 type PlaySortRelRepo interface {
+	GetPlaySortRelBySortId(ctx context.Context, sortId int64) ([]*PlaySortRel, error)
 	CreatePlaySortRel(ctx context.Context, rel *PlaySortRel) (*PlaySortRel, error)
 }
+
 type PlayGameScoreUserRelRepo interface {
+	GetPlayGameScoreUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameScoreUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
 	GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameScoreUserRel, error)
 }
@@ -105,16 +152,24 @@ type PlayGameScoreUserRelRepo interface {
 type PlayGameTeamResultUserRelRepo interface {
 	GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamResultUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
+	GetPlayGameTeamResultUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameTeamResultUserRel, error)
 }
 
 type PlayGameTeamGoalUserRelRepo interface {
-	GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamGoalUserRel, error)
+	GetPlayGameTeamGoalUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamGoalUserRel, error)
+	SetRewarded(ctx context.Context, id int64) error
+	GetPlayGameTeamGoalUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameTeamGoalUserRel, error)
+}
+
+type PlayGameTeamSortUserRelRepo interface {
+	GetPlayGameTeamSortUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamSortUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
 }
 
 type UserBalanceRepo interface {
 	TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
+	GetUserBalanceRecord(ctx context.Context) ([]*UserBalanceRecord, error)
 	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) error
 	GetAddressEthBalanceByAddress(ctx context.Context, address string) (*AddressEthBalance, error)
 	Deposit(ctx context.Context, userId int64, amount int64) (*UserBalance, error)
@@ -127,16 +182,21 @@ type UserProxyRepo interface {
 
 type UserInfoRepo interface {
 	GetUserInfoByUserId(ctx context.Context, userId int64) (*UserInfo, error)
+	GetUserInfoListByRecommendCode(ctx context.Context, recommendCode string) ([]*UserInfo, error)
 }
 
 type PlayUseCase struct {
+	uRepo                         UserRepo
+	roomRepo                      RoomRepo
 	playRepo                      PlayRepo
 	gameRepo                      GameRepo
 	playGameRelRepo               PlayGameRelRepo
+	playRoomRelRepo               PlayRoomRelRepo
 	playSortRelRepo               PlaySortRelRepo
 	playGameScoreUserRelRepo      PlayGameScoreUserRelRepo
 	playGameTeamResultUserRelRepo PlayGameTeamResultUserRelRepo
 	playGameTeamGoalUserRelRepo   PlayGameTeamGoalUserRelRepo
+	playGameTeamSortUserRelRepo   PlayGameTeamSortUserRelRepo
 	userBalanceRepo               UserBalanceRepo
 	userProxyRepo                 UserProxyRepo
 	userInfoRepo                  UserInfoRepo
@@ -146,12 +206,16 @@ type PlayUseCase struct {
 }
 
 func NewPlayUseCase(
+	uRepo UserRepo,
 	repo PlayRepo,
+	roomRepo RoomRepo,
 	playGameRelRepo PlayGameRelRepo,
 	playSortRelRepo PlaySortRelRepo,
+	playRoomRelRepo PlayRoomRelRepo,
 	playGameScoreUserRelRepo PlayGameScoreUserRelRepo,
 	playGameTeamGoalUserRelRepo PlayGameTeamGoalUserRelRepo,
 	playGameTeamResultUserRelRepo PlayGameTeamResultUserRelRepo,
+	playGameTeamSortUserRelRepo PlayGameTeamSortUserRelRepo,
 	gameRepo GameRepo,
 	sortRepo SortRepo,
 	userBalanceRepo UserBalanceRepo,
@@ -160,14 +224,18 @@ func NewPlayUseCase(
 	tx Transaction,
 	logger log.Logger) *PlayUseCase {
 	return &PlayUseCase{
+		uRepo:                         uRepo,
+		roomRepo:                      roomRepo,
 		playRepo:                      repo,
 		gameRepo:                      gameRepo,
 		sortRepo:                      sortRepo,
 		playGameRelRepo:               playGameRelRepo,
+		playRoomRelRepo:               playRoomRelRepo,
 		playSortRelRepo:               playSortRelRepo,
 		playGameScoreUserRelRepo:      playGameScoreUserRelRepo,
 		playGameTeamGoalUserRelRepo:   playGameTeamGoalUserRelRepo,
 		playGameTeamResultUserRelRepo: playGameTeamResultUserRelRepo,
+		playGameTeamSortUserRelRepo:   playGameTeamSortUserRelRepo,
 		userBalanceRepo:               userBalanceRepo,
 		userProxyRepo:                 userProxyRepo,
 		userInfoRepo:                  userInfoRepo,
@@ -225,6 +293,213 @@ func (p *PlayUseCase) GamePlayGrant(ctx context.Context, req *v1.GamePlayGrantRe
 	return &v1.GamePlayGrantReply{
 		Result: "处理完成",
 	}, nil
+}
+
+func (p *PlayUseCase) SortPlayGrant(ctx context.Context, req *v1.SortPlayGrantRequest) (*v1.SortPlayGrantReply, error) {
+	var (
+		playSort     *Sort
+		playSortRel  []*PlaySortRel
+		playIds      []int64
+		playGameSort []*Play
+		err          error
+	)
+
+	playSort, err = p.sortRepo.GetGameSortById(ctx, req.SendBody.SortId) // 获取排名截至日期以校验创建的玩法
+	if nil != err {
+		return nil, err
+	}
+
+	if !strings.EqualFold("end", playSort.Status) {
+		return nil, errors.New(500, "TIME_ERROR", "比赛排名未结束")
+	}
+
+	playSortRel, err = p.playSortRelRepo.GetPlaySortRelBySortId(ctx, playSort.ID)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range playSortRel {
+		playIds = append(playIds, v.PlayId)
+	}
+
+	playGameSort, err = p.playRepo.GetPlayListByIds(ctx, playIds...) // 获取玩法
+	if err != nil {
+		return nil, err
+	}
+
+	p.grantTypeGameSort(ctx, playSort, playGameSort)
+
+	return &v1.SortPlayGrantReply{
+		Result: "处理完成",
+	}, nil
+
+}
+
+func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, play []*Play) bool {
+	var (
+		playIds                 []int64
+		playGameTeamSortUserRel map[int64][]*PlayGameTeamSortUserRel
+		err                     error
+		rate                    int64 = 80 // 猜中分比率可后台设置
+	)
+
+	for _, v := range play {
+		playIds = append(playIds, v.ID)
+	}
+
+	playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.GetPlayGameTeamSortUserRelByPlayIds(ctx, playIds...)
+	if err != nil {
+		return false
+	}
+
+	contentTeamId := make(map[int64]int)
+	for k, v := range strings.Split(playSort.Content, ":") { //解析除队伍id
+		if tmp, ok := strconv.ParseInt(v, 10, 64); 0 < tmp && nil == ok {
+			contentTeamId[tmp] = k
+		}
+	}
+
+	for _, playUserRel := range playGameTeamSortUserRel {
+		// 每一场玩法，数据都是一个玩法类型
+		var (
+			winNoRewardedPlayGameTeamResultUserRel []*struct {
+				AmountBase int64
+				Pay        int64
+				UserId     int64
+				Id         int64
+			} // 猜中未发放奖励的用户
+			poolAmount     int64 // 每个玩法的奖池
+			winTotalAmount int64 // 中奖人的钱总额
+		)
+
+		// 解析中奖人
+		for _, v := range playUserRel {
+			tmpTeams := strings.Split(v.Content, ":") // 解析
+			if "team_sort_three" == playSort.Type {
+				amountBaseTmp := int64(0)
+				for k, sv := range tmpTeams { //解析除队伍id
+					tmp, _ := strconv.ParseInt(sv, 10, 64)
+					if 0 >= tmp {
+						break // 不符合规范，非正式输入的
+					}
+					if _, ok := contentTeamId[tmp]; ok && k == contentTeamId[tmp] { // 不存在
+						if 0 == k {
+							amountBaseTmp += 50
+						} else if 1 == k {
+							amountBaseTmp += 30
+						} else if 2 == k {
+							amountBaseTmp += 20
+						}
+					}
+				}
+
+				if 0 < amountBaseTmp {
+					winTotalAmount += v.Pay
+					if strings.EqualFold("no_rewarded", v.Status) {
+						winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
+							AmountBase int64
+							Pay        int64
+							UserId     int64
+							Id         int64
+						}{AmountBase: amountBaseTmp, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
+					}
+				}
+
+			} else { // 非冠亚军
+				num := 0
+				for _, sv := range tmpTeams { //解析除队伍id
+					tmp, _ := strconv.ParseInt(sv, 10, 64)
+					if 0 >= tmp {
+						break // 不符合规范，非正式输入的
+					}
+					if _, ok := contentTeamId[tmp]; !ok { // 不存在
+						break
+					}
+					num++
+				}
+
+				if (16 == num && 16 == len(tmpTeams) && "team_sort_sixteen" == playSort.Type) || (8 == num && 8 == len(tmpTeams) && "team_sort_eight" == playSort.Type) { // 16强或8强全部猜中并且没发奖励
+					winTotalAmount += v.Pay
+					if strings.EqualFold("no_rewarded", v.Status) {
+						winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
+							AmountBase int64
+							Pay        int64
+							UserId     int64
+							Id         int64
+						}{AmountBase: 100, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
+					}
+				}
+
+			}
+
+			poolAmount += v.Pay
+		}
+
+		sizeofWin := int64(len(winNoRewardedPlayGameTeamResultUserRel))
+		if 0 == sizeofWin {
+			continue
+		}
+
+		poolAmount = poolAmount * rate / 100
+		for _, winV := range winNoRewardedPlayGameTeamResultUserRel {
+			var (
+				recommendUserIds []int64
+				userInfo         *UserInfo
+			)
+			perAmount := poolAmount * winV.Pay * winV.AmountBase / 100 / winTotalAmount // 加权分的钱
+
+			userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, winV.UserId) // 获取推荐关系
+			for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") {    // 解析userId, 取前三代
+				tmp, _ := strconv.ParseInt(ruv, 10, 64)
+				if 0 < tmp {
+					recommendUserIds = append(recommendUserIds, tmp)
+				}
+			}
+			userIdsLen := len(recommendUserIds)
+			if userIdsLen > 3 {
+				recommendUserIds = recommendUserIds[userIdsLen-3:]
+			}
+
+			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+
+				for k, recommendUserId := range recommendUserIds { // 推荐人
+					var tmpPerAmount int64
+					if 0 == k {
+						tmpPerAmount = perAmount * 2 / 1000
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
+							return res
+						}
+					} else if 1 == k {
+						tmpPerAmount = perAmount * 3 / 1000
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
+							return res
+						}
+					} else if 2 == k {
+						tmpPerAmount = perAmount * 5 / 1000
+						tmpPerAmount += perAmount * 10 / 1000
+						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
+							return res
+						}
+					}
+					perAmount -= tmpPerAmount
+				}
+
+				if res := p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != res {
+					return res
+				}
+
+				if res := p.playGameTeamSortUserRelRepo.SetRewarded(ctx, winV.Id); nil != res {
+					return res
+				}
+
+				return nil
+			}); nil != err {
+				continue
+			}
+
+		}
+	}
+
+	return true
 }
 
 func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play []*Play) bool {
@@ -452,7 +727,7 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 		playIds = append(playIds, v.ID)
 	}
 
-	playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamResultUserRelByPlayIds(ctx, playIds...)
+	playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIds(ctx, playIds...)
 	if err != nil {
 		return false
 	}
@@ -699,4 +974,168 @@ func (p *PlayUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 	return &v1.CreatePlaySortReply{
 		PlayId: play.ID,
 	}, err
+}
+
+func (p *PlayUseCase) GetPlayList(ctx context.Context, req *v1.GetPlayListRequest) (*v1.GetPlayListReply, error) {
+	var (
+		play        []*Play
+		playIds     []int64
+		playGameRel []*PlayGameRel
+		err         error
+	)
+
+	playGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameId(ctx, req.GameId)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range playGameRel {
+		playIds = append(playIds, v.PlayId)
+	}
+
+	play, err = p.playRepo.GetPlayListByIds(ctx, playIds...)
+
+	res := &v1.GetPlayListReply{
+		Items: make([]*v1.GetPlayListReply_Item, 0),
+	}
+	for _, item := range play {
+		res.Items = append(res.Items, &v1.GetPlayListReply_Item{
+			PlayId:    item.ID,
+			Type:      item.Type,
+			StartTime: item.StartTime.Format("2006-01-02 15:04:05"),
+			EndTime:   item.EndTime.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
+func (p *PlayUseCase) GetRoomPlayList(ctx context.Context, req *v1.GetRoomPlayListRequest) (*v1.GetRoomPlayListReply, error) {
+	var (
+		play        []*Play
+		playIds     []int64
+		playRoomRel []*PlayRoomRel
+		err         error
+	)
+
+	playRoomRel, err = p.playRoomRelRepo.GetPlayRoomRelByRoomId(ctx, req.RoomId)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range playRoomRel {
+		playIds = append(playIds, v.PlayId)
+	}
+
+	play, err = p.playRepo.GetPlayListByIds(ctx, playIds...)
+
+	res := &v1.GetRoomPlayListReply{
+		Items: make([]*v1.GetRoomPlayListReply_Item, 0),
+	}
+	for _, item := range play {
+		res.Items = append(res.Items, &v1.GetRoomPlayListReply_Item{
+			PlayId:    item.ID,
+			Type:      item.Type,
+			StartTime: item.StartTime.Format("2006-01-02 15:04:05"),
+			EndTime:   item.EndTime.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
+func (p *PlayUseCase) GetPlayUserRelList(ctx context.Context, req *v1.GetPlayRelListRequest) (*v1.GetPlayRelListReply, error) {
+	var (
+		play        *Play
+		userId      []int64
+		playUserRel []*struct {
+			UserId int64
+			Status string
+			Pay    int64
+		}
+		user map[int64]*User
+		err  error
+	)
+
+	play, err = p.playRepo.GetPlayById(ctx, req.PlayId)
+	if nil != err {
+		return nil, err
+	}
+
+	if "game_team_goal_all" == play.Type || "game_team_goal_up" == play.Type || "game_team_goal_down" == play.Type {
+		playGameTeamGoalUserRel, _ := p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayId(ctx, play.ID)
+		for _, v := range playGameTeamGoalUserRel {
+			playUserRel = append(playUserRel, &struct {
+				UserId int64
+				Status string
+				Pay    int64
+			}{UserId: v.UserId, Status: v.Status, Pay: v.Pay})
+		}
+	} else if "game_score" == play.Type {
+		playGameScoreUserRel, _ := p.playGameScoreUserRelRepo.GetPlayGameScoreUserRelByPlayId(ctx, play.ID)
+		for _, v := range playGameScoreUserRel {
+			playUserRel = append(playUserRel, &struct {
+				UserId int64
+				Status string
+				Pay    int64
+			}{UserId: v.UserId, Status: v.Status, Pay: v.Pay})
+		}
+	} else if "game_team_result" == play.Type {
+		playGameTeamResultUserRel, _ := p.playGameTeamResultUserRelRepo.GetPlayGameTeamResultUserRelByPlayId(ctx, play.ID)
+		for _, v := range playGameTeamResultUserRel {
+			playUserRel = append(playUserRel, &struct {
+				UserId int64
+				Status string
+				Pay    int64
+			}{UserId: v.UserId, Status: v.Status, Pay: v.Pay})
+		}
+	}
+
+	for _, v := range playUserRel {
+		userId = append(userId, v.UserId)
+	}
+
+	user, _ = p.uRepo.GetUserMap(ctx, userId...)
+
+	res := &v1.GetPlayRelListReply{
+		Items: make([]*v1.GetPlayRelListReply_Item, 0),
+	}
+
+	for _, item := range playUserRel {
+		tempAddress := ""
+		if v, ok := user[item.UserId]; ok {
+			tempAddress = v.Address
+		}
+		res.Items = append(res.Items, &v1.GetPlayRelListReply_Item{
+			Address: tempAddress,
+			Pay:     item.Pay,
+			Status:  item.Status,
+		})
+	}
+
+	return res, nil
+}
+
+func (p *PlayUseCase) GetRooms(ctx context.Context) (*v1.GetRoomListReply, error) {
+	var (
+		room []*Room
+		err  error
+	)
+
+	room, err = p.roomRepo.GetRoomList(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &v1.GetRoomListReply{
+		Items: make([]*v1.GetRoomListReply_Item, 0),
+	}
+
+	for _, item := range room {
+		res.Items = append(res.Items, &v1.GetRoomListReply_Item{
+			RoomId:    item.ID,
+			Account:   item.Account,
+			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
 }

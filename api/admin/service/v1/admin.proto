@@ -17,6 +17,13 @@ service Admin {
 		};
 	};
 
+	rpc SortPlayGrant (SortPlayGrantRequest) returns (SortPlayGrantReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play/sort/grant"
+			body: "send_body"
+		};
+	};
+
 	rpc CreatePlayGame (CreatePlayGameRequest) returns (CreatePlayGameReply){
 		option (google.api.http) = {
 			post: "/api/goal_admin/play/game"
@@ -30,6 +37,30 @@ service Admin {
 			body: "send_body"
 		};
 	};
+
+	rpc GetPlayList (GetPlayListRequest) returns (GetPlayListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/game/{game_id}/play"
+		};
+	};
+
+	rpc GetPlayRelList (GetPlayRelListRequest) returns (GetPlayRelListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/play/{play_id}/play_rel"
+		};
+	};
+
+	rpc GetRoomList (GetRoomListRequest) returns (GetRoomListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/room_list"
+		};
+	};
+
+	rpc GetRoomPlayList (GetRoomPlayListRequest) returns (GetRoomPlayListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/room/{room_id}/play_list"
+		};
+	};
 }
 
 service User {
@@ -37,6 +68,36 @@ service User {
 		option (google.api.http) = {
 			post: "/api/goal_admin/user/deposit"
 			body: "send_body"
+		};
+	};
+
+	rpc GetUserList (GetUserListRequest) returns (GetUserListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/user_list"
+		};
+	};
+
+	rpc GetUserProxyList (GetUserProxyListRequest) returns (GetUserProxyListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/user_proxy_list"
+		};
+	};
+
+	rpc GetUserRecommendList (GetUserRecommendListRequest) returns (GetUserRecommendListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/user/{user_id}/recommend_user_list"
+		};
+	};
+
+	rpc GetUser (GetUserRequest) returns (GetUserReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/user/{user_id}"
+		};
+	};
+
+	rpc GetUserBalanceRecord (GetUserBalanceRecordRequest) returns (GetUserBalanceRecordReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/user_balance_record"
 		};
 	};
 }
@@ -120,6 +181,18 @@ message GamePlayGrantReply {
 	string result = 1;
 }
 
+message SortPlayGrantRequest {
+	message SendBody{
+		int64 sort_id = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message SortPlayGrantReply {
+	string result = 1;
+}
+
 message CreateGameRequest {
 	message SendBody{
 		int64 red_team_id = 1;
@@ -192,6 +265,27 @@ message GetGameReply {
 	string result = 15;
 }
 
+message GetUserRequest {
+	int64 user_id = 1;
+}
+
+message GetUserReply {
+	int64 userBalance = 1;
+}
+
+message GetUserRecommendListRequest {
+	int64 user_id = 1;
+}
+
+message GetUserRecommendListReply {
+	repeated Item items = 1;
+	message Item {
+		string Address = 1;
+		string CreatedAt = 3;
+		int64 userId = 2;
+	}
+}
+
 message GetGameListRequest {
 
 }
@@ -205,6 +299,103 @@ message GetGameListReply {
 		string end_time = 4;
 		string up_end_time = 5;
 		string down_start_time = 6;
+	}
+}
+
+message GetPlayListRequest {
+	int64 game_id = 1;
+}
+
+message GetPlayListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 play_id = 1;
+		string type = 2;
+		string start_time = 3;
+		string end_time = 4;
+	}
+}
+
+message GetRoomPlayListRequest {
+	int64 room_id = 1;
+}
+
+message GetRoomPlayListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 play_id = 1;
+		string type = 2;
+		string start_time = 3;
+		string end_time = 4;
+	}
+}
+
+
+message GetPlayRelListRequest {
+	int64 play_id = 1;
+}
+
+message GetPlayRelListReply {
+	repeated Item items = 1;
+	message Item {
+		string address = 1;
+		string status = 2;
+		int64 Pay = 3;
+	}
+}
+
+message GetRoomListRequest {
+}
+
+message GetRoomListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 room_id = 1;
+		string account = 2;
+		string CreatedAt = 3;
+	}
+}
+
+message GetUserListRequest {
+
+}
+
+message GetUserListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 user_id = 1;
+		string address = 2;
+		string toAddress = 3;
+		string CreatedAt = 4;
+	}
+}
+
+message GetUserProxyListRequest {
+	int64 user_id = 1;
+}
+
+message GetUserProxyListReply {
+	repeated Item items = 1;
+	message Item {
+		string address = 2;
+		string CreatedAt = 4;
+		int64 rate = 1;
+	}
+}
+
+message GetUserBalanceRecordRequest {
+
+}
+
+message GetUserBalanceRecordReply {
+	repeated Item items = 1;
+	message Item {
+		string address = 7;
+		int64 balance = 1;
+		int64 amount = 2;
+		string reason = 3;
+		string type = 4;
+		string CreatedAt = 6;
 	}
 }
 

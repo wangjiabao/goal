@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
+	v1 "goal/api/admin/service/v1"
 	"strconv"
+	"time"
 )
 
 type User struct {
@@ -12,6 +14,7 @@ type User struct {
 	Address             string
 	ToAddress           string
 	ToAddressPrivateKey string
+	CreatedAt           time.Time
 }
 
 type AddressEthBalance struct {
@@ -22,6 +25,9 @@ type AddressEthBalance struct {
 
 type UserRepo interface {
 	GetUserList(ctx context.Context) ([]*User, error)
+	GetUserListByUserIds(ctx context.Context, userIds ...int64) ([]*User, error)
+	GetUserMap(ctx context.Context, userIds ...int64) (map[int64]*User, error)
+	GetUserProxyList(ctx context.Context, userId ...int64) ([]*UserProxy, error)
 }
 
 type UserUseCase struct {
@@ -44,6 +50,170 @@ func NewUserUseCase(repo UserRepo, tx Transaction, uiRepo UserInfoRepo, ubRepo U
 
 func (u *UserUseCase) GetUserList(ctx context.Context) ([]*User, error) {
 	return u.repo.GetUserList(ctx)
+}
+
+func (u *UserUseCase) GetUsers(ctx context.Context) (*v1.GetUserListReply, error) {
+	var (
+		user []*User
+		err  error
+	)
+
+	user, err = u.repo.GetUserList(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &v1.GetUserListReply{
+		Items: make([]*v1.GetUserListReply_Item, 0),
+	}
+
+	for _, item := range user {
+		res.Items = append(res.Items, &v1.GetUserListReply_Item{
+			UserId:    item.ID,
+			Address:   item.Address,
+			ToAddress: item.ToAddress,
+			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
+func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context) (*v1.GetUserBalanceRecordReply, error) {
+	var (
+		user              map[int64]*User
+		userBalanceRecord []*UserBalanceRecord
+		userId            []int64
+		err               error
+	)
+
+	userBalanceRecord, err = u.ubRepo.GetUserBalanceRecord(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range userBalanceRecord {
+		userId = append(userId, v.UserId)
+	}
+
+	user, err = u.repo.GetUserMap(ctx, userId...)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &v1.GetUserBalanceRecordReply{
+		Items: make([]*v1.GetUserBalanceRecordReply_Item, 0),
+	}
+
+	for _, item := range userBalanceRecord {
+		tempAddress := ""
+		if v, ok := user[item.UserId]; ok {
+			tempAddress = v.Address
+		}
+		res.Items = append(res.Items, &v1.GetUserBalanceRecordReply_Item{
+			Address:   tempAddress,
+			Balance:   item.Balance,
+			Type:      item.Type,
+			Amount:    item.Amount,
+			Reason:    item.Reason,
+			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
+func (u *UserUseCase) GetUserProxyList(ctx context.Context, req *v1.GetUserProxyListRequest) (*v1.GetUserProxyListReply, error) {
+	var (
+		user      map[int64]*User
+		userProxy []*UserProxy
+		userId    []int64
+		err       error
+	)
+
+	userProxy, err = u.repo.GetUserProxyList(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range userProxy {
+		userId = append(userId, v.UserId)
+	}
+
+	user, err = u.repo.GetUserMap(ctx, userId...)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &v1.GetUserProxyListReply{
+		Items: make([]*v1.GetUserProxyListReply_Item, 0),
+	}
+
+	for _, item := range userProxy {
+		tempAddress := ""
+		if v, ok := user[item.UserId]; ok {
+			tempAddress = v.Address
+		}
+		res.Items = append(res.Items, &v1.GetUserProxyListReply_Item{
+			Address:   tempAddress,
+			Rate:      item.Rate,
+			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
+func (u *UserUseCase) GetUserRecommendList(ctx context.Context, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {
+	var (
+		user              map[int64]*User
+		userInfo          *UserInfo
+		recommendUserInfo []*UserInfo
+		recommendUserIds  []int64
+		err               error
+	)
+
+	userInfo, err = u.uiRepo.GetUserInfoByUserId(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	recommendUserInfo, err = u.uiRepo.GetUserInfoListByRecommendCode(ctx, userInfo.MyRecommendCode)
+	for _, v := range recommendUserInfo {
+		recommendUserIds = append(recommendUserIds, v.UserId)
+	}
+
+	user, err = u.repo.GetUserMap(ctx, recommendUserIds...)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &v1.GetUserRecommendListReply{
+		Items: make([]*v1.GetUserRecommendListReply_Item, 0),
+	}
+
+	for _, item := range recommendUserInfo {
+		tempAddress := ""
+		if v, ok := user[item.UserId]; ok {
+			tempAddress = v.Address
+		}
+		res.Items = append(res.Items, &v1.GetUserRecommendListReply_Item{
+			Address:   tempAddress,
+			UserId:    item.ID,
+			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
+func (u *UserUseCase) GetUserInfo(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserReply, error) {
+	var base int64 = 100000 // 基础精度0.00001 todo 加配置文件
+	userBalance, err := u.ubRepo.GetUserBalance(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.GetUserReply{UserBalance: userBalance.Balance / base}, nil
 }
 
 //func (u *UserUseCase) GetAddressEthBalance(ctx context.Context, address string) (*AddressEthBalance, error) {

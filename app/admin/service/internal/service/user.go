@@ -65,3 +65,23 @@ func (u *UserService) Deposit(ctx context.Context) (bool, error) {
 
 	return false, nil
 }
+
+func (u *UserService) GetUserList(ctx context.Context, req *v1.GetUserListRequest) (*v1.GetUserListReply, error) {
+	return u.uc.GetUsers(ctx)
+}
+
+func (u *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserReply, error) {
+	return u.uc.GetUserInfo(ctx, req)
+}
+
+func (u *UserService) GetUserProxyList(ctx context.Context, req *v1.GetUserProxyListRequest) (*v1.GetUserProxyListReply, error) {
+	return u.uc.GetUserProxyList(ctx, req)
+}
+
+func (u *UserService) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserBalanceRecordRequest) (*v1.GetUserBalanceRecordReply, error) {
+	return u.uc.GetUserBalanceRecord(ctx)
+}
+
+func (u *UserService) GetUserRecommendList(ctx context.Context, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {
+	return u.uc.GetUserRecommendList(ctx, req)
+}

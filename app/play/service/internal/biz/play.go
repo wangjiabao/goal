@@ -557,13 +557,13 @@ func (r *RoomUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 		playRoomRel *PlayRoomRel
 		playSortRel *PlaySortRel
 		play        *Play
-		sort        *Sort
+		playSort    *Sort
 		err         error
 		startTime   time.Time
 		endTime     time.Time
 	)
 
-	sort, err = r.sortRepo.GetGameSortById(ctx, req.SendBody.SortId) // 获取排名截至日期以校验创建的玩法
+	playSort, err = r.sortRepo.GetGameSortById(ctx, req.SendBody.SortId) // 获取排名截至日期以校验创建的玩法
 	if nil != err {
 		return nil, err
 	}
@@ -576,7 +576,7 @@ func (r *RoomUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 	if nil != err {
 		return nil, err
 	}
-	if endTime.Before(startTime) || endTime.After(sort.EndTime) {
+	if endTime.Before(startTime) || endTime.After(playSort.EndTime) {
 		return nil, errors.New(500, "TIME_ERROR", "时间输入错误")
 	}
 
@@ -594,7 +594,7 @@ func (r *RoomUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 		play, err = r.playRepo.CreatePlay(ctx, &Play{ // 新增玩法
 			CreateUserId:   userId,
 			CreateUserType: userType,
-			Type:           sort.Type,
+			Type:           playSort.Type,
 			StartTime:      startTime,
 			EndTime:        endTime,
 		})
@@ -612,7 +612,7 @@ func (r *RoomUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 
 		playSortRel, err = r.playSortRelRepo.CreatePlaySortRel(ctx, &PlaySortRel{ // 新增排名和玩法关系
 			PlayId: play.ID,
-			SortId: sort.ID,
+			SortId: playSort.ID,
 		})
 		if err != nil {
 			return err
@@ -650,6 +650,10 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 	}
 	if "game_score" != play.Type {
 		return nil, errors.New(500, "PLAY_ERROR", "玩法类型不匹配")
+	}
+
+	if play.EndTime.Before(time.Now()) {
+		return nil, errors.New(500, "TIME_ERROR", "玩法已结束")
 	}
 
 	pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
@@ -786,6 +790,10 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		return nil, errors.New(500, "PLAY_ERROR", "玩法类型不匹配")
 	}
 
+	if play.EndTime.Before(time.Now()) {
+		return nil, errors.New(500, "TIME_ERROR", "玩法已结束")
+	}
+
 	pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
@@ -901,6 +909,10 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		return nil, errors.New(500, "PLAY_ERROR", "玩法类型不匹配")
 	}
 
+	if play.EndTime.Before(time.Now()) {
+		return nil, errors.New(500, "TIME_ERROR", "玩法已结束")
+	}
+
 	pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
@@ -1010,6 +1022,10 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 	play, err = p.playRepo.GetPlayById(ctx, req.SendBody.PlayId) // 查玩法
 	if nil != err {
 		return nil, err
+	}
+
+	if play.EndTime.Before(time.Now()) {
+		return nil, errors.New(500, "TIME_ERROR", "玩法已结束")
 	}
 
 	if "game_team_goal_all" != req.SendBody.PlayType && "game_team_goal_up" != req.SendBody.PlayType && "game_team_goal_down" != req.SendBody.PlayType {

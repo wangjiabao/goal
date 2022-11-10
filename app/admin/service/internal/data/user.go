@@ -160,6 +160,31 @@ func (ub *UserBalanceRepo) GetUserBalance(ctx context.Context, userId int64) (*b
 	}, nil
 }
 
+func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context) ([]*biz.UserBalanceRecord, error) {
+	var userBalanceRecord []*UserBalanceRecord
+	if err := ub.data.DB(ctx).Table("user_balance_record").Find(&userBalanceRecord).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("USER_BALANCE_NOT_FOUND", "用户余额记录不存在")
+		}
+
+		return nil, errors.New(500, "USER_BALANCE_NOT_FOUND", err.Error())
+	}
+
+	res := make([]*biz.UserBalanceRecord, 0)
+	for _, item := range userBalanceRecord {
+		res = append(res, &biz.UserBalanceRecord{
+			UserId:    item.UserId,
+			Balance:   item.Balance,
+			Type:      item.Type,
+			Amount:    item.Amount,
+			Reason:    item.Reason,
+			CreatedAt: item.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
 func (ub *UserBalanceRepo) GetAddressEthBalanceByAddress(ctx context.Context, address string) (*biz.AddressEthBalance, error) {
 	var addressEthBalance AddressEthBalance
 	if err := ub.data.DB(ctx).Where("address=?", address).Table("address_eth_balance").First(&addressEthBalance).Error; err != nil {
@@ -304,6 +329,30 @@ func (ui *UserInfoRepo) GetUserInfoByUserId(ctx context.Context, userId int64) (
 	}, nil
 }
 
+func (ui *UserInfoRepo) GetUserInfoListByRecommendCode(ctx context.Context, recommendCode string) ([]*biz.UserInfo, error) {
+	var userInfo []*UserInfo
+	if err := ui.data.DB(ctx).
+		Table("user_info").
+		Where("recommend_code Like ?", recommendCode+"%").
+		Find(&userInfo).Error; err != nil {
+		return nil, errors.NotFound("USER_INFO_NOT_FOUND", "用户信息不存在")
+	}
+
+	res := make([]*biz.UserInfo, 0)
+	for _, item := range userInfo {
+		res = append(res, &biz.UserInfo{
+			ID:              item.ID,
+			Name:            item.Name,
+			Avatar:          item.Avatar,
+			UserId:          item.UserId,
+			MyRecommendCode: item.MyRecommendCode,
+			CreatedAt:       item.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
 func (u *UserRepo) GetUserList(ctx context.Context) ([]*biz.User, error) {
 	var user []*User
 	if err := u.data.DB(ctx).Table("user").Find(&user).Error; err != nil {
@@ -318,6 +367,70 @@ func (u *UserRepo) GetUserList(ctx context.Context) ([]*biz.User, error) {
 			ToAddress:           item.ToAddress,
 			ToAddressPrivateKey: item.ToAddressPrivateKey,
 		})
+	}
+
+	return res, nil
+}
+
+func (u *UserRepo) GetUserListByUserIds(ctx context.Context, userIds ...int64) ([]*biz.User, error) {
+	var user []*User
+	if err := u.data.DB(ctx).Table("user").
+		Where("ID IN (?)", userIds).
+		Find(&user).Error; err != nil {
+		return nil, errors.NotFound("USER_NOT_FOUND", "用户不存在")
+	}
+
+	res := make([]*biz.User, 0)
+	for _, item := range user {
+		res = append(res, &biz.User{
+			ID:                  item.ID,
+			Address:             item.Address,
+			ToAddress:           item.ToAddress,
+			ToAddressPrivateKey: item.ToAddressPrivateKey,
+		})
+	}
+
+	return res, nil
+}
+
+func (u *UserRepo) GetUserProxyList(ctx context.Context, userId ...int64) ([]*biz.UserProxy, error) {
+	var userProxy []*UserProxy
+	if err := u.data.DB(ctx).
+		Where("up_user_id", userId).
+		Table("user_proxy").Find(&userProxy).Error; err != nil {
+		return nil, errors.NotFound("USER_NOT_FOUND", "用户代理不存在")
+	}
+
+	res := make([]*biz.UserProxy, 0)
+	for _, item := range userProxy {
+		res = append(res, &biz.UserProxy{
+			ID:        item.ID,
+			UpUserId:  item.UpUserId,
+			UserId:    item.UserId,
+			CreatedAt: item.CreatedAt,
+			Rate:      item.Rate,
+		})
+	}
+
+	return res, nil
+}
+
+func (u *UserRepo) GetUserMap(ctx context.Context, userIds ...int64) (map[int64]*biz.User, error) {
+	var user []*User
+	if err := u.data.DB(ctx).Table("user").
+		Where("ID IN (?)", userIds).
+		Find(&user).Error; err != nil {
+		return nil, errors.NotFound("USER_NOT_FOUND", "用户不存在")
+	}
+
+	res := make(map[int64]*biz.User, 0)
+	for _, item := range user {
+		res[item.ID] = &biz.User{
+			ID:                  item.ID,
+			Address:             item.Address,
+			ToAddress:           item.ToAddress,
+			ToAddressPrivateKey: item.ToAddressPrivateKey,
+		}
 	}
 
 	return res, nil

@@ -12,6 +12,8 @@ import (
 type Sort struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	SortName  string    `gorm:"type:varchar(45);not null"`
+	Status    string    `gorm:"type:varchar(45);not null"`
+	Content   string    `gorm:"type:varchar(500);not null"`
 	Type      string    `gorm:"type:varchar(45);not null"`
 	EndTime   time.Time `gorm:"type:datetime;not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
@@ -41,9 +43,12 @@ func (s *SortRepo) GetGameSortById(ctx context.Context, gameId int64) (*biz.Sort
 	}
 
 	return &biz.Sort{
-		ID:      sort.ID,
-		EndTime: sort.EndTime,
-		Type:    sort.Type,
+		ID:       sort.ID,
+		EndTime:  sort.EndTime,
+		SortName: sort.SortName,
+		Type:     sort.Type,
+		Status:   sort.Status,
+		Content:  sort.Content,
 	}, nil
 }
 

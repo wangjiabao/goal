@@ -548,6 +548,7 @@ func (p *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByUserId(ctx
 			Pay:       playGameTeamResultUserRel.Pay,
 			Content:   playGameTeamResultUserRel.Content,
 			CreatedAt: playGameTeamResultUserRel.CreatedAt,
+			Status:    playGameTeamResultUserRel.Status,
 		})
 	}
 	return pl, nil
