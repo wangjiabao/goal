@@ -465,6 +465,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/goal_admin/sort/update:
+        post:
+            tags:
+                - Game
+            operationId: Game_UpdateSort
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateSortRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateSortReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/goal_admin/sorts:
         get:
             tags:
@@ -1408,6 +1432,24 @@ components:
                     type: integer
                     format: int64
                 name:
+                    type: string
+        UpdateSortReply:
+            type: object
+            properties:
+                sortId:
+                    type: integer
+                    format: int64
+        UpdateSortRequest_SendBody:
+            type: object
+            properties:
+                sortId:
+                    type: integer
+                    format: int64
+                endTime:
+                    type: string
+                content:
+                    type: string
+                status:
                     type: string
         UserDepositReply:
             type: object

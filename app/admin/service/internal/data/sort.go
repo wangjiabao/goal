@@ -86,3 +86,20 @@ func (s *SortRepo) CreateSort(ctx context.Context, sc *biz.Sort) (*biz.Sort, err
 		ID: sort.ID,
 	}, nil
 }
+
+// UpdateSort .
+func (s *SortRepo) UpdateSort(ctx context.Context, sc *biz.Sort) (*biz.Sort, error) {
+	var sort Sort
+	sort.ID = sc.ID
+	sort.Content = sc.Content
+	sort.Status = sc.Status
+	sort.EndTime = sc.EndTime
+	res := s.data.DB(ctx).Table("soccer_game_team_sort").Updates(&sort)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_SORT_ERROR", "修改排名失败")
+	}
+
+	return &biz.Sort{
+		ID: sort.ID,
+	}, nil
+}

@@ -53,6 +53,10 @@ func (g *GameService) CreateSort(ctx context.Context, req *v1.CreateSortRequest)
 	return g.suc.CreateSort(ctx, req)
 }
 
+func (g *GameService) UpdateSort(ctx context.Context, req *v1.UpdateSortRequest) (*v1.UpdateSortReply, error) {
+	return g.suc.UpdateSort(ctx, req)
+}
+
 func (g *GameService) GetTeamList(ctx context.Context, req *v1.GetTeamListRequest) (*v1.GetTeamListReply, error) {
 	return g.tc.GetTeamList(ctx)
 }

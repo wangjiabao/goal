@@ -211,3 +211,6 @@ func (u *UserService) GetUserProxyList(ctx context.Context, req *v1.GetUserProxy
 		ID: userId,
 	}, req)
 }
+func (u *UserService) GetUserProxyConfigList(ctx context.Context, req *v1.GetUserProxyConfigListRequest) (*v1.GetUserProxyConfigListReply, error) {
+	return u.uc.GetUserProxyConfigList(ctx)
+}

@@ -1206,6 +1206,239 @@ var _ interface {
 	ErrorName() string
 } = UpdateGameReplyValidationError{}
 
+// Validate checks the field values on UpdateSortRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UpdateSortRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateSortRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateSortRequestMultiError, or nil if none found.
+func (m *UpdateSortRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateSortRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateSortRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateSortRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateSortRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UpdateSortRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateSortRequestMultiError is an error wrapping multiple validation errors
+// returned by UpdateSortRequest.ValidateAll() if the designated constraints
+// aren't met.
+type UpdateSortRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateSortRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateSortRequestMultiError) AllErrors() []error { return m }
+
+// UpdateSortRequestValidationError is the validation error returned by
+// UpdateSortRequest.Validate if the designated constraints aren't met.
+type UpdateSortRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateSortRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateSortRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateSortRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateSortRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateSortRequestValidationError) ErrorName() string {
+	return "UpdateSortRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateSortRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateSortRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateSortRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateSortRequestValidationError{}
+
+// Validate checks the field values on UpdateSortReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UpdateSortReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateSortReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateSortReplyMultiError, or nil if none found.
+func (m *UpdateSortReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateSortReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for SortId
+
+	if len(errors) > 0 {
+		return UpdateSortReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateSortReplyMultiError is an error wrapping multiple validation errors
+// returned by UpdateSortReply.ValidateAll() if the designated constraints
+// aren't met.
+type UpdateSortReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateSortReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateSortReplyMultiError) AllErrors() []error { return m }
+
+// UpdateSortReplyValidationError is the validation error returned by
+// UpdateSortReply.Validate if the designated constraints aren't met.
+type UpdateSortReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateSortReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateSortReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateSortReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateSortReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateSortReplyValidationError) ErrorName() string { return "UpdateSortReplyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e UpdateSortReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateSortReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateSortReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateSortReplyValidationError{}
+
 // Validate checks the field values on DisplayGameIndexRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -8094,6 +8327,116 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UpdateGameRequest_SendBodyValidationError{}
+
+// Validate checks the field values on UpdateSortRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateSortRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateSortRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateSortRequest_SendBodyMultiError, or nil if none found.
+func (m *UpdateSortRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateSortRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for SortId
+
+	// no validation rules for EndTime
+
+	// no validation rules for Content
+
+	// no validation rules for Status
+
+	if len(errors) > 0 {
+		return UpdateSortRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateSortRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by UpdateSortRequest_SendBody.ValidateAll() if
+// the designated constraints aren't met.
+type UpdateSortRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateSortRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateSortRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// UpdateSortRequest_SendBodyValidationError is the validation error returned
+// by UpdateSortRequest_SendBody.Validate if the designated constraints aren't met.
+type UpdateSortRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateSortRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateSortRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateSortRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateSortRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateSortRequest_SendBodyValidationError) ErrorName() string {
+	return "UpdateSortRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateSortRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateSortRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateSortRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateSortRequest_SendBodyValidationError{}
 
 // Validate checks the field values on GetUserRecommendListReply_Item with the
 // rules defined in the proto definition for this message. If any rules are

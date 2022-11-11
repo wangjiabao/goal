@@ -25,6 +25,7 @@ const OperationUserDeposit = "/api.user.service.v1.User/Deposit"
 const OperationUserEthAuthorize = "/api.user.service.v1.User/EthAuthorize"
 const OperationUserGetUser = "/api.user.service.v1.User/GetUser"
 const OperationUserGetUserDepositList = "/api.user.service.v1.User/GetUserDepositList"
+const OperationUserGetUserProxyConfigList = "/api.user.service.v1.User/GetUserProxyConfigList"
 const OperationUserGetUserProxyList = "/api.user.service.v1.User/GetUserProxyList"
 const OperationUserGetUserRecommendList = "/api.user.service.v1.User/GetUserRecommendList"
 const OperationUserGetUserWithdrawList = "/api.user.service.v1.User/GetUserWithdrawList"
@@ -37,6 +38,7 @@ type UserHTTPServer interface {
 	EthAuthorize(context.Context, *EthAuthorizeRequest) (*EthAuthorizeReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	GetUserDepositList(context.Context, *GetUserDepositListRequest) (*GetUserDepositListReply, error)
+	GetUserProxyConfigList(context.Context, *GetUserProxyConfigListRequest) (*GetUserProxyConfigListReply, error)
 	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
 	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
 	GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error)
@@ -55,6 +57,7 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r.POST("/api/user/proxy/create", _User_CreateProxy0_HTTP_Handler(srv))
 	r.POST("/api/user/proxy/down/create", _User_CreateDownProxy0_HTTP_Handler(srv))
 	r.GET("/api/user_proxy/list", _User_GetUserProxyList0_HTTP_Handler(srv))
+	r.GET("/api/user_proxy/config_list", _User_GetUserProxyConfigList0_HTTP_Handler(srv))
 }
 
 func _User_EthAuthorize0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -262,6 +265,25 @@ func _User_GetUserProxyList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Cont
 	}
 }
 
+func _User_GetUserProxyConfigList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserProxyConfigListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserGetUserProxyConfigList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserProxyConfigList(ctx, req.(*GetUserProxyConfigListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserProxyConfigListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserHTTPClient interface {
 	CreateDownProxy(ctx context.Context, req *CreateDownProxyRequest, opts ...http.CallOption) (rsp *CreateDownProxyReply, err error)
 	CreateProxy(ctx context.Context, req *CreateProxyRequest, opts ...http.CallOption) (rsp *CreateProxyReply, err error)
@@ -269,6 +291,7 @@ type UserHTTPClient interface {
 	EthAuthorize(ctx context.Context, req *EthAuthorizeRequest, opts ...http.CallOption) (rsp *EthAuthorizeReply, err error)
 	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserReply, err error)
 	GetUserDepositList(ctx context.Context, req *GetUserDepositListRequest, opts ...http.CallOption) (rsp *GetUserDepositListReply, err error)
+	GetUserProxyConfigList(ctx context.Context, req *GetUserProxyConfigListRequest, opts ...http.CallOption) (rsp *GetUserProxyConfigListReply, err error)
 	GetUserProxyList(ctx context.Context, req *GetUserProxyListRequest, opts ...http.CallOption) (rsp *GetUserProxyListReply, err error)
 	GetUserRecommendList(ctx context.Context, req *GetUserRecommendListRequest, opts ...http.CallOption) (rsp *GetUserRecommendListReply, err error)
 	GetUserWithdrawList(ctx context.Context, req *GetUserWithdrawListRequest, opts ...http.CallOption) (rsp *GetUserWithdrawListReply, err error)
@@ -353,6 +376,19 @@ func (c *UserHTTPClientImpl) GetUserDepositList(ctx context.Context, in *GetUser
 	pattern := "/api/deposit/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUserDepositList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) GetUserProxyConfigList(ctx context.Context, in *GetUserProxyConfigListRequest, opts ...http.CallOption) (*GetUserProxyConfigListReply, error) {
+	var out GetUserProxyConfigListReply
+	pattern := "/api/user_proxy/config_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserGetUserProxyConfigList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -833,6 +833,7 @@ const OperationGameGetGameSortList = "/api.admin.service.v1.Game/GetGameSortList
 const OperationGameGetTeamList = "/api.admin.service.v1.Game/GetTeamList"
 const OperationGameSaveDisplayGameIndex = "/api.admin.service.v1.Game/SaveDisplayGameIndex"
 const OperationGameUpdateGame = "/api.admin.service.v1.Game/UpdateGame"
+const OperationGameUpdateSort = "/api.admin.service.v1.Game/UpdateSort"
 
 type GameHTTPServer interface {
 	CreateGame(context.Context, *CreateGameRequest) (*CreateGameReply, error)
@@ -846,6 +847,7 @@ type GameHTTPServer interface {
 	GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error)
 	SaveDisplayGameIndex(context.Context, *SaveDisplayGameIndexRequest) (*SaveDisplayGameIndexReply, error)
 	UpdateGame(context.Context, *UpdateGameRequest) (*UpdateGameReply, error)
+	UpdateSort(context.Context, *UpdateSortRequest) (*UpdateSortReply, error)
 }
 
 func RegisterGameHTTPServer(s *http.Server, srv GameHTTPServer) {
@@ -857,6 +859,7 @@ func RegisterGameHTTPServer(s *http.Server, srv GameHTTPServer) {
 	r.GET("/api/goal_admin/display_game/index", _Game_DisplayGameIndex0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/display_game/index", _Game_SaveDisplayGameIndex0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/sort/create", _Game_CreateSort0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/sort/update", _Game_UpdateSort0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/sorts", _Game_GetGameSortList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/team/list", _Game_GetTeamList0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/team/create", _Game_CreateTeam0_HTTP_Handler(srv))
@@ -1011,6 +1014,28 @@ func _Game_CreateSort0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) e
 	}
 }
 
+func _Game_UpdateSort0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateSortRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGameUpdateSort)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateSort(ctx, req.(*UpdateSortRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateSortReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _Game_GetGameSortList0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetGameSortListRequest
@@ -1102,6 +1127,7 @@ type GameHTTPClient interface {
 	GetTeamList(ctx context.Context, req *GetTeamListRequest, opts ...http.CallOption) (rsp *GetTeamListReply, err error)
 	SaveDisplayGameIndex(ctx context.Context, req *SaveDisplayGameIndexRequest, opts ...http.CallOption) (rsp *SaveDisplayGameIndexReply, err error)
 	UpdateGame(ctx context.Context, req *UpdateGameRequest, opts ...http.CallOption) (rsp *UpdateGameReply, err error)
+	UpdateSort(ctx context.Context, req *UpdateSortRequest, opts ...http.CallOption) (rsp *UpdateSortReply, err error)
 }
 
 type GameHTTPClientImpl struct {
@@ -1247,6 +1273,19 @@ func (c *GameHTTPClientImpl) UpdateGame(ctx context.Context, in *UpdateGameReque
 	pattern := "/api/goal_admin/game/update"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationGameUpdateGame))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *GameHTTPClientImpl) UpdateSort(ctx context.Context, in *UpdateSortRequest, opts ...http.CallOption) (*UpdateSortReply, error) {
+	var out UpdateSortReply
+	pattern := "/api/goal_admin/sort/update"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationGameUpdateSort))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {

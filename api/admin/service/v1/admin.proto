@@ -190,6 +190,13 @@ service Game {
 		};
 	};
 
+	rpc UpdateSort (UpdateSortRequest) returns (UpdateSortReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/sort/update"
+			body: "send_body"
+		};
+	};
+
 	rpc GetGameSortList (GetGameSortListRequest) returns (GetGameSortListReply) {
 		option (google.api.http) = {
 			get: "/api/goal_admin/sorts"
@@ -294,6 +301,21 @@ message UpdateGameRequest {
 
 message UpdateGameReply {
 	int64 game_id = 1;
+}
+
+message UpdateSortRequest {
+	message SendBody{
+		int64 sort_id = 1;
+		string end_time = 4;
+		string content = 2;
+		string status = 3;
+	}
+
+	SendBody send_body = 1;
+}
+
+message UpdateSortReply {
+	int64 sort_id = 1;
 }
 
 message DisplayGameIndexRequest {

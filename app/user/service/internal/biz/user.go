@@ -389,7 +389,7 @@ func (uc *UserUseCase) CreateProxy(ctx context.Context, u *User, req *v1.CreateP
 
 		return nil
 	}); nil != err {
-		return nil, err
+		return nil, errors.New(500, "USER_BALANCE_ERROR", "余额不足")
 	}
 
 	return &v1.CreateProxyReply{
@@ -454,6 +454,32 @@ func (uc *UserUseCase) GetUserProxyList(ctx context.Context, u *User, req *v1.Ge
 		res.Records = append(res.Records, &v1.GetUserProxyListReply_Record{
 			Amount:    tmpAmount,
 			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
+func (uc *UserUseCase) GetUserProxyConfigList(ctx context.Context) (*v1.GetUserProxyConfigListReply, error) {
+	var (
+		config map[string]*SystemConfig
+	)
+
+	config, _ = uc.systemConfigRepo.GetSystemConfigByNames(ctx,
+		"become_proxy_amount_first", "become_proxy_amount_first_rate",
+		"become_proxy_amount_second", "become_proxy_amount_second_rate",
+		"become_proxy_amount_third", "become_proxy_amount_third_rate",
+		"become_proxy_amount_fourth", "become_proxy_amount_fourth_rate",
+	)
+
+	res := &v1.GetUserProxyConfigListReply{
+		Records: make([]*v1.GetUserProxyConfigListReply_Record, 0),
+	}
+
+	for _, v := range config {
+		res.Records = append(res.Records, &v1.GetUserProxyConfigListReply_Record{
+			Name:  v.Name,
+			Value: v.Value,
 		})
 	}
 

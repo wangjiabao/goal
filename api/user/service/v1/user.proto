@@ -73,6 +73,12 @@ service User {
 			get: "/api/user_proxy/list"
 		};
 	};
+
+	rpc GetUserProxyConfigList (GetUserProxyConfigListRequest) returns (GetUserProxyConfigListReply) {
+		option (google.api.http) = {
+			get: "/api/user_proxy/config_list"
+		};
+	};
 }
 
 message EthAuthorizeRequest {
@@ -205,5 +211,17 @@ message GetUserProxyListReply {
 	message Record {
 		int64  amount = 1;
 		string created_at = 2;
+	}
+}
+
+message GetUserProxyConfigListRequest {
+
+}
+
+message GetUserProxyConfigListReply {
+	repeated Record records = 1;
+	message Record {
+		string name = 1;
+		int64 value = 2;
 	}
 }

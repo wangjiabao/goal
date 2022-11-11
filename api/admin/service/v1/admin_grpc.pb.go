@@ -849,6 +849,7 @@ type GameClient interface {
 	DisplayGameIndex(ctx context.Context, in *DisplayGameIndexRequest, opts ...grpc.CallOption) (*DisplayGameIndexReply, error)
 	SaveDisplayGameIndex(ctx context.Context, in *SaveDisplayGameIndexRequest, opts ...grpc.CallOption) (*SaveDisplayGameIndexReply, error)
 	CreateSort(ctx context.Context, in *CreateSortRequest, opts ...grpc.CallOption) (*CreateSortReply, error)
+	UpdateSort(ctx context.Context, in *UpdateSortRequest, opts ...grpc.CallOption) (*UpdateSortReply, error)
 	GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error)
 	GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...grpc.CallOption) (*GetTeamListReply, error)
 	CreateTeam(ctx context.Context, in *CreateTeamRequest, opts ...grpc.CallOption) (*CreateTeamReply, error)
@@ -926,6 +927,15 @@ func (c *gameClient) CreateSort(ctx context.Context, in *CreateSortRequest, opts
 	return out, nil
 }
 
+func (c *gameClient) UpdateSort(ctx context.Context, in *UpdateSortRequest, opts ...grpc.CallOption) (*UpdateSortReply, error) {
+	out := new(UpdateSortReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/UpdateSort", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gameClient) GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error) {
 	out := new(GetGameSortListReply)
 	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/GetGameSortList", in, out, opts...)
@@ -973,6 +983,7 @@ type GameServer interface {
 	DisplayGameIndex(context.Context, *DisplayGameIndexRequest) (*DisplayGameIndexReply, error)
 	SaveDisplayGameIndex(context.Context, *SaveDisplayGameIndexRequest) (*SaveDisplayGameIndexReply, error)
 	CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error)
+	UpdateSort(context.Context, *UpdateSortRequest) (*UpdateSortReply, error)
 	GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error)
 	GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error)
 	CreateTeam(context.Context, *CreateTeamRequest) (*CreateTeamReply, error)
@@ -1004,6 +1015,9 @@ func (UnimplementedGameServer) SaveDisplayGameIndex(context.Context, *SaveDispla
 }
 func (UnimplementedGameServer) CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSort not implemented")
+}
+func (UnimplementedGameServer) UpdateSort(context.Context, *UpdateSortRequest) (*UpdateSortReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateSort not implemented")
 }
 func (UnimplementedGameServer) GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGameSortList not implemented")
@@ -1156,6 +1170,24 @@ func _Game_CreateSort_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Game_UpdateSort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateSortRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).UpdateSort(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Game/UpdateSort",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).UpdateSort(ctx, req.(*UpdateSortRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Game_GetGameSortList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetGameSortListRequest)
 	if err := dec(in); err != nil {
@@ -1262,6 +1294,10 @@ var Game_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateSort",
 			Handler:    _Game_CreateSort_Handler,
+		},
+		{
+			MethodName: "UpdateSort",
+			Handler:    _Game_UpdateSort_Handler,
 		},
 		{
 			MethodName: "GetGameSortList",

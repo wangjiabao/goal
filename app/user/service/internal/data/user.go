@@ -317,6 +317,7 @@ func (s *SystemConfigRepo) GetSystemConfigByNames(ctx context.Context, name ...s
 	for _, v := range l {
 		pl[v.Name] = &biz.SystemConfig{
 			Value: v.Value,
+			Name:  v.Name,
 		}
 	}
 
