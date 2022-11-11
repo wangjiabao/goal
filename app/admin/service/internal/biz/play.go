@@ -146,12 +146,14 @@ type PlaySortRelRepo interface {
 type PlayGameScoreUserRelRepo interface {
 	GetPlayGameScoreUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameScoreUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
+	CreatePlayGameScoreUserRel(ctx context.Context, pr *PlayGameScoreUserRel) (*PlayGameScoreUserRel, error)
 	GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameScoreUserRel, error)
 }
 
 type PlayGameTeamResultUserRelRepo interface {
 	GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamResultUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
+	CreatePlayGameTeamResultUserRel(ctx context.Context, pr *PlayGameTeamResultUserRel) (*PlayGameTeamResultUserRel, error)
 	GetPlayGameTeamResultUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameTeamResultUserRel, error)
 }
 
@@ -159,6 +161,7 @@ type PlayGameTeamGoalUserRelRepo interface {
 	GetPlayGameTeamGoalUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamGoalUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
 	GetPlayGameTeamGoalUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameTeamGoalUserRel, error)
+	CreatePlayGameTeamGoalUserRel(ctx context.Context, pr *PlayGameTeamGoalUserRel) (*PlayGameTeamGoalUserRel, error)
 }
 
 type PlayGameTeamSortUserRelRepo interface {
@@ -393,7 +396,9 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 				}
 
 				if 0 < amountBaseTmp {
-					winTotalAmount += v.Pay
+					if 999999999 != v.UserId {
+						winTotalAmount += v.Pay
+					}
 					if strings.EqualFold("no_rewarded", v.Status) {
 						winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
 							AmountBase int64
@@ -418,7 +423,9 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 				}
 
 				if (16 == num && 16 == len(tmpTeams) && "team_sort_sixteen" == playSort.Type) || (8 == num && 8 == len(tmpTeams) && "team_sort_eight" == playSort.Type) { // 16强或8强全部猜中并且没发奖励
-					winTotalAmount += v.Pay
+					if 999999999 != v.UserId {
+						winTotalAmount += v.Pay
+					}
 					if strings.EqualFold("no_rewarded", v.Status) {
 						winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
 							AmountBase int64
@@ -528,7 +535,9 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 		for _, v := range playUserRel {
 			poolAmount += v.Pay
 			if strings.EqualFold(game.Result, v.Content) { // 判断是否猜中
-				winTotalAmount += v.Pay
+				if 999999999 != v.UserId {
+					winTotalAmount += v.Pay
+				}
 				if strings.EqualFold("no_rewarded", v.Status) {
 					winNoRewardedPlayGameScoreUserRel = append(winNoRewardedPlayGameScoreUserRel, v)
 				}
@@ -637,7 +646,9 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 		)
 		for _, v := range playUserRel {
 			if strings.EqualFold(content, v.Content) { // 判断是否猜中
-				winTotalAmount += v.Pay
+				if 999999999 != v.UserId {
+					winTotalAmount += v.Pay
+				}
 				if strings.EqualFold("no_rewarded", v.Status) {
 					winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, v)
 				}
@@ -743,12 +754,16 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 		for _, v := range playUserRel { // 当前玩法，全为上半场或下半场或全场
 			if strings.EqualFold("game_team_goal_all", v.Type) { // 判断是否猜中
 				if v.TeamId == game.RedTeamId && v.Goal == game.RedTeamUpGoal+game.RedTeamDownGoal {
-					winTotalAmount += v.Pay
+					if 999999999 != v.UserId {
+						winTotalAmount += v.Pay
+					}
 					if strings.EqualFold("no_rewarded", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else if v.TeamId == game.BlueTeamId && v.Goal == game.BlueTeamUpGoal+game.BlueTeamDownGoal {
-					winTotalAmount += v.Pay
+					if 999999999 != v.UserId {
+						winTotalAmount += v.Pay
+					}
 					if strings.EqualFold("no_rewarded", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
@@ -756,12 +771,16 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 
 			} else if strings.EqualFold("game_team_goal_up", v.Type) {
 				if v.TeamId == game.RedTeamId && v.Goal == game.RedTeamUpGoal {
-					winTotalAmount += v.Pay
+					if 999999999 != v.UserId {
+						winTotalAmount += v.Pay
+					}
 					if strings.EqualFold("no_rewarded", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else if v.TeamId == game.BlueTeamId && v.Goal == game.BlueTeamUpGoal {
-					winTotalAmount += v.Pay
+					if 999999999 != v.UserId {
+						winTotalAmount += v.Pay
+					}
 					if strings.EqualFold("no_rewarded", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
@@ -769,12 +788,16 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 
 			} else if strings.EqualFold("game_team_goal_down", v.Type) {
 				if v.TeamId == game.RedTeamId && v.Goal == game.RedTeamDownGoal {
-					winTotalAmount += v.Pay
+					if 999999999 != v.UserId {
+						winTotalAmount += v.Pay
+					}
 					if strings.EqualFold("no_rewarded", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else if v.TeamId == game.BlueTeamId && v.Goal == game.BlueTeamDownGoal {
-					winTotalAmount += v.Pay
+					if 999999999 != v.UserId {
+						winTotalAmount += v.Pay
+					}
 					if strings.EqualFold("no_rewarded", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
@@ -1138,4 +1161,102 @@ func (p *PlayUseCase) GetRooms(ctx context.Context) (*v1.GetRoomListReply, error
 	}
 
 	return res, nil
+}
+
+func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePlayGameScoreRequest) (*v1.CreatePlayGameScoreReply, error) {
+
+	var (
+		playGameScoreUserRel *PlayGameScoreUserRel
+		play                 *Play
+		err                  error
+		base                 int64 = 100000 // 基础精度0.00001 todo 加配置文件
+	)
+
+	play, err = p.playRepo.GetPlayById(ctx, req.SendBody.PlayId) // 查玩法
+	if nil != err {
+		return nil, err
+	}
+
+	playGameScoreUserRel, err = p.playGameScoreUserRelRepo.CreatePlayGameScoreUserRel(ctx, &PlayGameScoreUserRel{
+		UserId:  999999999,
+		PlayId:  play.ID,
+		Content: "49:49",
+		Pay:     req.SendBody.Pay * base,
+		Status:  "rewarded",
+	})
+	if nil != err {
+		return nil, err
+	}
+
+	return &v1.CreatePlayGameScoreReply{PlayId: playGameScoreUserRel.PlayId}, nil
+}
+
+func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePlayGameResultRequest) (*v1.CreatePlayGameResultReply, error) {
+
+	var (
+		playGameTeamResultUserRel *PlayGameTeamResultUserRel
+		play                      *Play
+		err                       error
+		base                      int64 = 100000 // 基础精度0.00001 todo 加配置文件
+	)
+
+	play, err = p.playRepo.GetPlayById(ctx, req.SendBody.PlayId) // 查玩法
+	if nil != err {
+		return nil, err
+	}
+
+	playGameTeamResultUserRel, err = p.playGameTeamResultUserRelRepo.CreatePlayGameTeamResultUserRel(ctx, &PlayGameTeamResultUserRel{
+		UserId:  999999999,
+		PlayId:  play.ID,
+		Content: req.SendBody.Content,
+		Pay:     req.SendBody.Pay * base,
+		Status:  "rewarded",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.CreatePlayGameResultReply{PlayId: playGameTeamResultUserRel.PlayId}, nil
+}
+
+func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlayGameGoalRequest) (*v1.CreatePlayGameGoalReply, error) {
+
+	var (
+		playGameTeamGoalUserRel *PlayGameTeamGoalUserRel
+		play                    *Play
+		game                    *Game
+		err                     error
+		teamId                  int64
+		base                    int64 = 100000 // 基础精度0.00001 todo 加配置文件
+	)
+
+	play, err = p.playRepo.GetPlayById(ctx, req.SendBody.PlayId) // 查玩法
+	if nil != err {
+		return nil, err
+	}
+
+	game, err = p.gameRepo.GetGameById(ctx, req.SendBody.GameId)
+	if err != nil {
+		return nil, err
+	}
+
+	if "red" == req.SendBody.Team {
+		teamId = game.RedTeamId
+	} else {
+		teamId = game.BlueTeamId
+	}
+
+	playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.CreatePlayGameTeamGoalUserRel(ctx, &PlayGameTeamGoalUserRel{
+		UserId: 999999999,
+		PlayId: play.ID,
+		TeamId: teamId,
+		Type:   play.Type,
+		Goal:   req.SendBody.Goal,
+		Pay:    req.SendBody.Pay * base,
+		Status: "rewarded",
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &v1.CreatePlayGameGoalReply{PlayId: playGameTeamGoalUserRel.PlayId}, nil
 }

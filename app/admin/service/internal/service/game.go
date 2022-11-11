@@ -60,3 +60,7 @@ func (g *GameService) GetTeamList(ctx context.Context, req *v1.GetTeamListReques
 func (g *GameService) CreateTeam(ctx context.Context, req *v1.CreateTeamRequest) (*v1.CreateTeamReply, error) {
 	return g.tc.CreateTeam(ctx, req)
 }
+
+func (g *GameService) GameIndexStatistics(ctx context.Context, req *v1.GameIndexStatisticsRequest) (*v1.GameIndexStatisticsReply, error) {
+	return g.uc.GameIndexStatistics(ctx, req)
+}

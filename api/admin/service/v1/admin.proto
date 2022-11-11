@@ -61,6 +61,34 @@ service Admin {
 			get: "/api/goal_admin/room/{room_id}/play_list"
 		};
 	};
+
+	rpc CreatePlayGameScore (CreatePlayGameScoreRequest) returns (CreatePlayGameScoreReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play_game_score"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlayGameResult (CreatePlayGameResultRequest) returns (CreatePlayGameResultReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play_game_result"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlayGameGoal (CreatePlayGameGoalRequest) returns (CreatePlayGameGoalReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play_game_goal"
+			body: "send_body"
+		};
+	};
+
+	rpc CreatePlayGameSort (CreatePlayGameSortRequest) returns (CreatePlayGameSortReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play_game_sort"
+			body: "send_body"
+		};
+	};
 }
 
 service User {
@@ -165,6 +193,12 @@ service Game {
 		option (google.api.http) = {
 			post: "/api/goal_admin/team/create"
 			body: "send_body"
+		};
+	};
+
+	rpc GameIndexStatistics (GameIndexStatisticsRequest) returns (GameIndexStatisticsReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/index_game/statistics"
 		};
 	};
 }
@@ -399,6 +433,64 @@ message GetUserBalanceRecordReply {
 	}
 }
 
+message CreatePlayGameScoreRequest {
+	message SendBody{
+		int64 play_id = 1;
+		int64 pay = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameScoreReply{
+	int64 play_id = 3;
+}
+
+message CreatePlayGameResultRequest {
+	message SendBody{
+		int64 play_id = 1;
+		string content = 3;
+		int64 pay = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameResultReply{
+	int64 play_id = 3;
+}
+
+message CreatePlayGameSortRequest {
+	message SendBody{
+		int64 play_id = 1;
+		int64 pay = 2;
+		int64  sort_id = 4;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameSortReply{
+	int64 play_id = 3;
+}
+
+message CreatePlayGameGoalRequest {
+	message SendBody{
+		int64 game_id = 4;
+		int64 goal = 5;
+		int64 play_id = 1;
+		int64 pay = 2;
+		string team = 3;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreatePlayGameGoalReply{
+	int64 play_id = 3;
+}
+
+
 message GetGameSortListRequest {
 
 }
@@ -490,6 +582,73 @@ message CreateTeamRequest {
 
 message CreateTeamReply {
 	int64 team_id = 1;
+}
+
+message GameIndexStatisticsRequest {
+}
+
+message GameIndexStatisticsReply {
+	int64 gameId = 1;
+
+	int64 goalAllPlayId = 2;
+	int64 goalAllTotal = 19;
+	int64 goalAllRedTotal = 20;
+	repeated GoalAllRed goalAllRed = 3;
+	message GoalAllRed {
+		int64 goal = 1;
+		int64 total = 2;
+	}
+	int64 goalAllBlueTotal = 21;
+	repeated GoalAllBlue goalAllBlue = 4;
+	message GoalAllBlue {
+		int64 goal = 1;
+		int64 total = 2;
+	}
+
+	int64 goalUpPlayId = 5;
+	int64  goalUpTotal = 22;
+	int64  goalUpRedTotal = 23;
+	repeated GoalUpRed goalUpRed = 6;
+	message GoalUpRed {
+		int64 goal = 1;
+		int64 total = 2;
+	}
+	int64  goalUpBlueTotal = 24;
+	repeated GoalUpBlue goalUpBlue = 7;
+	message GoalUpBlue {
+		int64 goal = 1;
+		int64 total = 2;
+	}
+
+	int64 goalDownPlayId = 8;
+	int64  goalDownTotal = 25;
+	int64  goalDownRedTotal = 26;
+	repeated GoalDownRed goalDownRed = 9;
+	message GoalDownRed {
+		int64 goal = 1;
+		int64 total = 2;
+	}
+	int64  goalDownBlueTotal = 27;
+	repeated GoalDownBlue goalDownBlue = 10;
+	message GoalDownBlue {
+		int64 goal = 1;
+		int64 total = 2;
+	}
+
+	int64 resultPlayId = 11;
+	int64 resultRedTotal = 12;
+	int64 resultTotal = 13;
+	int64 resultBlueTotal = 14;
+	int64 resultDrawTotal = 15;
+
+
+	int64 scorePlayId = 16;
+	int64 scoreTotal = 17;
+	repeated Score score = 18;
+	message Score {
+		string content = 1;
+		int64 total = 2;
+	}
 }
 
 message UserDepositRequest {

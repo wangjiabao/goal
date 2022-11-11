@@ -30,6 +30,10 @@ type AdminClient interface {
 	GetPlayRelList(ctx context.Context, in *GetPlayRelListRequest, opts ...grpc.CallOption) (*GetPlayRelListReply, error)
 	GetRoomList(ctx context.Context, in *GetRoomListRequest, opts ...grpc.CallOption) (*GetRoomListReply, error)
 	GetRoomPlayList(ctx context.Context, in *GetRoomPlayListRequest, opts ...grpc.CallOption) (*GetRoomPlayListReply, error)
+	CreatePlayGameScore(ctx context.Context, in *CreatePlayGameScoreRequest, opts ...grpc.CallOption) (*CreatePlayGameScoreReply, error)
+	CreatePlayGameResult(ctx context.Context, in *CreatePlayGameResultRequest, opts ...grpc.CallOption) (*CreatePlayGameResultReply, error)
+	CreatePlayGameGoal(ctx context.Context, in *CreatePlayGameGoalRequest, opts ...grpc.CallOption) (*CreatePlayGameGoalReply, error)
+	CreatePlayGameSort(ctx context.Context, in *CreatePlayGameSortRequest, opts ...grpc.CallOption) (*CreatePlayGameSortReply, error)
 }
 
 type adminClient struct {
@@ -112,6 +116,42 @@ func (c *adminClient) GetRoomPlayList(ctx context.Context, in *GetRoomPlayListRe
 	return out, nil
 }
 
+func (c *adminClient) CreatePlayGameScore(ctx context.Context, in *CreatePlayGameScoreRequest, opts ...grpc.CallOption) (*CreatePlayGameScoreReply, error) {
+	out := new(CreatePlayGameScoreReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/CreatePlayGameScore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) CreatePlayGameResult(ctx context.Context, in *CreatePlayGameResultRequest, opts ...grpc.CallOption) (*CreatePlayGameResultReply, error) {
+	out := new(CreatePlayGameResultReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/CreatePlayGameResult", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) CreatePlayGameGoal(ctx context.Context, in *CreatePlayGameGoalRequest, opts ...grpc.CallOption) (*CreatePlayGameGoalReply, error) {
+	out := new(CreatePlayGameGoalReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/CreatePlayGameGoal", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) CreatePlayGameSort(ctx context.Context, in *CreatePlayGameSortRequest, opts ...grpc.CallOption) (*CreatePlayGameSortReply, error) {
+	out := new(CreatePlayGameSortReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/CreatePlayGameSort", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServer is the server API for Admin service.
 // All implementations must embed UnimplementedAdminServer
 // for forward compatibility
@@ -124,6 +164,10 @@ type AdminServer interface {
 	GetPlayRelList(context.Context, *GetPlayRelListRequest) (*GetPlayRelListReply, error)
 	GetRoomList(context.Context, *GetRoomListRequest) (*GetRoomListReply, error)
 	GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error)
+	CreatePlayGameScore(context.Context, *CreatePlayGameScoreRequest) (*CreatePlayGameScoreReply, error)
+	CreatePlayGameResult(context.Context, *CreatePlayGameResultRequest) (*CreatePlayGameResultReply, error)
+	CreatePlayGameGoal(context.Context, *CreatePlayGameGoalRequest) (*CreatePlayGameGoalReply, error)
+	CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error)
 	mustEmbedUnimplementedAdminServer()
 }
 
@@ -154,6 +198,18 @@ func (UnimplementedAdminServer) GetRoomList(context.Context, *GetRoomListRequest
 }
 func (UnimplementedAdminServer) GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoomPlayList not implemented")
+}
+func (UnimplementedAdminServer) CreatePlayGameScore(context.Context, *CreatePlayGameScoreRequest) (*CreatePlayGameScoreReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePlayGameScore not implemented")
+}
+func (UnimplementedAdminServer) CreatePlayGameResult(context.Context, *CreatePlayGameResultRequest) (*CreatePlayGameResultReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePlayGameResult not implemented")
+}
+func (UnimplementedAdminServer) CreatePlayGameGoal(context.Context, *CreatePlayGameGoalRequest) (*CreatePlayGameGoalReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePlayGameGoal not implemented")
+}
+func (UnimplementedAdminServer) CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePlayGameSort not implemented")
 }
 func (UnimplementedAdminServer) mustEmbedUnimplementedAdminServer() {}
 
@@ -312,6 +368,78 @@ func _Admin_GetRoomPlayList_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Admin_CreatePlayGameScore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlayGameScoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).CreatePlayGameScore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/CreatePlayGameScore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).CreatePlayGameScore(ctx, req.(*CreatePlayGameScoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_CreatePlayGameResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlayGameResultRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).CreatePlayGameResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/CreatePlayGameResult",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).CreatePlayGameResult(ctx, req.(*CreatePlayGameResultRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_CreatePlayGameGoal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlayGameGoalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).CreatePlayGameGoal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/CreatePlayGameGoal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).CreatePlayGameGoal(ctx, req.(*CreatePlayGameGoalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_CreatePlayGameSort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePlayGameSortRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).CreatePlayGameSort(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/CreatePlayGameSort",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).CreatePlayGameSort(ctx, req.(*CreatePlayGameSortRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Admin_ServiceDesc is the grpc.ServiceDesc for Admin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -350,6 +478,22 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRoomPlayList",
 			Handler:    _Admin_GetRoomPlayList_Handler,
+		},
+		{
+			MethodName: "CreatePlayGameScore",
+			Handler:    _Admin_CreatePlayGameScore_Handler,
+		},
+		{
+			MethodName: "CreatePlayGameResult",
+			Handler:    _Admin_CreatePlayGameResult_Handler,
+		},
+		{
+			MethodName: "CreatePlayGameGoal",
+			Handler:    _Admin_CreatePlayGameGoal_Handler,
+		},
+		{
+			MethodName: "CreatePlayGameSort",
+			Handler:    _Admin_CreatePlayGameSort_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -636,6 +780,7 @@ type GameClient interface {
 	GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error)
 	GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...grpc.CallOption) (*GetTeamListReply, error)
 	CreateTeam(ctx context.Context, in *CreateTeamRequest, opts ...grpc.CallOption) (*CreateTeamReply, error)
+	GameIndexStatistics(ctx context.Context, in *GameIndexStatisticsRequest, opts ...grpc.CallOption) (*GameIndexStatisticsReply, error)
 }
 
 type gameClient struct {
@@ -736,6 +881,15 @@ func (c *gameClient) CreateTeam(ctx context.Context, in *CreateTeamRequest, opts
 	return out, nil
 }
 
+func (c *gameClient) GameIndexStatistics(ctx context.Context, in *GameIndexStatisticsRequest, opts ...grpc.CallOption) (*GameIndexStatisticsReply, error) {
+	out := new(GameIndexStatisticsReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/GameIndexStatistics", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServer is the server API for Game service.
 // All implementations must embed UnimplementedGameServer
 // for forward compatibility
@@ -750,6 +904,7 @@ type GameServer interface {
 	GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error)
 	GetTeamList(context.Context, *GetTeamListRequest) (*GetTeamListReply, error)
 	CreateTeam(context.Context, *CreateTeamRequest) (*CreateTeamReply, error)
+	GameIndexStatistics(context.Context, *GameIndexStatisticsRequest) (*GameIndexStatisticsReply, error)
 	mustEmbedUnimplementedGameServer()
 }
 
@@ -786,6 +941,9 @@ func (UnimplementedGameServer) GetTeamList(context.Context, *GetTeamListRequest)
 }
 func (UnimplementedGameServer) CreateTeam(context.Context, *CreateTeamRequest) (*CreateTeamReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTeam not implemented")
+}
+func (UnimplementedGameServer) GameIndexStatistics(context.Context, *GameIndexStatisticsRequest) (*GameIndexStatisticsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GameIndexStatistics not implemented")
 }
 func (UnimplementedGameServer) mustEmbedUnimplementedGameServer() {}
 
@@ -980,6 +1138,24 @@ func _Game_CreateTeam_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Game_GameIndexStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GameIndexStatisticsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).GameIndexStatistics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Game/GameIndexStatistics",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).GameIndexStatistics(ctx, req.(*GameIndexStatisticsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Game_ServiceDesc is the grpc.ServiceDesc for Game service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1026,6 +1202,10 @@ var Game_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateTeam",
 			Handler:    _Game_CreateTeam_Handler,
+		},
+		{
+			MethodName: "GameIndexStatistics",
+			Handler:    _Game_GameIndexStatistics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

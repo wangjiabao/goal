@@ -163,6 +163,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/goal_admin/index_game/statistics:
+        get:
+            tags:
+                - Game
+            operationId: Game_GameIndexStatistics
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GameIndexStatisticsReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/goal_admin/play/game:
         post:
             tags:
@@ -278,6 +296,102 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/GetPlayRelListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/play_game_goal:
+        post:
+            tags:
+                - Admin
+            operationId: Admin_CreatePlayGameGoal
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlayGameGoalRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlayGameGoalReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/play_game_result:
+        post:
+            tags:
+                - Admin
+            operationId: Admin_CreatePlayGameResult
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlayGameResultRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlayGameResultReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/play_game_score:
+        post:
+            tags:
+                - Admin
+            operationId: Admin_CreatePlayGameScore
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlayGameScoreRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlayGameScoreReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/play_game_sort:
+        post:
+            tags:
+                - Admin
+            operationId: Admin_CreatePlayGameSort
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreatePlayGameSortRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreatePlayGameSortReply'
                 default:
                     description: Default error response
                     content:
@@ -572,6 +686,29 @@ components:
                     type: string
                 name:
                     type: string
+        CreatePlayGameGoalReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameGoalRequest_SendBody:
+            type: object
+            properties:
+                gameId:
+                    type: integer
+                    format: int64
+                goal:
+                    type: integer
+                    format: int64
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+                team:
+                    type: string
         CreatePlayGameReply:
             type: object
             properties:
@@ -588,6 +725,56 @@ components:
                 playType:
                     type: string
                 gameId:
+                    type: integer
+                    format: int64
+        CreatePlayGameResultReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameResultRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                content:
+                    type: string
+                pay:
+                    type: integer
+                    format: int64
+        CreatePlayGameScoreReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameScoreRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+        CreatePlayGameSortReply:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        CreatePlayGameSortRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                pay:
+                    type: integer
+                    format: int64
+                sortId:
                     type: integer
                     format: int64
         CreatePlaySortReply:
@@ -636,6 +823,159 @@ components:
             type: object
             properties:
                 gameId:
+                    type: integer
+                    format: int64
+        GameIndexStatisticsReply:
+            type: object
+            properties:
+                gameId:
+                    type: integer
+                    format: int64
+                goalAllPlayId:
+                    type: integer
+                    format: int64
+                goalAllTotal:
+                    type: integer
+                    format: int64
+                goalAllRedTotal:
+                    type: integer
+                    format: int64
+                goalAllRed:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GameIndexStatisticsReply_GoalAllRed'
+                goalAllBlueTotal:
+                    type: integer
+                    format: int64
+                goalAllBlue:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GameIndexStatisticsReply_GoalAllBlue'
+                goalUpPlayId:
+                    type: integer
+                    format: int64
+                goalUpTotal:
+                    type: integer
+                    format: int64
+                goalUpRedTotal:
+                    type: integer
+                    format: int64
+                goalUpRed:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GameIndexStatisticsReply_GoalUpRed'
+                goalUpBlueTotal:
+                    type: integer
+                    format: int64
+                goalUpBlue:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GameIndexStatisticsReply_GoalUpBlue'
+                goalDownPlayId:
+                    type: integer
+                    format: int64
+                goalDownTotal:
+                    type: integer
+                    format: int64
+                goalDownRedTotal:
+                    type: integer
+                    format: int64
+                goalDownRed:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GameIndexStatisticsReply_GoalDownRed'
+                goalDownBlueTotal:
+                    type: integer
+                    format: int64
+                goalDownBlue:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GameIndexStatisticsReply_GoalDownBlue'
+                resultPlayId:
+                    type: integer
+                    format: int64
+                resultRedTotal:
+                    type: integer
+                    format: int64
+                resultTotal:
+                    type: integer
+                    format: int64
+                resultBlueTotal:
+                    type: integer
+                    format: int64
+                resultDrawTotal:
+                    type: integer
+                    format: int64
+                scorePlayId:
+                    type: integer
+                    format: int64
+                scoreTotal:
+                    type: integer
+                    format: int64
+                score:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GameIndexStatisticsReply_Score'
+        GameIndexStatisticsReply_GoalAllBlue:
+            type: object
+            properties:
+                goal:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        GameIndexStatisticsReply_GoalAllRed:
+            type: object
+            properties:
+                goal:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        GameIndexStatisticsReply_GoalDownBlue:
+            type: object
+            properties:
+                goal:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        GameIndexStatisticsReply_GoalDownRed:
+            type: object
+            properties:
+                goal:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        GameIndexStatisticsReply_GoalUpBlue:
+            type: object
+            properties:
+                goal:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        GameIndexStatisticsReply_GoalUpRed:
+            type: object
+            properties:
+                goal:
+                    type: integer
+                    format: int64
+                total:
+                    type: integer
+                    format: int64
+        GameIndexStatisticsReply_Score:
+            type: object
+            properties:
+                content:
+                    type: string
+                total:
                     type: integer
                     format: int64
         GamePlayGrantReply:

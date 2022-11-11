@@ -56,3 +56,18 @@ func (p *PlayService) GetRoomList(ctx context.Context, req *v1.GetRoomListReques
 func (p *PlayService) GetRoomPlayList(ctx context.Context, req *v1.GetRoomPlayListRequest) (*v1.GetRoomPlayListReply, error) {
 	return p.uc.GetRoomPlayList(ctx, req)
 }
+
+// CreatePlayGameScore 创建比分玩法竞猜
+func (p *PlayService) CreatePlayGameScore(ctx context.Context, req *v1.CreatePlayGameScoreRequest) (*v1.CreatePlayGameScoreReply, error) {
+	return p.uc.CreatePlayGameScore(ctx, req)
+}
+
+// CreatePlayGameResult 创建输赢平玩法竞猜
+func (p *PlayService) CreatePlayGameResult(ctx context.Context, req *v1.CreatePlayGameResultRequest) (*v1.CreatePlayGameResultReply, error) {
+	return p.uc.CreatePlayGameResult(ctx, req)
+}
+
+// CreatePlayGameGoal 创建进球数玩法竞猜
+func (p *PlayService) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlayGameGoalRequest) (*v1.CreatePlayGameGoalReply, error) {
+	return p.uc.CreatePlayGameGoal(ctx, req)
+}
