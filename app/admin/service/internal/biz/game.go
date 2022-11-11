@@ -346,7 +346,7 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 			}{Goal: v.Goal, Total: v.Pay + playGameTeamGoalRedUpUserRelMap[v.Goal].Total}
 		}
 
-		if v.TeamId == game.RedTeamId {
+		if v.TeamId == game.BlueTeamId {
 			playGameTeamGoalBlueUpUserRelMap[v.Goal] = struct {
 				Goal  int64
 				Total int64
@@ -393,7 +393,7 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 			}{Goal: v.Goal, Total: v.Pay + playGameTeamGoalRedDownUserRelMap[v.Goal].Total}
 		}
 
-		if v.TeamId == game.RedTeamId {
+		if v.TeamId == game.BlueTeamId {
 			playGameTeamGoalBlueDownUserRelMap[v.Goal] = struct {
 				Goal  int64
 				Total int64
@@ -439,7 +439,7 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 			}{Goal: v.Goal, Total: v.Pay + playGameTeamGoalRedAllUserRelMap[v.Goal].Total}
 		}
 
-		if v.TeamId == game.RedTeamId {
+		if v.TeamId == game.BlueTeamId {
 			playGameTeamGoalBlueAllUserRelMap[v.Goal] = struct {
 				Goal  int64
 				Total int64
@@ -456,7 +456,7 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 			Total: tmpTotal,
 		})
 	}
-	for _, v := range playGameTeamGoalBlueDownUserRelMap {
+	for _, v := range playGameTeamGoalBlueAllUserRelMap {
 		tmpTotal := v.Total / base
 		res.GoalAllBlueTotal += tmpTotal
 		res.GoalAllTotal += tmpTotal

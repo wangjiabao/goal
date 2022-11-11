@@ -816,6 +816,11 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		return nil, errors.New(500, "RESULT_ERROR", "比赛结果不匹配")
 	}
 
+	userId, _, err = getUserFromJwt(ctx) // 获取用户id
+	if nil != err {
+		return nil, errors.New(500, "USER_ERROR", "用户信息错误")
+	}
+
 	//  todo 参数真实验证，房间人员验证
 	playGameTeamResultUserRelList, err = p.playGameTeamResultUserRelRepo.GetPlayGameTeamResultUserRelByUserId(ctx, userId)
 	for _, v := range playGameTeamResultUserRelList {
@@ -847,10 +852,6 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 	}
 	feeRate = systemConfig.Value
 
-	userId, _, err = getUserFromJwt(ctx) // 获取用户id
-	if nil != err {
-		return nil, errors.New(500, "USER_ERROR", "用户信息错误")
-	}
 	userBalance, err = p.userBalanceRepo.GetUserBalance(ctx, userId) // 查余额
 	if nil != err {
 		return nil, err
@@ -878,6 +879,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		}
 
 		fee := pay / feeRate // 扣除手续费
+		pay -= fee
 		for _, uv := range upUserProxy {
 			var uvFee int64
 			if 0 >= uv.Rate {
@@ -1004,6 +1006,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		}
 
 		fee := pay / feeRate // 扣除手续费
+		pay -= fee
 		for _, uv := range upUserProxy {
 			var uvFee int64
 			if 0 >= uv.Rate {
@@ -1130,6 +1133,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		}
 
 		fee := pay / feeRate // 扣除手续费
+		pay -= fee
 		for _, uv := range upUserProxy {
 			var uvFee int64
 			if 0 >= uv.Rate {

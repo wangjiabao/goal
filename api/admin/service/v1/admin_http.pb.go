@@ -66,7 +66,7 @@ func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
 	r.POST("/api/goal_admin/play_game_goal", _Admin_CreatePlayGameGoal0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play_game_sort", _Admin_CreatePlayGameSort0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/system_config_list", _Admin_GetConfigList0_HTTP_Handler(srv))
-	r.POST("/api/goal_admin/update_system_config_list", _Admin_UpdateConfig0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/update_system_config", _Admin_UpdateConfig0_HTTP_Handler(srv))
 }
 
 func _Admin_GamePlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
@@ -567,7 +567,7 @@ func (c *AdminHTTPClientImpl) SortPlayGrant(ctx context.Context, in *SortPlayGra
 
 func (c *AdminHTTPClientImpl) UpdateConfig(ctx context.Context, in *UpdateConfigRequest, opts ...http.CallOption) (*UpdateConfigReply, error) {
 	var out UpdateConfigReply
-	pattern := "/api/goal_admin/update_system_config_list"
+	pattern := "/api/goal_admin/update_system_config"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAdminUpdateConfig))
 	opts = append(opts, http.PathTemplate(pattern))
