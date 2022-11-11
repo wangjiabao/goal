@@ -83,6 +83,7 @@ func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context) (*v1.GetUserBala
 	var (
 		user              map[int64]*User
 		userBalanceRecord []*UserBalanceRecord
+		base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		userId            []int64
 		err               error
 	)
@@ -112,7 +113,7 @@ func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context) (*v1.GetUserBala
 		}
 		res.Items = append(res.Items, &v1.GetUserBalanceRecordReply_Item{
 			Address:   tempAddress,
-			Balance:   item.Balance,
+			Balance:   item.Balance / base,
 			Type:      item.Type,
 			Amount:    item.Amount,
 			Reason:    item.Reason,

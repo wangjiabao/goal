@@ -34,6 +34,17 @@ type UserProxy struct {
 	Rate     int64
 }
 
+type SystemConfig struct {
+	ID    int64
+	Name  string
+	Value int64
+}
+
+type SystemConfigRepo interface {
+	GetSystemConfigByName(ctx context.Context, name string) (*SystemConfig, error)
+	GetSystemConfigByNames(ctx context.Context, name ...string) (map[string]*SystemConfig, error)
+}
+
 type UserRepo interface {
 	CreateUser(ctx context.Context, user *User) (*User, error)
 	GetUserByAddress(ctx context.Context, address string) (*User, error)
@@ -56,24 +67,27 @@ type AddressEthBalanceRepo interface {
 }
 
 type UserUseCase struct {
-	repo   UserRepo
-	abRepo AddressEthBalanceRepo
-	rRepo  RoleRepo
-	uiRepo UserInfoRepo
-	ubRepo UserBalanceRepo
-	tx     Transaction
-	log    *log.Helper
+	repo             UserRepo
+	systemConfigRepo SystemConfigRepo
+	abRepo           AddressEthBalanceRepo
+	rRepo            RoleRepo
+	uiRepo           UserInfoRepo
+	ubRepo           UserBalanceRepo
+	tx               Transaction
+	log              *log.Helper
 }
 
-func NewUserUseCase(repo UserRepo, tx Transaction, abRepo AddressEthBalanceRepo, rRepo RoleRepo, uiRepo UserInfoRepo, ubRepo UserBalanceRepo, logger log.Logger) *UserUseCase {
+func NewUserUseCase(repo UserRepo, tx Transaction,
+	systemConfigRepo SystemConfigRepo, abRepo AddressEthBalanceRepo, rRepo RoleRepo, uiRepo UserInfoRepo, ubRepo UserBalanceRepo, logger log.Logger) *UserUseCase {
 	return &UserUseCase{
-		repo:   repo,
-		tx:     tx,
-		rRepo:  rRepo,
-		abRepo: abRepo,
-		uiRepo: uiRepo,
-		ubRepo: ubRepo,
-		log:    log.NewHelper(logger),
+		repo:             repo,
+		tx:               tx,
+		systemConfigRepo: systemConfigRepo,
+		rRepo:            rRepo,
+		abRepo:           abRepo,
+		uiRepo:           uiRepo,
+		ubRepo:           ubRepo,
+		log:              log.NewHelper(logger),
 	}
 }
 
@@ -314,21 +328,38 @@ func (uc *UserUseCase) CreateProxy(ctx context.Context, u *User, req *v1.CreateP
 		userBalance          *UserBalance
 		userInfo             *UserInfo
 		recommendUserInfo    *UserInfo
+		systemConfig         *SystemConfig
 		rate                 int64 = 5
-		amount               int64 = 500
+		amount               int64
 		recommendProxyReward int64 = 20
 		base                 int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		err                  error
 	)
 
 	// todo 后台比例
-	if req.SendBody.Amount == amount {
-		rate = 20
-	}
-
+	amount = req.SendBody.Amount
 	userProxy, err = uc.repo.GetUserProxyByUserId(ctx, u.ID)
 	if err == nil {
 		return nil, errors.New(500, "USER_PROXY_ALREADY", "已经是代理了")
+	}
+
+	systemConfig, err = uc.systemConfigRepo.GetSystemConfigByName(ctx, "proxy_recommend_rate")
+	if nil != err {
+		return nil, err
+	}
+	recommendProxyReward = systemConfig.Value
+
+	if "" != req.SendBody.Name {
+		systemConfig, err = uc.systemConfigRepo.GetSystemConfigByName(ctx, req.SendBody.Name)
+		if nil != err {
+			return nil, err
+		}
+		amount = systemConfig.Value * base
+		systemConfig, err = uc.systemConfigRepo.GetSystemConfigByName(ctx, req.SendBody.Name+"_rate")
+		if nil != err {
+			return nil, err
+		}
+		rate = systemConfig.Value
 	}
 
 	// 查找上级是否大代理

@@ -188,7 +188,19 @@ type PlayGameScoreUserRelRepo interface {
 	GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameScoreUserRel, error)
 }
 
+type SystemConfigRepo interface {
+	GetSystemConfigByName(ctx context.Context, name string) (*SystemConfig, error)
+	GetSystemConfigByNames(ctx context.Context, name ...string) (map[string]*SystemConfig, error)
+}
+
+type SystemConfig struct {
+	ID    int64
+	Name  string
+	Value int64
+}
+
 type PlayUseCase struct {
+	systemConfigRepo              SystemConfigRepo
 	playRepo                      PlayRepo
 	playGameRelRepo               PlayGameRelRepo
 	playSortRelRepo               PlaySortRelRepo
@@ -205,6 +217,7 @@ type PlayUseCase struct {
 
 func NewPlayUseCase(repo PlayRepo,
 	playGameRelRepo PlayGameRelRepo,
+	systemConfigRepo SystemConfigRepo,
 	playSortRelRepo PlaySortRelRepo,
 	playRoomRelRepo PlayRoomRelRepo,
 	playGameScoreUserRelRepo PlayGameScoreUserRelRepo,
@@ -218,6 +231,7 @@ func NewPlayUseCase(repo PlayRepo,
 	return &PlayUseCase{
 		playRepo:                      repo,
 		playGameRelRepo:               playGameRelRepo,
+		systemConfigRepo:              systemConfigRepo,
 		playSortRelRepo:               playSortRelRepo,
 		playRoomRelRepo:               playRoomRelRepo,
 		playGameScoreUserRelRepo:      playGameScoreUserRelRepo,
@@ -658,10 +672,11 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		userBalance          *UserBalance
 		upUserProxy          []*UserProxy
 		downUserProxy        map[int64][]*UserProxy
+		systemConfig         *SystemConfig
 		err                  error
 		feeRate              int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
-		base                 int64 = 100000 // 基础精度0.00001 todo 加配置文件
-		payLimit             int64 = 100    // 限额 todo 后台可以设置
+		base                 int64 = 100000 // 基础精度0.00001
+		payLimit             int64 = 100    // 限额
 	)
 	// todo 参数真实验证，房间人员验证
 	play, err = p.playRepo.GetPlayById(ctx, req.SendBody.PlayId) // 查玩法
@@ -680,6 +695,12 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
+
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
+	if nil != err {
+		return nil, err
+	}
+	feeRate = systemConfig.Value
 
 	userId, _, err = getUserFromJwt(ctx) // 获取用户id
 	if nil != err {
@@ -776,6 +797,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		pay                           int64
 		gameResult                    string
 		userBalance                   *UserBalance
+		systemConfig                  *SystemConfig
 		upUserProxy                   []*UserProxy
 		downUserProxy                 map[int64][]*UserProxy
 		err                           error
@@ -818,6 +840,12 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
+
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
+	if nil != err {
+		return nil, err
+	}
+	feeRate = systemConfig.Value
 
 	userId, _, err = getUserFromJwt(ctx) // 获取用户id
 	if nil != err {
@@ -914,6 +942,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		upUserProxy             []*UserProxy
 		downUserProxy           map[int64][]*UserProxy
 		err                     error
+		systemConfig            *SystemConfig
 		feeRate                 int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                    int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		payLimit                int64 = 100    // 限额 todo 后台可以设置
@@ -937,6 +966,12 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
+
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
+	if nil != err {
+		return nil, err
+	}
+	feeRate = systemConfig.Value
 
 	userId, _, err = getUserFromJwt(ctx) // 获取用户id
 	if nil != err {
@@ -1033,6 +1068,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		userBalance             *UserBalance
 		upUserProxy             []*UserProxy
 		downUserProxy           map[int64][]*UserProxy
+		systemConfig            *SystemConfig
 		err                     error
 		feeRate                 int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                    int64 = 100000 // 基础精度0.00001 todo 加配置文件
@@ -1069,6 +1105,12 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 	if pay > userBalance.Balance {
 		return nil, errors.New(500, "USER_BALANCE_ERROR", "余额不足")
 	}
+
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
+	if nil != err {
+		return nil, err
+	}
+	feeRate = systemConfig.Value
 
 	// 查找代理
 	upUserProxy, downUserProxy, err = p.userProxyRepo.GetUserProxyAndDown(ctx)

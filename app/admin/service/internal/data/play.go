@@ -275,6 +275,36 @@ func (p *PlayRepo) GetPlayListByIds(ctx context.Context, ids ...int64) ([]*biz.P
 
 	return pl, nil
 }
+
+func (s *SystemConfigRepo) GetSystemConfigByName(ctx context.Context, name string) (*biz.SystemConfig, error) {
+	var config *SystemConfig
+	if err := s.data.DB(ctx).Table("system_config").Where("name=?", name).First(&config).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "查询配置失败")
+	}
+
+	return &biz.SystemConfig{
+		ID:    config.ID,
+		Name:  config.Name,
+		Value: config.Value,
+	}, nil
+}
+
+func (s *SystemConfigRepo) GetSystemConfigByNames(ctx context.Context, name ...string) (map[string]*biz.SystemConfig, error) {
+	var l []*SystemConfig
+	if err := s.data.DB(ctx).Table("system_config").Where("name IN (?)", name).Find(&l).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "查询玩法列表失败")
+	}
+
+	pl := make(map[string]*biz.SystemConfig, 0)
+	for _, v := range l {
+		pl[v.Name] = &biz.SystemConfig{
+			Value: v.Value,
+		}
+	}
+
+	return pl, nil
+}
+
 func (s *SystemConfigRepo) GetSystemConfigList(ctx context.Context) ([]*biz.SystemConfig, error) {
 	var l []*SystemConfig
 	if err := s.data.DB(ctx).Table("system_config").Find(&l).Error; err != nil {

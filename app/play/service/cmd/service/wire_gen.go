@@ -32,6 +32,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logg
 	}
 	playRepo := data.NewPlayRepo(dataData, logger)
 	playGameRelRepo := data.NewPlayGameRelRepo(dataData, logger)
+	systemConfigRepo := data.NewSystemConfigRepo(dataData, logger)
 	playSortRelRepo := data.NewPlaySortRelRepo(dataData, logger)
 	playRoomRelRepo := data.NewPlayRoomRelRepo(dataData, logger)
 	playGameScoreUserRelRepo := data.NewPlayGameScoreUserRelRepo(dataData, logger)
@@ -41,7 +42,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logg
 	userBalanceRepo := data.NewUserBalanceRepo(dataData, logger)
 	userProxyRepo := data.NewUserProxyRepo(dataData, logger)
 	transaction := data.NewTransaction(dataData)
-	playUseCase := biz.NewPlayUseCase(playRepo, playGameRelRepo, playSortRelRepo, playRoomRelRepo, playGameScoreUserRelRepo, playGameTeamSortUserRelRepo, playGameTeamGoalUserRelRepo, playGameTeamResultUserRelRepo, userBalanceRepo, userProxyRepo, transaction, logger)
+	playUseCase := biz.NewPlayUseCase(playRepo, playGameRelRepo, systemConfigRepo, playSortRelRepo, playRoomRelRepo, playGameScoreUserRelRepo, playGameTeamSortUserRelRepo, playGameTeamGoalUserRelRepo, playGameTeamResultUserRelRepo, userBalanceRepo, userProxyRepo, transaction, logger)
 	roomRepo := data.NewRoomRepo(dataData, logger)
 	roomUserRelRepo := data.NewRoomUserRelRepo(dataData, logger)
 	gameRepo := data.NewGameRepo(dataData, logger)

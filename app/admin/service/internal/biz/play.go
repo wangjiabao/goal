@@ -3,6 +3,7 @@ package biz
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
@@ -131,6 +132,8 @@ type RoomRepo interface {
 
 type SystemConfigRepo interface {
 	GetSystemConfigList(ctx context.Context) ([]*SystemConfig, error)
+	GetSystemConfigByNames(ctx context.Context, name ...string) (map[string]*SystemConfig, error)
+	GetSystemConfigByName(ctx context.Context, name string) (*SystemConfig, error)
 	UpdateConfig(ctx context.Context, id int64, value int64) (bool, error)
 }
 
@@ -357,7 +360,39 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 		playGameTeamSortUserRel map[int64][]*PlayGameTeamSortUserRel
 		err                     error
 		rate                    int64 = 80 // 猜中分比率可后台设置
+		systemConfig            map[string]*SystemConfig
+		ok                      bool
+		rateZero                int64
+		rateFirst               int64
+		rateSecond              int64
+		rateThird               int64
 	)
+
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third", "sort_play_rate")
+	if _, ok = systemConfig["recommend_rate_zero"]; !ok {
+		return false
+	}
+	rateZero = systemConfig["recommend_rate_zero"].Value
+
+	if _, ok = systemConfig["recommend_rate_first"]; !ok {
+		return false
+	}
+	rateFirst = systemConfig["recommend_rate_first"].Value
+
+	if _, ok = systemConfig["recommend_rate_second"]; !ok {
+		return false
+	}
+	rateSecond = systemConfig["recommend_rate_second"].Value
+
+	if _, ok = systemConfig["recommend_rate_third"]; !ok {
+		return false
+	}
+	rateThird = systemConfig["recommend_rate_third"].Value
+
+	if _, ok = systemConfig["sort_play_rate"]; !ok {
+		return false
+	}
+	rate = systemConfig["sort_play_rate"].Value
 
 	for _, v := range play {
 		playIds = append(playIds, v.ID)
@@ -485,18 +520,18 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 				for k, recommendUserId := range recommendUserIds { // 推荐人
 					var tmpPerAmount int64
 					if 0 == k {
-						tmpPerAmount = perAmount * 2 / 1000
+						tmpPerAmount = perAmount * rateThird / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 1 == k {
-						tmpPerAmount = perAmount * 3 / 1000
+						tmpPerAmount = perAmount * rateSecond / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 2 == k {
-						tmpPerAmount = perAmount * 5 / 1000
-						tmpPerAmount += perAmount * 10 / 1000
+						tmpPerAmount = perAmount * rateFirst / 1000
+						tmpPerAmount += perAmount * rateZero / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
@@ -528,11 +563,38 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 		playIds              []int64
 		playGameScoreUserRel map[int64][]*PlayGameScoreUserRel
 		err                  error
+		systemConfig         map[string]*SystemConfig
+		ok                   bool
+		rateZero             int64
+		rateFirst            int64
+		rateSecond           int64
+		rateThird            int64
 	)
 	for _, v := range play {
 		playIds = append(playIds, v.ID)
 	}
 
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
+	if _, ok = systemConfig["recommend_rate_zero"]; !ok {
+		return false
+	}
+	rateZero = systemConfig["recommend_rate_zero"].Value
+
+	if _, ok = systemConfig["recommend_rate_first"]; !ok {
+		return false
+	}
+	rateFirst = systemConfig["recommend_rate_first"].Value
+
+	if _, ok = systemConfig["recommend_rate_second"]; !ok {
+		return false
+	}
+	rateSecond = systemConfig["recommend_rate_second"].Value
+
+	if _, ok = systemConfig["recommend_rate_third"]; !ok {
+		return false
+	}
+	rateThird = systemConfig["recommend_rate_third"].Value
+	fmt.Println(rateThird, rateSecond)
 	playGameScoreUserRel, err = p.playGameScoreUserRelRepo.GetPlayGameScoreUserRelByPlayIds(ctx, playIds...)
 	if err != nil {
 		return false
@@ -588,18 +650,18 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 				for k, recommendUserId := range recommendUserIds { // 推荐人
 					var tmpPerAmount int64
 					if 0 == k {
-						tmpPerAmount = perAmount * 2 / 1000
+						tmpPerAmount = perAmount * rateThird / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 1 == k {
-						tmpPerAmount = perAmount * 3 / 1000
+						tmpPerAmount = perAmount * rateSecond / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 2 == k {
-						tmpPerAmount = perAmount * 5 / 1000
-						tmpPerAmount += perAmount * 10 / 1000
+						tmpPerAmount = perAmount * rateFirst / 1000
+						tmpPerAmount += perAmount * rateZero / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
@@ -632,6 +694,12 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 		content                   string
 		err                       error
 		rate                      int64 = 80 // 猜中分比率可后台设置
+		systemConfig              map[string]*SystemConfig
+		ok                        bool
+		rateZero                  int64
+		rateFirst                 int64
+		rateSecond                int64
+		rateThird                 int64
 	)
 
 	for _, v := range play {
@@ -650,6 +718,27 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 	} else {
 		content = "draw"
 	}
+
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
+	if _, ok = systemConfig["recommend_rate_zero"]; !ok {
+		return false
+	}
+	rateZero = systemConfig["recommend_rate_zero"].Value
+
+	if _, ok = systemConfig["recommend_rate_first"]; !ok {
+		return false
+	}
+	rateFirst = systemConfig["recommend_rate_first"].Value
+
+	if _, ok = systemConfig["recommend_rate_second"]; !ok {
+		return false
+	}
+	rateSecond = systemConfig["recommend_rate_second"].Value
+
+	if _, ok = systemConfig["recommend_rate_third"]; !ok {
+		return false
+	}
+	rateThird = systemConfig["recommend_rate_third"].Value
 
 	for _, playUserRel := range playGameTeamResultUserRel {
 		// 每一场玩法
@@ -701,18 +790,18 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 				for k, recommendUserId := range recommendUserIds { // 推荐人
 					var tmpPerAmount int64
 					if 0 == k {
-						tmpPerAmount = perAmount * 2 / 1000
+						tmpPerAmount = perAmount * rateThird / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 1 == k {
-						tmpPerAmount = perAmount * 3 / 1000
+						tmpPerAmount = perAmount * rateSecond / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 2 == k {
-						tmpPerAmount = perAmount * 5 / 1000
-						tmpPerAmount += perAmount * 10 / 1000
+						tmpPerAmount = perAmount * rateFirst / 1000
+						tmpPerAmount += perAmount * rateZero / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
@@ -746,6 +835,12 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 		playGameTeamGoalUserRel map[int64][]*PlayGameTeamGoalUserRel
 		err                     error
 		rate                    int64 = 80 // 猜中分比率可后台设置
+		systemConfig            map[string]*SystemConfig
+		ok                      bool
+		rateZero                int64
+		rateFirst               int64
+		rateSecond              int64
+		rateThird               int64
 	)
 
 	for _, v := range play {
@@ -764,6 +859,32 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 			poolAmount                           int64                      // 每个玩法的奖池
 			winTotalAmount                       int64                      // 中奖人的钱总额
 		)
+
+		systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third", "sort_play_rate")
+		if _, ok = systemConfig["recommend_rate_zero"]; !ok {
+			return false
+		}
+		rateZero = systemConfig["recommend_rate_zero"].Value
+
+		if _, ok = systemConfig["recommend_rate_first"]; !ok {
+			return false
+		}
+		rateFirst = systemConfig["recommend_rate_first"].Value
+
+		if _, ok = systemConfig["recommend_rate_second"]; !ok {
+			return false
+		}
+		rateSecond = systemConfig["recommend_rate_second"].Value
+
+		if _, ok = systemConfig["recommend_rate_third"]; !ok {
+			return false
+		}
+		rateThird = systemConfig["recommend_rate_third"].Value
+
+		if _, ok = systemConfig["sort_play_rate"]; !ok {
+			return false
+		}
+		rate = systemConfig["sort_play_rate"].Value
 
 		for _, v := range playUserRel { // 当前玩法，全为上半场或下半场或全场
 			if strings.EqualFold("game_team_goal_all", v.Type) { // 判断是否猜中
@@ -853,18 +974,18 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 				for k, recommendUserId := range recommendUserIds { // 推荐人
 					var tmpPerAmount int64
 					if 0 == k {
-						tmpPerAmount = perAmount * 2 / 1000
+						tmpPerAmount = perAmount * rateThird / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 1 == k {
-						tmpPerAmount = perAmount * 3 / 1000
+						tmpPerAmount = perAmount * rateSecond / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}
 					} else if 2 == k {
-						tmpPerAmount = perAmount * 5 / 1000
-						tmpPerAmount += perAmount * 10 / 1000
+						tmpPerAmount = perAmount * rateFirst / 1000
+						tmpPerAmount += perAmount * rateZero / 1000
 						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
 							return res
 						}

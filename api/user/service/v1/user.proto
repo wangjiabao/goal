@@ -171,6 +171,7 @@ message GetUserDepositListReply {
 message CreateProxyRequest {
 	message SendBody{
 		int64 amount = 1;
+		string name = 2;
 	}
 
 	SendBody send_body = 1;

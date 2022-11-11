@@ -32,11 +32,12 @@ func wireApp(confServer *conf.Server, confData *conf.Data, auth *conf.Auth, logg
 	}
 	userRepo := data.NewUserRepo(dataData, logger)
 	transaction := data.NewTransaction(dataData)
+	systemConfigRepo := data.NewSystemConfigRepo(dataData, logger)
 	addressEthBalanceRepo := data.NewAddressEthBalanceRepo(dataData, logger)
 	roleRepo := data.NewRoleRepo(dataData, logger)
 	userInfoRepo := data.NewUserInfoRepo(dataData, logger)
 	userBalanceRepo := data.NewUserBalanceRepo(dataData, logger)
-	userUseCase := biz.NewUserUseCase(userRepo, transaction, addressEthBalanceRepo, roleRepo, userInfoRepo, userBalanceRepo, logger)
+	userUseCase := biz.NewUserUseCase(userRepo, transaction, systemConfigRepo, addressEthBalanceRepo, roleRepo, userInfoRepo, userBalanceRepo, logger)
 	userService := service.NewUserService(userUseCase, logger, auth)
 	httpServer := server.NewHTTPServer(confServer, auth, userService, logger)
 	app := newApp(logger, httpServer)

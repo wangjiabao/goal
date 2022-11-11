@@ -106,6 +106,14 @@ type PlayGameTeamResultUserRel struct {
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
 
+type SystemConfig struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	Name      string    `gorm:"type:varchar(100);not null"`
+	Value     int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type PlayRepo struct {
 	data *Data
 	log  *log.Helper
@@ -136,6 +144,11 @@ type PlayGameScoreUserRelRepo struct {
 	log  *log.Helper
 }
 
+type SystemConfigRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
 type PlayGameTeamSortUserRelRepo struct {
 	data *Data
 	log  *log.Helper
@@ -148,6 +161,13 @@ type PlayGameTeamResultUserRelRepo struct {
 
 func NewPlayRepo(data *Data, logger log.Logger) biz.PlayRepo {
 	return &PlayRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewSystemConfigRepo(data *Data, logger log.Logger) biz.SystemConfigRepo {
+	return &SystemConfigRepo{
 		data: data,
 		log:  log.NewHelper(logger),
 	}
@@ -724,5 +744,34 @@ func (p *PlayRepo) GetUserByUserIds(ctx context.Context, userIds ...int64) ([]*b
 			Address: v.Address,
 		})
 	}
+	return pl, nil
+}
+
+func (s *SystemConfigRepo) GetSystemConfigByName(ctx context.Context, name string) (*biz.SystemConfig, error) {
+	var config *SystemConfig
+	if err := s.data.DB(ctx).Table("system_config").Where("name=?", name).First(&config).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "查询配置失败")
+	}
+
+	return &biz.SystemConfig{
+		ID:    config.ID,
+		Name:  config.Name,
+		Value: config.Value,
+	}, nil
+}
+
+func (s *SystemConfigRepo) GetSystemConfigByNames(ctx context.Context, name ...string) (map[string]*biz.SystemConfig, error) {
+	var l []*SystemConfig
+	if err := s.data.DB(ctx).Table("system_config").Where("name IN (?)", name).Find(&l).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "查询玩法列表失败")
+	}
+
+	pl := make(map[string]*biz.SystemConfig, 0)
+	for _, v := range l {
+		pl[v.Name] = &biz.SystemConfig{
+			Value: v.Value,
+		}
+	}
+
 	return pl, nil
 }
