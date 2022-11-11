@@ -79,6 +79,22 @@ type PlayGameTeamGoalUserRel struct {
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
 
+type PlayGameTeamGoalUserRelTotal struct {
+	Total int64
+}
+
+type PlayGameScoreUserRelTotal struct {
+	Total int64
+}
+
+type PlayGameTeamResultUserRelTotal struct {
+	Total int64
+}
+
+type PlayGameTeamSortUserRelTotal struct {
+	Total int64
+}
+
 type PlayGameTeamResultUserRel struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	PlayId    int64     `gorm:"type:int;not null"`
@@ -475,6 +491,49 @@ func (p *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByPlayIds(ct
 		})
 	}
 	return pl, nil
+}
+
+func (p *PlayGameTeamGoalUserRelRepo) GetPlayGameTeamGoalUserRelByPlayIdTotal(ctx context.Context, playId int64) (*biz.PlayGameTeamGoalUserRelTotal, error) {
+	var playGameTeamGoalUserRelTotal *PlayGameTeamGoalUserRelTotal
+	if result := p.data.DB(ctx).Table("play_game_team_goal_user_rel").Select("sum(pay) as total").Where("play_id", playId).Take(&playGameTeamGoalUserRelTotal); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SCORE_REL_ERROR", "查询比赛进球数总额")
+	}
+
+	return &biz.PlayGameTeamGoalUserRelTotal{
+		Total: playGameTeamGoalUserRelTotal.Total,
+	}, nil
+}
+
+func (p *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByPlayIdTotal(ctx context.Context, playId int64) (*biz.PlayGameTeamResultUserRelTotal, error) {
+	var playGameTeamResultUserRelTotal *PlayGameTeamResultUserRelTotal
+	if result := p.data.DB(ctx).Table("play_game_team_result_user_rel").Select("sum(pay) as total").Where("play_id", playId).Take(&playGameTeamResultUserRelTotal); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_RESULT_REL_ERROR", "查询比赛结果总额")
+	}
+
+	return &biz.PlayGameTeamResultUserRelTotal{
+		Total: playGameTeamResultUserRelTotal.Total,
+	}, nil
+}
+
+func (p *PlayGameTeamSortUserRelRepo) GetPlayGameTeamSortUserRelByPlayIdTotal(ctx context.Context, playId int64) (*biz.PlayGameTeamSortUserRelTotal, error) {
+	var playGameTeamSortUserRelTotal *PlayGameTeamGoalUserRelTotal
+	if result := p.data.DB(ctx).Table("play_game_team_sort_user_rel").Select("sum(pay) as total").Where("play_id", playId).Take(&playGameTeamSortUserRelTotal); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SORT_REL_ERROR", "查询比赛排名总额")
+	}
+
+	return &biz.PlayGameTeamSortUserRelTotal{
+		Total: playGameTeamSortUserRelTotal.Total,
+	}, nil
+}
+func (p *PlayGameScoreUserRelRepo) GetPlayGameScoreUserRelByPlayIdTotal(ctx context.Context, playId int64) (*biz.PlayGameScoreUserRelTotal, error) {
+	var playGameScoreUserRelTotal *PlayGameScoreUserRelTotal
+	if result := p.data.DB(ctx).Table("play_game_score_user_rel").Select("sum(pay) as total").Where("play_id", playId).Take(&playGameScoreUserRelTotal); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SCORE_REL_ERROR", "查询比赛得分总额")
+	}
+
+	return &biz.PlayGameScoreUserRelTotal{
+		Total: playGameScoreUserRelTotal.Total,
+	}, nil
 }
 
 func (p *PlayGameTeamGoalUserRelRepo) GetPlayGameTeamGoalUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*biz.PlayGameTeamGoalUserRel, error) {

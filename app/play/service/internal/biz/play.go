@@ -72,6 +72,22 @@ type PlayGameTeamGoalUserRel struct {
 	CreatedAt time.Time
 }
 
+type PlayGameTeamGoalUserRelTotal struct {
+	Total int64
+}
+
+type PlayGameScoreUserRelTotal struct {
+	Total int64
+}
+
+type PlayGameTeamResultUserRelTotal struct {
+	Total int64
+}
+
+type PlayGameTeamSortUserRelTotal struct {
+	Total int64
+}
+
 type PlayGameTeamResultUserRel struct {
 	ID        int64
 	UserId    int64
@@ -145,24 +161,28 @@ type UserProxyRepo interface {
 }
 
 type PlayGameTeamResultUserRelRepo interface {
+	GetPlayGameTeamResultUserRelByPlayIdTotal(ctx context.Context, playId int64) (*PlayGameTeamResultUserRelTotal, error)
 	GetPlayGameTeamResultUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamResultUserRel, error)
 	CreatePlayGameTeamResultUserRel(ctx context.Context, pr *PlayGameTeamResultUserRel) (*PlayGameTeamResultUserRel, error)
 	GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamResultUserRel, error)
 }
 
 type PlayGameTeamGoalUserRelRepo interface {
+	GetPlayGameTeamGoalUserRelByPlayIdTotal(ctx context.Context, playId int64) (*PlayGameTeamGoalUserRelTotal, error)
 	GetPlayGameTeamGoalUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamGoalUserRel, error)
 	CreatePlayGameTeamGoalUserRel(ctx context.Context, pr *PlayGameTeamGoalUserRel) (*PlayGameTeamGoalUserRel, error)
 	GetPlayGameTeamGoalUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamGoalUserRel, error)
 }
 
 type PlayGameTeamSortUserRelRepo interface {
+	GetPlayGameTeamSortUserRelByPlayIdTotal(ctx context.Context, playId int64) (*PlayGameTeamSortUserRelTotal, error)
 	GetPlayGameTeamSortUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamSortUserRel, error)
 	CreatePlayGameTeamSortUserRel(ctx context.Context, pr *PlayGameTeamSortUserRel) (*PlayGameTeamSortUserRel, error)
 	GetPlayGameTeamScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamSortUserRel, error)
 }
 
 type PlayGameScoreUserRelRepo interface {
+	GetPlayGameScoreUserRelByPlayIdTotal(ctx context.Context, playId int64) (*PlayGameScoreUserRelTotal, error)
 	CreatePlayGameScoreUserRel(ctx context.Context, pr *PlayGameScoreUserRel) (*PlayGameScoreUserRel, error)
 	GetPlayGameScoreUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameScoreUserRel, error)
 	GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameScoreUserRel, error)
@@ -1121,4 +1141,51 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 	}
 
 	return &v1.CreatePlayGameGoalReply{PlayId: playGameTeamGoalUserRel.PlayId}, nil
+}
+
+func (p *PlayUseCase) PlayAmountTotal(ctx context.Context, req *v1.PlayAmountTotalRequest) (*v1.PlayAmountTotalReply, error) {
+
+	var (
+		play                           *Play
+		playGameTeamGoalUserRelTotal   *PlayGameTeamGoalUserRelTotal
+		playGameScoreUserRelTotal      *PlayGameScoreUserRelTotal
+		playGameTeamSortUserRelTotal   *PlayGameTeamSortUserRelTotal
+		playGameTeamResultUserRelTotal *PlayGameTeamResultUserRelTotal
+		base                           int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		total                          int64
+		err                            error
+	)
+
+	play, err = p.playRepo.GetPlayById(ctx, req.PlayId)
+	if nil != err {
+		return nil, err
+	}
+
+	if "game_team_goal_all" == play.Type || "game_team_goal_up" == play.Type || "game_team_goal_down" == play.Type {
+		playGameTeamGoalUserRelTotal, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIdTotal(ctx, play.ID)
+		if nil != err {
+			return nil, err
+		}
+		total = playGameTeamGoalUserRelTotal.Total
+	} else if "game_score" == play.Type {
+		playGameScoreUserRelTotal, err = p.playGameScoreUserRelRepo.GetPlayGameScoreUserRelByPlayIdTotal(ctx, play.ID)
+		if nil != err {
+			return nil, err
+		}
+		total = playGameScoreUserRelTotal.Total
+	} else if "game_team_result" == play.Type {
+		playGameTeamResultUserRelTotal, err = p.playGameTeamResultUserRelRepo.GetPlayGameTeamResultUserRelByPlayIdTotal(ctx, play.ID)
+		if nil != err {
+			return nil, err
+		}
+		total = playGameTeamResultUserRelTotal.Total
+	} else if "team_sort_eight" == play.Type || "team_sort_three" == play.Type || "team_sort_sixteen" == play.Type {
+		playGameTeamSortUserRelTotal, err = p.playGameTeamSortUserRelRepo.GetPlayGameTeamSortUserRelByPlayIdTotal(ctx, play.ID)
+		if nil != err {
+			return nil, err
+		}
+		total = playGameTeamSortUserRelTotal.Total
+	}
+
+	return &v1.PlayAmountTotalReply{TotalAmount: total / base}, err
 }

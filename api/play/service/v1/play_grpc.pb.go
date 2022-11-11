@@ -28,6 +28,7 @@ type PlayClient interface {
 	CreatePlaySort(ctx context.Context, in *CreatePlaySortRequest, opts ...grpc.CallOption) (*CreatePlaySortReply, error)
 	CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...grpc.CallOption) (*CreatePlayGameReply, error)
 	RoomAccount(ctx context.Context, in *RoomAccountRequest, opts ...grpc.CallOption) (*RoomAccountReply, error)
+	PlayAmountTotal(ctx context.Context, in *PlayAmountTotalRequest, opts ...grpc.CallOption) (*PlayAmountTotalReply, error)
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomReply, error)
 	CreatePlayGameScore(ctx context.Context, in *CreatePlayGameScoreRequest, opts ...grpc.CallOption) (*CreatePlayGameScoreReply, error)
 	CreatePlayGameResult(ctx context.Context, in *CreatePlayGameResultRequest, opts ...grpc.CallOption) (*CreatePlayGameResultReply, error)
@@ -93,6 +94,15 @@ func (c *playClient) CreatePlayGame(ctx context.Context, in *CreatePlayGameReque
 func (c *playClient) RoomAccount(ctx context.Context, in *RoomAccountRequest, opts ...grpc.CallOption) (*RoomAccountReply, error) {
 	out := new(RoomAccountReply)
 	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/RoomAccount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playClient) PlayAmountTotal(ctx context.Context, in *PlayAmountTotalRequest, opts ...grpc.CallOption) (*PlayAmountTotalReply, error) {
+	out := new(PlayAmountTotalReply)
+	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/PlayAmountTotal", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -172,6 +182,7 @@ type PlayServer interface {
 	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
 	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
 	RoomAccount(context.Context, *RoomAccountRequest) (*RoomAccountReply, error)
+	PlayAmountTotal(context.Context, *PlayAmountTotalRequest) (*PlayAmountTotalReply, error)
 	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomReply, error)
 	CreatePlayGameScore(context.Context, *CreatePlayGameScoreRequest) (*CreatePlayGameScoreReply, error)
 	CreatePlayGameResult(context.Context, *CreatePlayGameResultRequest) (*CreatePlayGameResultReply, error)
@@ -203,6 +214,9 @@ func (UnimplementedPlayServer) CreatePlayGame(context.Context, *CreatePlayGameRe
 }
 func (UnimplementedPlayServer) RoomAccount(context.Context, *RoomAccountRequest) (*RoomAccountReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RoomAccount not implemented")
+}
+func (UnimplementedPlayServer) PlayAmountTotal(context.Context, *PlayAmountTotalRequest) (*PlayAmountTotalReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlayAmountTotal not implemented")
 }
 func (UnimplementedPlayServer) CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRoom not implemented")
@@ -342,6 +356,24 @@ func _Play_RoomAccount_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlayServer).RoomAccount(ctx, req.(*RoomAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Play_PlayAmountTotal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayAmountTotalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayServer).PlayAmountTotal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.play.service.v1.Play/PlayAmountTotal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayServer).PlayAmountTotal(ctx, req.(*PlayAmountTotalRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -502,6 +534,10 @@ var Play_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RoomAccount",
 			Handler:    _Play_RoomAccount_Handler,
+		},
+		{
+			MethodName: "PlayAmountTotal",
+			Handler:    _Play_PlayAmountTotal_Handler,
 		},
 		{
 			MethodName: "CreateRoom",

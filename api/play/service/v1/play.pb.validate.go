@@ -1460,6 +1460,214 @@ var _ interface {
 	ErrorName() string
 } = RoomAccountReplyValidationError{}
 
+// Validate checks the field values on PlayAmountTotalRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *PlayAmountTotalRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PlayAmountTotalRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// PlayAmountTotalRequestMultiError, or nil if none found.
+func (m *PlayAmountTotalRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PlayAmountTotalRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for PlayId
+
+	if len(errors) > 0 {
+		return PlayAmountTotalRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// PlayAmountTotalRequestMultiError is an error wrapping multiple validation
+// errors returned by PlayAmountTotalRequest.ValidateAll() if the designated
+// constraints aren't met.
+type PlayAmountTotalRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PlayAmountTotalRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PlayAmountTotalRequestMultiError) AllErrors() []error { return m }
+
+// PlayAmountTotalRequestValidationError is the validation error returned by
+// PlayAmountTotalRequest.Validate if the designated constraints aren't met.
+type PlayAmountTotalRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PlayAmountTotalRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PlayAmountTotalRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PlayAmountTotalRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PlayAmountTotalRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PlayAmountTotalRequestValidationError) ErrorName() string {
+	return "PlayAmountTotalRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PlayAmountTotalRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPlayAmountTotalRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PlayAmountTotalRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PlayAmountTotalRequestValidationError{}
+
+// Validate checks the field values on PlayAmountTotalReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *PlayAmountTotalReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PlayAmountTotalReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// PlayAmountTotalReplyMultiError, or nil if none found.
+func (m *PlayAmountTotalReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PlayAmountTotalReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for TotalAmount
+
+	if len(errors) > 0 {
+		return PlayAmountTotalReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// PlayAmountTotalReplyMultiError is an error wrapping multiple validation
+// errors returned by PlayAmountTotalReply.ValidateAll() if the designated
+// constraints aren't met.
+type PlayAmountTotalReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PlayAmountTotalReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PlayAmountTotalReplyMultiError) AllErrors() []error { return m }
+
+// PlayAmountTotalReplyValidationError is the validation error returned by
+// PlayAmountTotalReply.Validate if the designated constraints aren't met.
+type PlayAmountTotalReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PlayAmountTotalReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PlayAmountTotalReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PlayAmountTotalReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PlayAmountTotalReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PlayAmountTotalReplyValidationError) ErrorName() string {
+	return "PlayAmountTotalReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e PlayAmountTotalReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPlayAmountTotalReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PlayAmountTotalReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PlayAmountTotalReplyValidationError{}
+
 // Validate checks the field values on CreateRoomRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.

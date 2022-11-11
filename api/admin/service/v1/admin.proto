@@ -89,6 +89,19 @@ service Admin {
 			body: "send_body"
 		};
 	};
+
+	rpc GetConfigList (GetConfigListRequest) returns (GetConfigListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/system_config_list"
+		};
+	};
+
+	rpc UpdateConfig (UpdateConfigRequest) returns (UpdateConfigReply) {
+		option (google.api.http) = {
+			post: "/api/goal_admin/update_system_config"
+			body: "send_body"
+		};
+	};
 }
 
 service User {
@@ -225,6 +238,19 @@ message SortPlayGrantRequest {
 
 message SortPlayGrantReply {
 	string result = 1;
+}
+
+message UpdateConfigRequest {
+	message SendBody{
+		int64 id = 1;
+		int64 value = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message UpdateConfigReply {
+	int64 id = 1;
 }
 
 message CreateGameRequest {
@@ -387,6 +413,18 @@ message GetRoomListReply {
 		int64 room_id = 1;
 		string account = 2;
 		string CreatedAt = 3;
+	}
+}
+
+message GetConfigListRequest {
+}
+
+message GetConfigListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 id = 3;
+		string name = 1;
+		int64 value = 2;
 	}
 }
 

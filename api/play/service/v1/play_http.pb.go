@@ -29,6 +29,7 @@ const OperationPlayCreatePlaySort = "/api.play.service.v1.Play/CreatePlaySort"
 const OperationPlayCreateRoom = "/api.play.service.v1.Play/CreateRoom"
 const OperationPlayGameUserList = "/api.play.service.v1.Play/GameUserList"
 const OperationPlayGetUserPlayList = "/api.play.service.v1.Play/GetUserPlayList"
+const OperationPlayPlayAmountTotal = "/api.play.service.v1.Play/PlayAmountTotal"
 const OperationPlayRoomAccount = "/api.play.service.v1.Play/RoomAccount"
 const OperationPlayRoomInfo = "/api.play.service.v1.Play/RoomInfo"
 const OperationPlayRoomPlayList = "/api.play.service.v1.Play/RoomPlayList"
@@ -44,6 +45,7 @@ type PlayHTTPServer interface {
 	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomReply, error)
 	GameUserList(context.Context, *GameUserListRequest) (*GameUserListReply, error)
 	GetUserPlayList(context.Context, *GetUserPlayListRequest) (*GetUserPlayListReply, error)
+	PlayAmountTotal(context.Context, *PlayAmountTotalRequest) (*PlayAmountTotalReply, error)
 	RoomAccount(context.Context, *RoomAccountRequest) (*RoomAccountReply, error)
 	RoomInfo(context.Context, *RoomInfoRequest) (*RoomInfoReply, error)
 	RoomPlayList(context.Context, *RoomPlayListRequest) (*RoomPlayListReply, error)
@@ -57,6 +59,7 @@ func RegisterPlayHTTPServer(s *http.Server, srv PlayHTTPServer) {
 	r.POST("/api/play/sort", _Play_CreatePlaySort0_HTTP_Handler(srv))
 	r.POST("/api/play/game", _Play_CreatePlayGame0_HTTP_Handler(srv))
 	r.POST("/api/room/account", _Play_RoomAccount0_HTTP_Handler(srv))
+	r.GET("/api/play_amount_total", _Play_PlayAmountTotal0_HTTP_Handler(srv))
 	r.POST("/api/room", _Play_CreateRoom0_HTTP_Handler(srv))
 	r.POST("/api/play/game_score", _Play_CreatePlayGameScore0_HTTP_Handler(srv))
 	r.POST("/api/play/game_result", _Play_CreatePlayGameResult0_HTTP_Handler(srv))
@@ -194,6 +197,25 @@ func _Play_RoomAccount0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Context) 
 			return err
 		}
 		reply := out.(*RoomAccountReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Play_PlayAmountTotal0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PlayAmountTotalRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlayPlayAmountTotal)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PlayAmountTotal(ctx, req.(*PlayAmountTotalRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PlayAmountTotalReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -360,6 +382,7 @@ type PlayHTTPClient interface {
 	CreateRoom(ctx context.Context, req *CreateRoomRequest, opts ...http.CallOption) (rsp *CreateRoomReply, err error)
 	GameUserList(ctx context.Context, req *GameUserListRequest, opts ...http.CallOption) (rsp *GameUserListReply, err error)
 	GetUserPlayList(ctx context.Context, req *GetUserPlayListRequest, opts ...http.CallOption) (rsp *GetUserPlayListReply, err error)
+	PlayAmountTotal(ctx context.Context, req *PlayAmountTotalRequest, opts ...http.CallOption) (rsp *PlayAmountTotalReply, err error)
 	RoomAccount(ctx context.Context, req *RoomAccountRequest, opts ...http.CallOption) (rsp *RoomAccountReply, err error)
 	RoomInfo(ctx context.Context, req *RoomInfoRequest, opts ...http.CallOption) (rsp *RoomInfoReply, err error)
 	RoomPlayList(ctx context.Context, req *RoomPlayListRequest, opts ...http.CallOption) (rsp *RoomPlayListReply, err error)
@@ -495,6 +518,19 @@ func (c *PlayHTTPClientImpl) GetUserPlayList(ctx context.Context, in *GetUserPla
 	pattern := "/api/play/user/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayGetUserPlayList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *PlayHTTPClientImpl) PlayAmountTotal(ctx context.Context, in *PlayAmountTotalRequest, opts ...http.CallOption) (*PlayAmountTotalReply, error) {
+	var out PlayAmountTotalReply
+	pattern := "/api/play_amount_total"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlayPlayAmountTotal))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

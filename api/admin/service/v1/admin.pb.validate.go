@@ -505,6 +505,241 @@ var _ interface {
 	ErrorName() string
 } = SortPlayGrantReplyValidationError{}
 
+// Validate checks the field values on UpdateConfigRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateConfigRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateConfigRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateConfigRequestMultiError, or nil if none found.
+func (m *UpdateConfigRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateConfigRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateConfigRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateConfigRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateConfigRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UpdateConfigRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateConfigRequestMultiError is an error wrapping multiple validation
+// errors returned by UpdateConfigRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateConfigRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateConfigRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateConfigRequestMultiError) AllErrors() []error { return m }
+
+// UpdateConfigRequestValidationError is the validation error returned by
+// UpdateConfigRequest.Validate if the designated constraints aren't met.
+type UpdateConfigRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateConfigRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateConfigRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateConfigRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateConfigRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateConfigRequestValidationError) ErrorName() string {
+	return "UpdateConfigRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateConfigRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateConfigRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateConfigRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateConfigRequestValidationError{}
+
+// Validate checks the field values on UpdateConfigReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *UpdateConfigReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateConfigReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateConfigReplyMultiError, or nil if none found.
+func (m *UpdateConfigReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateConfigReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return UpdateConfigReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateConfigReplyMultiError is an error wrapping multiple validation errors
+// returned by UpdateConfigReply.ValidateAll() if the designated constraints
+// aren't met.
+type UpdateConfigReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateConfigReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateConfigReplyMultiError) AllErrors() []error { return m }
+
+// UpdateConfigReplyValidationError is the validation error returned by
+// UpdateConfigReply.Validate if the designated constraints aren't met.
+type UpdateConfigReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateConfigReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateConfigReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateConfigReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateConfigReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateConfigReplyValidationError) ErrorName() string {
+	return "UpdateConfigReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateConfigReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateConfigReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateConfigReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateConfigReplyValidationError{}
+
 // Validate checks the field values on CreateGameRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -3041,6 +3276,244 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetRoomListReplyValidationError{}
+
+// Validate checks the field values on GetConfigListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetConfigListRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetConfigListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetConfigListRequestMultiError, or nil if none found.
+func (m *GetConfigListRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetConfigListRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetConfigListRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetConfigListRequestMultiError is an error wrapping multiple validation
+// errors returned by GetConfigListRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetConfigListRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetConfigListRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetConfigListRequestMultiError) AllErrors() []error { return m }
+
+// GetConfigListRequestValidationError is the validation error returned by
+// GetConfigListRequest.Validate if the designated constraints aren't met.
+type GetConfigListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetConfigListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetConfigListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetConfigListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetConfigListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetConfigListRequestValidationError) ErrorName() string {
+	return "GetConfigListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetConfigListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetConfigListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetConfigListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetConfigListRequestValidationError{}
+
+// Validate checks the field values on GetConfigListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetConfigListReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetConfigListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetConfigListReplyMultiError, or nil if none found.
+func (m *GetConfigListReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetConfigListReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetConfigListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetConfigListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetConfigListReplyValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetConfigListReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetConfigListReplyMultiError is an error wrapping multiple validation errors
+// returned by GetConfigListReply.ValidateAll() if the designated constraints
+// aren't met.
+type GetConfigListReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetConfigListReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetConfigListReplyMultiError) AllErrors() []error { return m }
+
+// GetConfigListReplyValidationError is the validation error returned by
+// GetConfigListReply.Validate if the designated constraints aren't met.
+type GetConfigListReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetConfigListReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetConfigListReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetConfigListReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetConfigListReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetConfigListReplyValidationError) ErrorName() string {
+	return "GetConfigListReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetConfigListReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetConfigListReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetConfigListReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetConfigListReplyValidationError{}
 
 // Validate checks the field values on GetUserListRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -7269,6 +7742,113 @@ var _ interface {
 	ErrorName() string
 } = SortPlayGrantRequest_SendBodyValidationError{}
 
+// Validate checks the field values on UpdateConfigRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateConfigRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateConfigRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateConfigRequest_SendBodyMultiError, or nil if none found.
+func (m *UpdateConfigRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateConfigRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Value
+
+	if len(errors) > 0 {
+		return UpdateConfigRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateConfigRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by UpdateConfigRequest_SendBody.ValidateAll() if
+// the designated constraints aren't met.
+type UpdateConfigRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateConfigRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateConfigRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// UpdateConfigRequest_SendBodyValidationError is the validation error returned
+// by UpdateConfigRequest_SendBody.Validate if the designated constraints
+// aren't met.
+type UpdateConfigRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateConfigRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateConfigRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateConfigRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateConfigRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateConfigRequest_SendBodyValidationError) ErrorName() string {
+	return "UpdateConfigRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateConfigRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateConfigRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateConfigRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateConfigRequest_SendBodyValidationError{}
+
 // Validate checks the field values on CreateGameRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -8173,6 +8753,114 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetRoomListReply_ItemValidationError{}
+
+// Validate checks the field values on GetConfigListReply_Item with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetConfigListReply_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetConfigListReply_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetConfigListReply_ItemMultiError, or nil if none found.
+func (m *GetConfigListReply_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetConfigListReply_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Name
+
+	// no validation rules for Value
+
+	if len(errors) > 0 {
+		return GetConfigListReply_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetConfigListReply_ItemMultiError is an error wrapping multiple validation
+// errors returned by GetConfigListReply_Item.ValidateAll() if the designated
+// constraints aren't met.
+type GetConfigListReply_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetConfigListReply_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetConfigListReply_ItemMultiError) AllErrors() []error { return m }
+
+// GetConfigListReply_ItemValidationError is the validation error returned by
+// GetConfigListReply_Item.Validate if the designated constraints aren't met.
+type GetConfigListReply_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetConfigListReply_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetConfigListReply_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetConfigListReply_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetConfigListReply_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetConfigListReply_ItemValidationError) ErrorName() string {
+	return "GetConfigListReply_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetConfigListReply_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetConfigListReply_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetConfigListReply_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetConfigListReply_ItemValidationError{}
 
 // Validate checks the field values on GetUserListReply_Item with the rules
 // defined in the proto definition for this message. If any rules are

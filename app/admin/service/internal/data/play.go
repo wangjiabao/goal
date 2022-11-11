@@ -27,6 +27,14 @@ type PlayGameRel struct {
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
 
+type SystemConfig struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	Name      string    `gorm:"type:varchar(100);not null"`
+	Value     int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type PlayRoomRel struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	PlayId    int64     `gorm:"type:int;not null"`
@@ -95,6 +103,11 @@ type PlayRepo struct {
 	log  *log.Helper
 }
 
+type SystemConfigRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
 type PlayGameRelRepo struct {
 	data *Data
 	log  *log.Helper
@@ -132,6 +145,13 @@ type PlayGameTeamSortUserRelRepo struct {
 
 func NewPlayRepo(data *Data, logger log.Logger) biz.PlayRepo {
 	return &PlayRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewSystemConfigRepo(data *Data, logger log.Logger) biz.SystemConfigRepo {
+	return &SystemConfigRepo{
 		data: data,
 		log:  log.NewHelper(logger),
 	}
@@ -250,6 +270,23 @@ func (p *PlayRepo) GetPlayListByIds(ctx context.Context, ids ...int64) ([]*biz.P
 			Type:      v.Type,
 			StartTime: v.StartTime,
 			EndTime:   v.EndTime,
+		})
+	}
+
+	return pl, nil
+}
+func (s *SystemConfigRepo) GetSystemConfigList(ctx context.Context) ([]*biz.SystemConfig, error) {
+	var l []*SystemConfig
+	if err := s.data.DB(ctx).Table("system_config").Find(&l).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "查询玩法列表失败")
+	}
+
+	pl := make([]*biz.SystemConfig, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.SystemConfig{
+			ID:    v.ID,
+			Name:  v.Name,
+			Value: v.Value,
 		})
 	}
 
@@ -617,4 +654,14 @@ func (psr *PlaySortRelRepo) CreatePlaySortRel(ctx context.Context, rel *biz.Play
 		PlayId: playSortRel.PlayId,
 		SortId: playSortRel.SortId,
 	}, nil
+}
+
+// UpdateConfig .
+func (s *SystemConfigRepo) UpdateConfig(ctx context.Context, id int64, value int64) (bool, error) {
+	res := s.data.DB(ctx).Table("system_config").Where("id=?", id).Update("value", value)
+	if res.Error != nil {
+		return false, errors.New(500, "CREATE_PLAY_SORT_REL_ERROR", "修改系统配置失败")
+	}
+
+	return true, nil
 }

@@ -71,3 +71,13 @@ func (p *PlayService) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 func (p *PlayService) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlayGameGoalRequest) (*v1.CreatePlayGameGoalReply, error) {
 	return p.uc.CreatePlayGameGoal(ctx, req)
 }
+
+// GetConfigList .
+func (p *PlayService) GetConfigList(ctx context.Context, req *v1.GetConfigListRequest) (*v1.GetConfigListReply, error) {
+	return p.uc.GetConfigList(ctx)
+}
+
+// UpdateConfig .
+func (p *PlayService) UpdateConfig(ctx context.Context, req *v1.UpdateConfigRequest) (*v1.UpdateConfigReply, error) {
+	return p.uc.UpdateConfig(ctx, req)
+}

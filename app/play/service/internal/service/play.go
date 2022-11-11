@@ -92,3 +92,8 @@ func (p *PlayService) GameUserList(ctx context.Context, req *v1.GameUserListRequ
 	sortIds := []int64{1, 2, 3} // 简单点，提前入库的三个排名规则
 	return p.uc.GetAdminCreateGameAndSortPlayUserList(ctx, req.GameId, sortIds...)
 }
+
+// PlayAmountTotal .
+func (p *PlayService) PlayAmountTotal(ctx context.Context, req *v1.PlayAmountTotalRequest) (*v1.PlayAmountTotalReply, error) {
+	return p.uc.PlayAmountTotal(ctx, req)
+}

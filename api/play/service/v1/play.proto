@@ -49,6 +49,12 @@ service Play {
 		};
 	};
 
+	rpc PlayAmountTotal (PlayAmountTotalRequest) returns (PlayAmountTotalReply){
+		option (google.api.http) = {
+			get: "/api/play_amount_total"
+		};
+	};
+
 	rpc CreateRoom (CreateRoomRequest) returns (CreateRoomReply){
 		option (google.api.http) = {
 			post: "/api/room"
@@ -180,6 +186,15 @@ message RoomAccountReply {
 	int64 RoomId = 1;
 	string RoomType = 2;
 }
+
+message PlayAmountTotalRequest {
+	int64 play_id = 1;
+}
+
+message PlayAmountTotalReply {
+	int64 totalAmount = 3;
+}
+
 
 message CreateRoomRequest {
 	message SendBody{

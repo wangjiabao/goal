@@ -101,6 +101,12 @@ type UserProxy struct {
 	CreatedAt time.Time
 }
 
+type SystemConfig struct {
+	ID    int64
+	Name  string
+	Value int64
+}
+
 type Room struct {
 	ID        int64
 	Account   string
@@ -121,6 +127,11 @@ type UserInfo struct {
 
 type RoomRepo interface {
 	GetRoomList(ctx context.Context) ([]*Room, error)
+}
+
+type SystemConfigRepo interface {
+	GetSystemConfigList(ctx context.Context) ([]*SystemConfig, error)
+	UpdateConfig(ctx context.Context, id int64, value int64) (bool, error)
 }
 
 type PlayRepo interface {
@@ -190,6 +201,7 @@ type UserInfoRepo interface {
 
 type PlayUseCase struct {
 	uRepo                         UserRepo
+	systemConfigRepo              SystemConfigRepo
 	roomRepo                      RoomRepo
 	playRepo                      PlayRepo
 	gameRepo                      GameRepo
@@ -212,6 +224,7 @@ func NewPlayUseCase(
 	uRepo UserRepo,
 	repo PlayRepo,
 	roomRepo RoomRepo,
+	systemConfigRepo SystemConfigRepo,
 	playGameRelRepo PlayGameRelRepo,
 	playSortRelRepo PlaySortRelRepo,
 	playRoomRelRepo PlayRoomRelRepo,
@@ -229,6 +242,7 @@ func NewPlayUseCase(
 	return &PlayUseCase{
 		uRepo:                         uRepo,
 		roomRepo:                      roomRepo,
+		systemConfigRepo:              systemConfigRepo,
 		playRepo:                      repo,
 		gameRepo:                      gameRepo,
 		sortRepo:                      sortRepo,
@@ -1259,4 +1273,39 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		return nil, err
 	}
 	return &v1.CreatePlayGameGoalReply{PlayId: playGameTeamGoalUserRel.PlayId}, nil
+}
+
+func (p *PlayUseCase) GetConfigList(ctx context.Context) (*v1.GetConfigListReply, error) {
+	var (
+		systemConfig []*SystemConfig
+		err          error
+	)
+
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigList(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res := &v1.GetConfigListReply{
+		Items: make([]*v1.GetConfigListReply_Item, 0),
+	}
+	for _, v := range systemConfig {
+		res.Items = append(res.Items, &v1.GetConfigListReply_Item{
+			Id:    v.ID,
+			Name:  v.Name,
+			Value: v.Value,
+		})
+	}
+
+	return res, nil
+}
+
+func (p *PlayUseCase) UpdateConfig(ctx context.Context, req *v1.UpdateConfigRequest) (*v1.UpdateConfigReply, error) {
+	var (
+		err error
+	)
+	_, err = p.systemConfigRepo.UpdateConfig(ctx, req.SendBody.Id, req.SendBody.Value)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UpdateConfigReply{Id: req.SendBody.Id}, nil
 }

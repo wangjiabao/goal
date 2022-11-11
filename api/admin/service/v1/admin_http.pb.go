@@ -26,11 +26,13 @@ const OperationAdminCreatePlayGameScore = "/api.admin.service.v1.Admin/CreatePla
 const OperationAdminCreatePlayGameSort = "/api.admin.service.v1.Admin/CreatePlayGameSort"
 const OperationAdminCreatePlaySort = "/api.admin.service.v1.Admin/CreatePlaySort"
 const OperationAdminGamePlayGrant = "/api.admin.service.v1.Admin/GamePlayGrant"
+const OperationAdminGetConfigList = "/api.admin.service.v1.Admin/GetConfigList"
 const OperationAdminGetPlayList = "/api.admin.service.v1.Admin/GetPlayList"
 const OperationAdminGetPlayRelList = "/api.admin.service.v1.Admin/GetPlayRelList"
 const OperationAdminGetRoomList = "/api.admin.service.v1.Admin/GetRoomList"
 const OperationAdminGetRoomPlayList = "/api.admin.service.v1.Admin/GetRoomPlayList"
 const OperationAdminSortPlayGrant = "/api.admin.service.v1.Admin/SortPlayGrant"
+const OperationAdminUpdateConfig = "/api.admin.service.v1.Admin/UpdateConfig"
 
 type AdminHTTPServer interface {
 	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
@@ -40,11 +42,13 @@ type AdminHTTPServer interface {
 	CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error)
 	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
 	GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error)
+	GetConfigList(context.Context, *GetConfigListRequest) (*GetConfigListReply, error)
 	GetPlayList(context.Context, *GetPlayListRequest) (*GetPlayListReply, error)
 	GetPlayRelList(context.Context, *GetPlayRelListRequest) (*GetPlayRelListReply, error)
 	GetRoomList(context.Context, *GetRoomListRequest) (*GetRoomListReply, error)
 	GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error)
 	SortPlayGrant(context.Context, *SortPlayGrantRequest) (*SortPlayGrantReply, error)
+	UpdateConfig(context.Context, *UpdateConfigRequest) (*UpdateConfigReply, error)
 }
 
 func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
@@ -61,6 +65,8 @@ func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
 	r.POST("/api/goal_admin/play_game_result", _Admin_CreatePlayGameResult0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play_game_goal", _Admin_CreatePlayGameGoal0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play_game_sort", _Admin_CreatePlayGameSort0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/system_config_list", _Admin_GetConfigList0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/update_system_config_list", _Admin_UpdateConfig0_HTTP_Handler(srv))
 }
 
 func _Admin_GamePlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
@@ -324,6 +330,47 @@ func _Admin_CreatePlayGameSort0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.
 	}
 }
 
+func _Admin_GetConfigList0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetConfigListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminGetConfigList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetConfigList(ctx, req.(*GetConfigListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetConfigListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Admin_UpdateConfig0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateConfigRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminUpdateConfig)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateConfig(ctx, req.(*UpdateConfigRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateConfigReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AdminHTTPClient interface {
 	CreatePlayGame(ctx context.Context, req *CreatePlayGameRequest, opts ...http.CallOption) (rsp *CreatePlayGameReply, err error)
 	CreatePlayGameGoal(ctx context.Context, req *CreatePlayGameGoalRequest, opts ...http.CallOption) (rsp *CreatePlayGameGoalReply, err error)
@@ -332,11 +379,13 @@ type AdminHTTPClient interface {
 	CreatePlayGameSort(ctx context.Context, req *CreatePlayGameSortRequest, opts ...http.CallOption) (rsp *CreatePlayGameSortReply, err error)
 	CreatePlaySort(ctx context.Context, req *CreatePlaySortRequest, opts ...http.CallOption) (rsp *CreatePlaySortReply, err error)
 	GamePlayGrant(ctx context.Context, req *GamePlayGrantRequest, opts ...http.CallOption) (rsp *GamePlayGrantReply, err error)
+	GetConfigList(ctx context.Context, req *GetConfigListRequest, opts ...http.CallOption) (rsp *GetConfigListReply, err error)
 	GetPlayList(ctx context.Context, req *GetPlayListRequest, opts ...http.CallOption) (rsp *GetPlayListReply, err error)
 	GetPlayRelList(ctx context.Context, req *GetPlayRelListRequest, opts ...http.CallOption) (rsp *GetPlayRelListReply, err error)
 	GetRoomList(ctx context.Context, req *GetRoomListRequest, opts ...http.CallOption) (rsp *GetRoomListReply, err error)
 	GetRoomPlayList(ctx context.Context, req *GetRoomPlayListRequest, opts ...http.CallOption) (rsp *GetRoomPlayListReply, err error)
 	SortPlayGrant(ctx context.Context, req *SortPlayGrantRequest, opts ...http.CallOption) (rsp *SortPlayGrantReply, err error)
+	UpdateConfig(ctx context.Context, req *UpdateConfigRequest, opts ...http.CallOption) (rsp *UpdateConfigReply, err error)
 }
 
 type AdminHTTPClientImpl struct {
@@ -438,6 +487,19 @@ func (c *AdminHTTPClientImpl) GamePlayGrant(ctx context.Context, in *GamePlayGra
 	return &out, err
 }
 
+func (c *AdminHTTPClientImpl) GetConfigList(ctx context.Context, in *GetConfigListRequest, opts ...http.CallOption) (*GetConfigListReply, error) {
+	var out GetConfigListReply
+	pattern := "/api/goal_admin/system_config_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminGetConfigList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
 func (c *AdminHTTPClientImpl) GetPlayList(ctx context.Context, in *GetPlayListRequest, opts ...http.CallOption) (*GetPlayListReply, error) {
 	var out GetPlayListReply
 	pattern := "/api/goal_admin/game/{game_id}/play"
@@ -495,6 +557,19 @@ func (c *AdminHTTPClientImpl) SortPlayGrant(ctx context.Context, in *SortPlayGra
 	pattern := "/api/goal_admin/play/sort/grant"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAdminSortPlayGrant))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) UpdateConfig(ctx context.Context, in *UpdateConfigRequest, opts ...http.CallOption) (*UpdateConfigReply, error) {
+	var out UpdateConfigReply
+	pattern := "/api/goal_admin/update_system_config_list"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminUpdateConfig))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {

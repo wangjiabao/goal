@@ -34,6 +34,8 @@ type AdminClient interface {
 	CreatePlayGameResult(ctx context.Context, in *CreatePlayGameResultRequest, opts ...grpc.CallOption) (*CreatePlayGameResultReply, error)
 	CreatePlayGameGoal(ctx context.Context, in *CreatePlayGameGoalRequest, opts ...grpc.CallOption) (*CreatePlayGameGoalReply, error)
 	CreatePlayGameSort(ctx context.Context, in *CreatePlayGameSortRequest, opts ...grpc.CallOption) (*CreatePlayGameSortReply, error)
+	GetConfigList(ctx context.Context, in *GetConfigListRequest, opts ...grpc.CallOption) (*GetConfigListReply, error)
+	UpdateConfig(ctx context.Context, in *UpdateConfigRequest, opts ...grpc.CallOption) (*UpdateConfigReply, error)
 }
 
 type adminClient struct {
@@ -152,6 +154,24 @@ func (c *adminClient) CreatePlayGameSort(ctx context.Context, in *CreatePlayGame
 	return out, nil
 }
 
+func (c *adminClient) GetConfigList(ctx context.Context, in *GetConfigListRequest, opts ...grpc.CallOption) (*GetConfigListReply, error) {
+	out := new(GetConfigListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/GetConfigList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) UpdateConfig(ctx context.Context, in *UpdateConfigRequest, opts ...grpc.CallOption) (*UpdateConfigReply, error) {
+	out := new(UpdateConfigReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/UpdateConfig", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServer is the server API for Admin service.
 // All implementations must embed UnimplementedAdminServer
 // for forward compatibility
@@ -168,6 +188,8 @@ type AdminServer interface {
 	CreatePlayGameResult(context.Context, *CreatePlayGameResultRequest) (*CreatePlayGameResultReply, error)
 	CreatePlayGameGoal(context.Context, *CreatePlayGameGoalRequest) (*CreatePlayGameGoalReply, error)
 	CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error)
+	GetConfigList(context.Context, *GetConfigListRequest) (*GetConfigListReply, error)
+	UpdateConfig(context.Context, *UpdateConfigRequest) (*UpdateConfigReply, error)
 	mustEmbedUnimplementedAdminServer()
 }
 
@@ -210,6 +232,12 @@ func (UnimplementedAdminServer) CreatePlayGameGoal(context.Context, *CreatePlayG
 }
 func (UnimplementedAdminServer) CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePlayGameSort not implemented")
+}
+func (UnimplementedAdminServer) GetConfigList(context.Context, *GetConfigListRequest) (*GetConfigListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConfigList not implemented")
+}
+func (UnimplementedAdminServer) UpdateConfig(context.Context, *UpdateConfigRequest) (*UpdateConfigReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateConfig not implemented")
 }
 func (UnimplementedAdminServer) mustEmbedUnimplementedAdminServer() {}
 
@@ -440,6 +468,42 @@ func _Admin_CreatePlayGameSort_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Admin_GetConfigList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConfigListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetConfigList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/GetConfigList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetConfigList(ctx, req.(*GetConfigListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_UpdateConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).UpdateConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/UpdateConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).UpdateConfig(ctx, req.(*UpdateConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Admin_ServiceDesc is the grpc.ServiceDesc for Admin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -494,6 +558,14 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreatePlayGameSort",
 			Handler:    _Admin_CreatePlayGameSort_Handler,
+		},
+		{
+			MethodName: "GetConfigList",
+			Handler:    _Admin_GetConfigList_Handler,
+		},
+		{
+			MethodName: "UpdateConfig",
+			Handler:    _Admin_UpdateConfig_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
