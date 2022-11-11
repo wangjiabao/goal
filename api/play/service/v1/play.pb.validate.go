@@ -755,6 +755,244 @@ var _ interface {
 	ErrorName() string
 } = GameUserListReplyValidationError{}
 
+// Validate checks the field values on GetRoomUserListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetRoomUserListRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetRoomUserListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetRoomUserListRequestMultiError, or nil if none found.
+func (m *GetRoomUserListRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetRoomUserListRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetRoomUserListRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetRoomUserListRequestMultiError is an error wrapping multiple validation
+// errors returned by GetRoomUserListRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GetRoomUserListRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetRoomUserListRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetRoomUserListRequestMultiError) AllErrors() []error { return m }
+
+// GetRoomUserListRequestValidationError is the validation error returned by
+// GetRoomUserListRequest.Validate if the designated constraints aren't met.
+type GetRoomUserListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetRoomUserListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetRoomUserListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetRoomUserListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetRoomUserListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetRoomUserListRequestValidationError) ErrorName() string {
+	return "GetRoomUserListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetRoomUserListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetRoomUserListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetRoomUserListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetRoomUserListRequestValidationError{}
+
+// Validate checks the field values on GetRoomUserListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetRoomUserListReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetRoomUserListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetRoomUserListReplyMultiError, or nil if none found.
+func (m *GetRoomUserListReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetRoomUserListReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetRoomUserListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetRoomUserListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetRoomUserListReplyValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetRoomUserListReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetRoomUserListReplyMultiError is an error wrapping multiple validation
+// errors returned by GetRoomUserListReply.ValidateAll() if the designated
+// constraints aren't met.
+type GetRoomUserListReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetRoomUserListReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetRoomUserListReplyMultiError) AllErrors() []error { return m }
+
+// GetRoomUserListReplyValidationError is the validation error returned by
+// GetRoomUserListReply.Validate if the designated constraints aren't met.
+type GetRoomUserListReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetRoomUserListReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetRoomUserListReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetRoomUserListReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetRoomUserListReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetRoomUserListReplyValidationError) ErrorName() string {
+	return "GetRoomUserListReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetRoomUserListReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetRoomUserListReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetRoomUserListReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetRoomUserListReplyValidationError{}
+
 // Validate checks the field values on CreatePlaySortRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -3645,6 +3883,112 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GameUserListReply_ItemValidationError{}
+
+// Validate checks the field values on GetRoomUserListReply_Item with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetRoomUserListReply_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetRoomUserListReply_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetRoomUserListReply_ItemMultiError, or nil if none found.
+func (m *GetRoomUserListReply_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetRoomUserListReply_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Account
+
+	// no validation rules for CreatedAt
+
+	if len(errors) > 0 {
+		return GetRoomUserListReply_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetRoomUserListReply_ItemMultiError is an error wrapping multiple validation
+// errors returned by GetRoomUserListReply_Item.ValidateAll() if the
+// designated constraints aren't met.
+type GetRoomUserListReply_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetRoomUserListReply_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetRoomUserListReply_ItemMultiError) AllErrors() []error { return m }
+
+// GetRoomUserListReply_ItemValidationError is the validation error returned by
+// GetRoomUserListReply_Item.Validate if the designated constraints aren't met.
+type GetRoomUserListReply_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetRoomUserListReply_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetRoomUserListReply_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetRoomUserListReply_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetRoomUserListReply_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetRoomUserListReply_ItemValidationError) ErrorName() string {
+	return "GetRoomUserListReply_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetRoomUserListReply_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetRoomUserListReply_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetRoomUserListReply_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetRoomUserListReply_ItemValidationError{}
 
 // Validate checks the field values on CreatePlaySortRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are

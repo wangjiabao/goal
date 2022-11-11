@@ -63,6 +63,8 @@ func (s *SortRepo) GetGameSortList(ctx context.Context) ([]*biz.Sort, error) {
 		res = append(res, &biz.Sort{
 			ID:       item.ID,
 			SortName: item.SortName,
+			Content:  item.Content,
+			Status:   item.Status,
 			Type:     item.Type,
 			EndTime:  item.EndTime,
 		})

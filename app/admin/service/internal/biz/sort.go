@@ -51,6 +51,8 @@ func (s *SortUseCase) GetGameSortList(ctx context.Context) (*v1.GetGameSortListR
 		res.Sorts = append(res.Sorts, &v1.GetGameSortListReply_Sort{
 			SortId:   item.ID,
 			SortType: item.Type,
+			Content:  item.Content,
+			Status:   item.Status,
 			EndTime:  item.EndTime.Format("2006-01-02 15:04:05"),
 			SortName: item.SortName,
 		})

@@ -204,6 +204,8 @@ type PlayUseCase struct {
 	playRepo                      PlayRepo
 	playGameRelRepo               PlayGameRelRepo
 	playSortRelRepo               PlaySortRelRepo
+	roomUserRelRepo               RoomUserRelRepo
+	roomRepo                      RoomRepo
 	playRoomRelRepo               PlayRoomRelRepo
 	playGameScoreUserRelRepo      PlayGameScoreUserRelRepo
 	playGameTeamSortUserRelRepo   PlayGameTeamSortUserRelRepo
@@ -220,6 +222,8 @@ func NewPlayUseCase(repo PlayRepo,
 	systemConfigRepo SystemConfigRepo,
 	playSortRelRepo PlaySortRelRepo,
 	playRoomRelRepo PlayRoomRelRepo,
+	roomUserRelRepo RoomUserRelRepo,
+	roomRepo RoomRepo,
 	playGameScoreUserRelRepo PlayGameScoreUserRelRepo,
 	playGameTeamSortUserRelRepo PlayGameTeamSortUserRelRepo,
 	playGameTeamGoalUserRelRepo PlayGameTeamGoalUserRelRepo,
@@ -230,10 +234,12 @@ func NewPlayUseCase(repo PlayRepo,
 	logger log.Logger) *PlayUseCase {
 	return &PlayUseCase{
 		playRepo:                      repo,
+		roomRepo:                      roomRepo,
 		playGameRelRepo:               playGameRelRepo,
 		systemConfigRepo:              systemConfigRepo,
 		playSortRelRepo:               playSortRelRepo,
 		playRoomRelRepo:               playRoomRelRepo,
+		roomUserRelRepo:               roomUserRelRepo,
 		playGameScoreUserRelRepo:      playGameScoreUserRelRepo,
 		playGameTeamSortUserRelRepo:   playGameTeamSortUserRelRepo,
 		playGameTeamGoalUserRelRepo:   playGameTeamGoalUserRelRepo,
@@ -379,6 +385,42 @@ func (p *PlayUseCase) GetAdminCreateGameAndSortPlayUserList(ctx context.Context,
 		for _, v := range users {
 			rep.Items = append(rep.Items, &v1.GameUserListReply_Item{Address: v.Address})
 		}
+	}
+
+	return rep, nil
+}
+
+// GetRoomUserList .
+func (p *PlayUseCase) GetRoomUserList(ctx context.Context) (*v1.GetRoomUserListReply, error) {
+	var (
+		roomIds     []int64
+		room        []*Room
+		userId      int64
+		roomUserRel []*RoomUserRel
+		err         error
+	)
+
+	userId, _, err = getUserFromJwt(ctx) // 获取用户id
+	if nil != err {
+		return nil, err
+	}
+
+	roomUserRel, _ = p.roomUserRelRepo.GetRoomByUserId(ctx, userId)
+	for _, v := range roomUserRel {
+		roomIds = append(roomIds, v.RoomId)
+	}
+
+	room, _ = p.roomRepo.GetRoomByIds(ctx, roomIds...)
+
+	rep := &v1.GetRoomUserListReply{
+		Items: make([]*v1.GetRoomUserListReply_Item, 0),
+	}
+
+	for _, v := range room {
+		rep.Items = append(rep.Items, &v1.GetRoomUserListReply_Item{
+			Account:   v.Account,
+			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
 	}
 
 	return rep, nil

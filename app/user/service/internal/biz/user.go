@@ -218,7 +218,8 @@ func (uc *UserUseCase) Deposit(ctx context.Context, u *User, req *v1.DepositRequ
 }
 
 func (uc *UserUseCase) Withdraw(ctx context.Context, u *User, req *v1.WithdrawRequest) (*v1.WithdrawReply, error) {
-	_, err := uc.ubRepo.Withdraw(ctx, u.ID, req.SendBody.Amount)
+	var base int64 = 100000 // 基础精度0.00001 todo 加配置文件
+	_, err := uc.ubRepo.Withdraw(ctx, u.ID, req.SendBody.Amount*base)
 	if err != nil {
 		return &v1.WithdrawReply{Result: "提交审核失败"}, err
 	}
@@ -229,6 +230,7 @@ func (uc *UserUseCase) Withdraw(ctx context.Context, u *User, req *v1.WithdrawRe
 func (uc *UserUseCase) WithdrawList(ctx context.Context, u *User, req *v1.GetUserWithdrawListRequest) (*v1.GetUserWithdrawListReply, error) {
 	var (
 		userWithDraw []*UserWithdraw
+		base         int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		err          error
 	)
 	userWithDraw, err = uc.ubRepo.WithdrawList(ctx, u.ID)
@@ -242,7 +244,7 @@ func (uc *UserUseCase) WithdrawList(ctx context.Context, u *User, req *v1.GetUse
 	for _, v := range userWithDraw {
 		res.Records = append(res.Records, &v1.GetUserWithdrawListReply_Record{
 			Status:    v.Status,
-			Amount:    v.Amount,
+			Amount:    v.Amount / base,
 			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
@@ -252,6 +254,7 @@ func (uc *UserUseCase) WithdrawList(ctx context.Context, u *User, req *v1.GetUse
 func (uc *UserUseCase) DepositList(ctx context.Context, u *User, req *v1.GetUserDepositListRequest) (*v1.GetUserDepositListReply, error) {
 	var (
 		userBalanceRecord []*UserBalanceRecord
+		base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		err               error
 	)
 
@@ -265,7 +268,7 @@ func (uc *UserUseCase) DepositList(ctx context.Context, u *User, req *v1.GetUser
 
 	for _, v := range userBalanceRecord {
 		res.Records = append(res.Records, &v1.GetUserDepositListReply_Record{
-			Amount:    v.Amount,
+			Amount:    v.Amount / base,
 			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
@@ -466,10 +469,10 @@ func (uc *UserUseCase) GetUserProxyConfigList(ctx context.Context) (*v1.GetUserP
 	)
 
 	config, _ = uc.systemConfigRepo.GetSystemConfigByNames(ctx,
-		"become_proxy_amount_first", "become_proxy_amount_first_rate",
-		"become_proxy_amount_second", "become_proxy_amount_second_rate",
-		"become_proxy_amount_third", "become_proxy_amount_third_rate",
-		"become_proxy_amount_fourth", "become_proxy_amount_fourth_rate",
+		"become_proxy_amount_first",
+		"become_proxy_amount_second",
+		"become_proxy_amount_third",
+		"become_proxy_amount_fourth",
 	)
 
 	res := &v1.GetUserProxyConfigListReply{

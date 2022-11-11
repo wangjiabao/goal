@@ -20,6 +20,7 @@ type Room struct {
 	ID           int64
 	CreateUserId int64
 	Account      string
+	CreatedAt    time.Time
 	Type         string
 }
 
@@ -33,6 +34,7 @@ type RoomRepo interface {
 	GetRoomByID(ctx context.Context, roomId int64) (*Room, error)
 	CreateRoom(ctx context.Context, rc *Room) (*Room, error)
 	GetUserByUseIds(ctx context.Context, userIds ...int64) (map[int64]*User, error)
+	GetRoomByIds(ctx context.Context, roomIds ...int64) ([]*Room, error)
 }
 
 type RoomUserRelRepo interface {
@@ -40,6 +42,7 @@ type RoomUserRelRepo interface {
 	GetRoomUserRelByRoomId(ctx context.Context, roomId int64) (map[int64]*RoomUserRel, error)
 	CreateRoomUserRel(ctx context.Context, userId int64, roomId int64) (*RoomUserRel, error)
 	GetRoomUsers(ctx context.Context, roomId int64) ([]*RoomUserRel, error)
+	GetRoomByUserId(ctx context.Context, userId int64) ([]*RoomUserRel, error)
 }
 
 type RoomUseCase struct {

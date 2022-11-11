@@ -101,6 +101,13 @@ service Play {
 			get: "/api/game/{game_id}/user_list"
 		};
 	};
+
+	rpc GetRoomUserList (GetRoomUserListRequest) returns (GetRoomUserListReply){
+		option (google.api.http) = {
+			get: "/api/room_user_list"
+		};
+	};
+
 }
 
 message AllowedPlayListRequest {
@@ -139,6 +146,17 @@ message GameUserListReply {
 	repeated Item items = 1;
 	message Item {
 		string Address = 1;
+	}
+}
+
+message GetRoomUserListRequest {
+}
+
+message GetRoomUserListReply {
+	repeated Item items = 1;
+	message Item {
+		string Account = 1;
+		string CreatedAt = 2;
 	}
 }
 

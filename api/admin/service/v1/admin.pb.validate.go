@@ -10010,6 +10010,10 @@ func (m *GetGameSortListReply_Sort) validate(all bool) error {
 
 	// no validation rules for SortType
 
+	// no validation rules for Content
+
+	// no validation rules for Status
+
 	// no validation rules for SortName
 
 	// no validation rules for EndTime

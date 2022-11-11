@@ -97,3 +97,7 @@ func (p *PlayService) GameUserList(ctx context.Context, req *v1.GameUserListRequ
 func (p *PlayService) PlayAmountTotal(ctx context.Context, req *v1.PlayAmountTotalRequest) (*v1.PlayAmountTotalReply, error) {
 	return p.uc.PlayAmountTotal(ctx, req)
 }
+
+func (p *PlayService) GetRoomUserList(ctx context.Context, req *v1.GetRoomUserListRequest) (*v1.GetRoomUserListReply, error) {
+	return p.uc.GetRoomUserList(ctx)
+}

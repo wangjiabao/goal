@@ -69,7 +69,7 @@ func (r *RoomUserRelRepo) GetRoomUserRel(ctx context.Context, userId int64, room
 
 func (r *RoomUserRelRepo) GetRoomUserRelByRoomId(ctx context.Context, roomId int64) (map[int64]*biz.RoomUserRel, error) {
 	var l []*RoomUserRel
-	if result := r.data.DB(ctx).Table("room_user_rel").Where(&PlayRoomRel{RoomId: roomId}).Find(&l); result.Error != nil {
+	if result := r.data.DB(ctx).Table("room_user_rel").Where(&RoomUserRel{RoomId: roomId}).Find(&l); result.Error != nil {
 		return nil, errors.InternalServer("ROOM_USER_REL_NOT_FOUND", "查询房间内用户关系失败")
 	}
 
@@ -86,7 +86,27 @@ func (r *RoomUserRelRepo) GetRoomUserRelByRoomId(ctx context.Context, roomId int
 
 func (r *RoomUserRelRepo) GetRoomUsers(ctx context.Context, roomId int64) ([]*biz.RoomUserRel, error) {
 	var l []*RoomUserRel
-	if result := r.data.DB(ctx).Table("room_user_rel").Where(&PlayRoomRel{RoomId: roomId}).Find(&l); result.Error != nil {
+	if result := r.data.DB(ctx).Table("room_user_rel").Where(&RoomUserRel{RoomId: roomId}).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("ROOM_USER_REL_NOT_FOUND", "查询房间内用户关系失败")
+	}
+
+	pl := make([]*biz.RoomUserRel, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.RoomUserRel{
+			ID:     v.ID,
+			UserId: v.UserId,
+			RoomId: v.RoomId,
+		})
+	}
+	return pl, nil
+}
+
+func (r *RoomUserRelRepo) GetRoomByUserId(ctx context.Context, userId int64) ([]*biz.RoomUserRel, error) {
+	var l []*RoomUserRel
+	if result := r.data.DB(ctx).Table("room_user_rel").
+		Where(&RoomUserRel{UserId: userId}).
+		Order("created_at desc").
+		Find(&l); result.Error != nil {
 		return nil, errors.InternalServer("ROOM_USER_REL_NOT_FOUND", "查询房间内用户关系失败")
 	}
 
@@ -113,6 +133,23 @@ func (r *RoomRepo) GetUserByUseIds(ctx context.Context, userIds ...int64) (map[i
 			ID:      v.ID,
 			Address: v.Address,
 		}
+	}
+	return pl, nil
+}
+
+func (r *RoomRepo) GetRoomByIds(ctx context.Context, roomIds ...int64) ([]*biz.Room, error) {
+	var l []*Room
+	if result := r.data.DB(ctx).Table("room").Where("id IN(?)", roomIds).Order("created_at desc").Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("ROOM_USER_REL_NOT_FOUND", "查询房间失败")
+	}
+
+	pl := make([]*biz.Room, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.Room{
+			ID:        v.ID,
+			Account:   v.Account,
+			CreatedAt: v.CreatedAt,
+		})
 	}
 	return pl, nil
 }

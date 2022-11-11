@@ -560,6 +560,8 @@ message GetGameSortListReply {
 	message Sort {
 		int64  sort_id = 1;
 		string sort_type = 2;
+		string content = 5;
+		string status = 6;
 		string sort_name = 3;
 		string end_time = 4;
 	}
