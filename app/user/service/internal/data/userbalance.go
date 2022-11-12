@@ -153,10 +153,10 @@ func (ub *UserBalanceRepo) Deposit(ctx context.Context, userId int64, amount int
 // TransferIntoProxy 在事务中使用
 func (ub *UserBalanceRepo) TransferIntoProxy(ctx context.Context, userId int64, amount int64) (*biz.UserBalance, error) {
 	var err error
-	if err = ub.data.DB(ctx).Table("user_balance").
+	if res := ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=? and balance>=?", userId, amount).
-		Updates(map[string]interface{}{"balance": gorm.Expr("balance - ?", amount)}).Error; nil != err {
-		return nil, errors.NotFound("user balance err", "user balance not found")
+		Updates(map[string]interface{}{"balance": gorm.Expr("balance - ?", amount)}); 0 == res.RowsAffected || nil != res.Error {
+		return nil, errors.NotFound("user balance err", "user balance error")
 	}
 
 	var userBalance UserBalance

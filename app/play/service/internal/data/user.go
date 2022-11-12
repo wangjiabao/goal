@@ -119,10 +119,10 @@ func (ub *UserBalanceRepo) GetUserBalance(ctx context.Context, userId int64) (*b
 // Pay 在事务中使用
 func (ub *UserBalanceRepo) Pay(ctx context.Context, userId int64, pay int64) error {
 	var err error
-	if err = ub.data.DB(ctx).Table("user_balance").
+	if res := ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=? and balance>=?", userId, pay).
-		Updates(map[string]interface{}{"balance": gorm.Expr("balance - ?", pay)}).Error; nil != err {
-		return errors.NotFound("user balance err", "user balance not found")
+		Updates(map[string]interface{}{"balance": gorm.Expr("balance - ?", pay)}); 0 == res.RowsAffected || nil != res.Error {
+		return errors.NotFound("user balance err", "user balance error")
 	}
 
 	var userBalance UserBalance
