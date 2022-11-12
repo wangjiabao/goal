@@ -105,9 +105,9 @@ service Admin {
 }
 
 service User {
-	rpc UserDeposit (UserDepositRequest) returns (UserDepositReply){
+	rpc UserWithdraw (UserWithdrawRequest) returns (UserWithdrawReply){
 		option (google.api.http) = {
-			post: "/api/goal_admin/user/deposit"
+			post: "/api/goal_admin/user/withdraw"
 			body: "send_body"
 		};
 	};
@@ -123,6 +123,13 @@ service User {
 			get: "/api/goal_admin/user_proxy_list"
 		};
 	};
+
+	rpc GetUserWithdrawList (GetUserWithdrawListRequest) returns (GetUserWithdrawListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/user_withdraw_list"
+		};
+	};
+
 
 	rpc GetUserRecommendList (GetUserRecommendListRequest) returns (GetUserRecommendListReply) {
 		option (google.api.http) = {
@@ -464,6 +471,23 @@ message GetUserListReply {
 	}
 }
 
+message GetUserWithdrawListRequest {
+	int64 page = 1;
+	string status = 2;
+}
+
+message GetUserWithdrawListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 ID = 1;
+		string tx = 6;
+		string address = 5;
+		string status = 2;
+		int64 amount = 3;
+		string createdAt = 4;
+	}
+}
+
 message GetUserProxyListRequest {
 	int64 user_id = 1;
 }
@@ -713,13 +737,14 @@ message GameIndexStatisticsReply {
 	}
 }
 
-message UserDepositRequest {
+message UserWithdrawRequest {
 	message SendBody{
+		int64 id = 1;
 	}
 
 	SendBody send_body = 1;
 }
 
-message UserDepositReply {
+message UserWithdrawReply {
 	string result = 1;
 }

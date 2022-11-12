@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
-	"goal/app/user/service/internal/biz"
+	"goal/user/internal/biz"
 	"gorm.io/gorm"
 	"strconv"
 	"time"
@@ -100,6 +100,56 @@ func (u *UserRepo) CreateUser(ctx context.Context, uc *biz.User) (*biz.User, err
 		Address:   user.Address,
 		ToAddress: user.ToAddress,
 	}, nil
+}
+
+func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error) {
+	if err := ub.data.DB(ctx).Where("address=?", address).
+		Table("address_eth_balance").
+		Update("balance", balance).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, errors.NotFound("ADDRESS_ETH_BALANCE_NOT_FOUND", "地址余额不存在")
+		}
+
+		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", err.Error())
+	}
+
+	return true, nil
+}
+
+func (ub *UserBalanceRepo) GetAddressEthBalanceByAddress(ctx context.Context, address string) (*biz.AddressEthBalance, error) {
+	var addressEthBalance AddressEthBalance
+	if err := ub.data.DB(ctx).Where("address=?", address).Table("address_eth_balance").First(&addressEthBalance).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("ADDRESS_ETH_BALANCE_NOT_FOUND", "地址余额记录不存在")
+		}
+
+		return nil, errors.New(500, "ADDRESS_ETH_BALANCE_NOT_FOUND", err.Error())
+	}
+
+	return &biz.AddressEthBalance{
+		ID:      addressEthBalance.ID,
+		Balance: addressEthBalance.Balance,
+		Address: addressEthBalance.Address,
+	}, nil
+}
+
+func (u *UserRepo) GetUserList(ctx context.Context) ([]*biz.User, error) {
+	var user []*User
+	if err := u.data.DB(ctx).Table("user").Find(&user).Error; err != nil {
+		return nil, errors.NotFound("USER_NOT_FOUND", "用户不存在")
+	}
+
+	res := make([]*biz.User, 0)
+	for _, item := range user {
+		res = append(res, &biz.User{
+			ID:                  item.ID,
+			Address:             item.Address,
+			ToAddress:           item.ToAddress,
+			ToAddressPrivateKey: item.ToAddressPrivateKey,
+		})
+	}
+
+	return res, nil
 }
 
 // GetUserByAddress .

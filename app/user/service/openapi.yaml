@@ -1,0 +1,471 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: User API
+    version: 0.0.1
+paths:
+    /api/deposit/list:
+        get:
+            tags:
+                - User
+            operationId: User_GetUserDepositList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserDepositListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user:
+        get:
+            tags:
+                - User
+            operationId: User_GetUser
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user/balance/deposit:
+        post:
+            tags:
+                - User
+            operationId: User_Deposit
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DepositRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DepositReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user/balance/withdraw:
+        post:
+            tags:
+                - User
+            operationId: User_Withdraw
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/WithdrawRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/WithdrawReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user/eth_authorize:
+        post:
+            tags:
+                - User
+            operationId: User_EthAuthorize
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/EthAuthorizeRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/EthAuthorizeReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user/proxy/create:
+        post:
+            tags:
+                - User
+            operationId: User_CreateProxy
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateProxyRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateProxyReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user/proxy/down/create:
+        post:
+            tags:
+                - User
+            operationId: User_CreateDownProxy
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateDownProxyRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateDownProxyReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user_deposit:
+        post:
+            tags:
+                - User
+            operationId: User_UserDeposit
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserDepositRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserDepositReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user_proxy/config_list:
+        get:
+            tags:
+                - User
+            operationId: User_GetUserProxyConfigList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserProxyConfigListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user_proxy/list:
+        get:
+            tags:
+                - User
+            operationId: User_GetUserProxyList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserProxyListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/user_recommend/list:
+        get:
+            tags:
+                - User
+            operationId: User_GetUserRecommendList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserRecommendListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/withdraw/list:
+        get:
+            tags:
+                - User
+            operationId: User_GetUserWithdrawList
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserWithdrawListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        CreateDownProxyReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        CreateDownProxyRequest_SendBody:
+            type: object
+            properties:
+                address:
+                    type: string
+                rate:
+                    type: integer
+                    format: int64
+        CreateProxyReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        CreateProxyRequest_SendBody:
+            type: object
+            properties:
+                amount:
+                    type: integer
+                    format: int64
+                name:
+                    type: string
+        DepositReply:
+            type: object
+            properties:
+                balance:
+                    type: integer
+                    format: int64
+        DepositRequest_SendBody:
+            type: object
+            properties:
+                amount:
+                    type: integer
+                    format: int64
+        EthAuthorizeReply:
+            type: object
+            properties:
+                token:
+                    type: string
+        EthAuthorizeRequest_SendBody:
+            type: object
+            properties:
+                address:
+                    type: string
+                code:
+                    type: string
+        GetUserDepositListReply:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetUserDepositListReply_Record'
+        GetUserDepositListReply_Record:
+            type: object
+            properties:
+                amount:
+                    type: integer
+                    format: int64
+                createdAt:
+                    type: string
+        GetUserProxyConfigListReply:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetUserProxyConfigListReply_Record'
+        GetUserProxyConfigListReply_Record:
+            type: object
+            properties:
+                name:
+                    type: string
+                value:
+                    type: integer
+                    format: int64
+        GetUserProxyListReply:
+            type: object
+            properties:
+                rate:
+                    type: integer
+                    format: int64
+                rewardCount:
+                    type: integer
+                    format: int64
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetUserProxyListReply_Record'
+        GetUserProxyListReply_Record:
+            type: object
+            properties:
+                amount:
+                    type: integer
+                    format: int64
+                createdAt:
+                    type: string
+        GetUserRecommendListReply:
+            type: object
+            properties:
+                userCount:
+                    type: integer
+                    format: int64
+                rewardCount:
+                    type: integer
+                    format: int64
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetUserRecommendListReply_Record'
+                userInfos:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetUserRecommendListReply_UserInfo'
+        GetUserRecommendListReply_Record:
+            type: object
+            properties:
+                amount:
+                    type: integer
+                    format: int64
+                createdAt:
+                    type: string
+        GetUserRecommendListReply_UserInfo:
+            type: object
+            properties:
+                name:
+                    type: string
+                address:
+                    type: string
+        GetUserReply:
+            type: object
+            properties:
+                address:
+                    type: string
+                balance:
+                    type: integer
+                    format: int64
+                avatar:
+                    type: string
+                myRecommendCode:
+                    type: string
+                toAddress:
+                    type: string
+        GetUserWithdrawListReply:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetUserWithdrawListReply_Record'
+        GetUserWithdrawListReply_Record:
+            type: object
+            properties:
+                amount:
+                    type: integer
+                    format: int64
+                status:
+                    type: string
+                createdAt:
+                    type: string
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+        UserDepositReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        UserDepositRequest_SendBody:
+            type: object
+            properties: {}
+        WithdrawReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        WithdrawRequest_SendBody:
+            type: object
+            properties:
+                amount:
+                    type: integer
+                    format: int64
+tags:
+    - name: User

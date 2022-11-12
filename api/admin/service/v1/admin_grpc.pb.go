@@ -576,9 +576,10 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {
-	UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...grpc.CallOption) (*UserDepositReply, error)
+	UserWithdraw(ctx context.Context, in *UserWithdrawRequest, opts ...grpc.CallOption) (*UserWithdrawReply, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListReply, error)
 	GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error)
+	GetUserWithdrawList(ctx context.Context, in *GetUserWithdrawListRequest, opts ...grpc.CallOption) (*GetUserWithdrawListReply, error)
 	GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...grpc.CallOption) (*GetUserRecommendListReply, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error)
 	GetUserBalanceRecord(ctx context.Context, in *GetUserBalanceRecordRequest, opts ...grpc.CallOption) (*GetUserBalanceRecordReply, error)
@@ -592,9 +593,9 @@ func NewUserClient(cc grpc.ClientConnInterface) UserClient {
 	return &userClient{cc}
 }
 
-func (c *userClient) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...grpc.CallOption) (*UserDepositReply, error) {
-	out := new(UserDepositReply)
-	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/UserDeposit", in, out, opts...)
+func (c *userClient) UserWithdraw(ctx context.Context, in *UserWithdrawRequest, opts ...grpc.CallOption) (*UserWithdrawReply, error) {
+	out := new(UserWithdrawReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/UserWithdraw", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -613,6 +614,15 @@ func (c *userClient) GetUserList(ctx context.Context, in *GetUserListRequest, op
 func (c *userClient) GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error) {
 	out := new(GetUserProxyListReply)
 	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/GetUserProxyList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) GetUserWithdrawList(ctx context.Context, in *GetUserWithdrawListRequest, opts ...grpc.CallOption) (*GetUserWithdrawListReply, error) {
+	out := new(GetUserWithdrawListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/GetUserWithdrawList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -650,9 +660,10 @@ func (c *userClient) GetUserBalanceRecord(ctx context.Context, in *GetUserBalanc
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
 type UserServer interface {
-	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
+	UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error)
 	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
+	GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error)
 	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	GetUserBalanceRecord(context.Context, *GetUserBalanceRecordRequest) (*GetUserBalanceRecordReply, error)
@@ -663,14 +674,17 @@ type UserServer interface {
 type UnimplementedUserServer struct {
 }
 
-func (UnimplementedUserServer) UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UserDeposit not implemented")
+func (UnimplementedUserServer) UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserWithdraw not implemented")
 }
 func (UnimplementedUserServer) GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserList not implemented")
 }
 func (UnimplementedUserServer) GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProxyList not implemented")
+}
+func (UnimplementedUserServer) GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserWithdrawList not implemented")
 }
 func (UnimplementedUserServer) GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserRecommendList not implemented")
@@ -694,20 +708,20 @@ func RegisterUserServer(s grpc.ServiceRegistrar, srv UserServer) {
 	s.RegisterService(&User_ServiceDesc, srv)
 }
 
-func _User_UserDeposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserDepositRequest)
+func _User_UserWithdraw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserWithdrawRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServer).UserDeposit(ctx, in)
+		return srv.(UserServer).UserWithdraw(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.admin.service.v1.User/UserDeposit",
+		FullMethod: "/api.admin.service.v1.User/UserWithdraw",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).UserDeposit(ctx, req.(*UserDepositRequest))
+		return srv.(UserServer).UserWithdraw(ctx, req.(*UserWithdrawRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -744,6 +758,24 @@ func _User_GetUserProxyList_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServer).GetUserProxyList(ctx, req.(*GetUserProxyListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_GetUserWithdrawList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserWithdrawListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).GetUserWithdrawList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/GetUserWithdrawList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).GetUserWithdrawList(ctx, req.(*GetUserWithdrawListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -810,8 +842,8 @@ var User_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "UserDeposit",
-			Handler:    _User_UserDeposit_Handler,
+			MethodName: "UserWithdraw",
+			Handler:    _User_UserWithdraw_Handler,
 		},
 		{
 			MethodName: "GetUserList",
@@ -820,6 +852,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserProxyList",
 			Handler:    _User_GetUserProxyList_Handler,
+		},
+		{
+			MethodName: "GetUserWithdrawList",
+			Handler:    _User_GetUserWithdrawList_Handler,
 		},
 		{
 			MethodName: "GetUserRecommendList",

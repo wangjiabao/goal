@@ -29,6 +29,7 @@ const OperationUserGetUserProxyConfigList = "/api.user.service.v1.User/GetUserPr
 const OperationUserGetUserProxyList = "/api.user.service.v1.User/GetUserProxyList"
 const OperationUserGetUserRecommendList = "/api.user.service.v1.User/GetUserRecommendList"
 const OperationUserGetUserWithdrawList = "/api.user.service.v1.User/GetUserWithdrawList"
+const OperationUserUserDeposit = "/api.user.service.v1.User/UserDeposit"
 const OperationUserWithdraw = "/api.user.service.v1.User/Withdraw"
 
 type UserHTTPServer interface {
@@ -42,6 +43,7 @@ type UserHTTPServer interface {
 	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
 	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
 	GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error)
+	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 }
 
@@ -58,6 +60,7 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r.POST("/api/user/proxy/down/create", _User_CreateDownProxy0_HTTP_Handler(srv))
 	r.GET("/api/user_proxy/list", _User_GetUserProxyList0_HTTP_Handler(srv))
 	r.GET("/api/user_proxy/config_list", _User_GetUserProxyConfigList0_HTTP_Handler(srv))
+	r.POST("/api/user_deposit", _User_UserDeposit0_HTTP_Handler(srv))
 }
 
 func _User_EthAuthorize0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -284,6 +287,28 @@ func _User_GetUserProxyConfigList0_HTTP_Handler(srv UserHTTPServer) func(ctx htt
 	}
 }
 
+func _User_UserDeposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UserDepositRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserUserDeposit)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UserDeposit(ctx, req.(*UserDepositRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UserDepositReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserHTTPClient interface {
 	CreateDownProxy(ctx context.Context, req *CreateDownProxyRequest, opts ...http.CallOption) (rsp *CreateDownProxyReply, err error)
 	CreateProxy(ctx context.Context, req *CreateProxyRequest, opts ...http.CallOption) (rsp *CreateProxyReply, err error)
@@ -295,6 +320,7 @@ type UserHTTPClient interface {
 	GetUserProxyList(ctx context.Context, req *GetUserProxyListRequest, opts ...http.CallOption) (rsp *GetUserProxyListReply, err error)
 	GetUserRecommendList(ctx context.Context, req *GetUserRecommendListRequest, opts ...http.CallOption) (rsp *GetUserRecommendListReply, err error)
 	GetUserWithdrawList(ctx context.Context, req *GetUserWithdrawListRequest, opts ...http.CallOption) (rsp *GetUserWithdrawListReply, err error)
+	UserDeposit(ctx context.Context, req *UserDepositRequest, opts ...http.CallOption) (rsp *UserDepositReply, err error)
 	Withdraw(ctx context.Context, req *WithdrawRequest, opts ...http.CallOption) (rsp *WithdrawReply, err error)
 }
 
@@ -430,6 +456,19 @@ func (c *UserHTTPClientImpl) GetUserWithdrawList(ctx context.Context, in *GetUse
 	opts = append(opts, http.Operation(OperationUserGetUserWithdrawList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...http.CallOption) (*UserDepositReply, error) {
+	var out UserDepositReply
+	pattern := "/api/user_deposit"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserUserDeposit))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

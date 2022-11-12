@@ -2,14 +2,17 @@ package service
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	jwt2 "github.com/golang-jwt/jwt/v4"
-	v1 "goal/api/user/service/v1"
-	"goal/app/user/service/internal/biz"
-	"goal/app/user/service/internal/conf"
-	"goal/app/user/service/internal/pkg/middleware/auth"
+	v1 "goal/user/api/user/service/v1"
+	"goal/user/internal/biz"
+	"goal/user/internal/conf"
+	"goal/user/internal/pkg/middleware/auth"
 	"time"
 )
 
@@ -211,6 +214,52 @@ func (u *UserService) GetUserProxyList(ctx context.Context, req *v1.GetUserProxy
 		ID: userId,
 	}, req)
 }
+
 func (u *UserService) GetUserProxyConfigList(ctx context.Context, req *v1.GetUserProxyConfigListRequest) (*v1.GetUserProxyConfigListReply, error) {
 	return u.uc.GetUserProxyConfigList(ctx)
+}
+
+func (u *UserService) UserDeposit(ctx context.Context, req *v1.UserDepositRequest) (*v1.UserDepositReply, error) {
+	_, err := u.DepositHandle(ctx)
+	if nil != err {
+		return &v1.UserDepositReply{Result: "失败"}, nil
+	}
+
+	return &v1.UserDepositReply{Result: "成功"}, nil
+}
+
+func (u *UserService) DepositHandle(ctx context.Context) (bool, error) {
+	var (
+		user []*biz.User
+	)
+
+	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	//client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+	if err != nil {
+		return false, err
+	}
+
+	user, _ = u.uc.GetUserList(ctx)
+
+	for _, v := range user {
+		tokenAddress := common.HexToAddress("0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
+		instance, err := NewToken(tokenAddress, client)
+		//tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
+		//instance, err := NewUsdt(tokenAddress, client)
+		if err != nil {
+			continue
+		}
+		address := common.HexToAddress(v.ToAddress)
+		bal, err := instance.BalanceOf(&bind.CallOpts{}, address)
+		if err != nil {
+			continue
+		}
+
+		_, err = u.uc.DepositHandle(ctx, bal.String(), v.ToAddress, v.ID)
+		if err != nil {
+			continue
+		}
+	}
+
+	return false, nil
 }

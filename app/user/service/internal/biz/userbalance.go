@@ -35,6 +35,8 @@ type UserWithdraw struct {
 }
 
 type UserBalanceRepo interface {
+	UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error)
+	GetAddressEthBalanceByAddress(ctx context.Context, address string) (*AddressEthBalance, error)
 	CreateUserBalance(ctx context.Context, u *User) (*UserBalance, error)
 	GetUserBalanceByUserId(ctx context.Context, userId int64) (*UserBalance, error)
 	Deposit(ctx context.Context, userId int64, amount int64) (*UserBalance, error)

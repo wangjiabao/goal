@@ -66,6 +66,16 @@ type UserInfo struct {
 	UpdatedAt       time.Time `gorm:"type:datetime;not null"`
 }
 
+type UserWithdraw struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	Amount    int64     `gorm:"type:int;not null"`
+	UserId    int64     `gorm:"type:int;not null"`
+	Tx        string    `gorm:"type:varchar(100);not null"`
+	Status    string    `gorm:"type:varchar(45);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type UserBalanceRepo struct {
 	data *Data
 	log  *log.Helper
@@ -200,6 +210,50 @@ func (ub *UserBalanceRepo) GetAddressEthBalanceByAddress(ctx context.Context, ad
 		Balance: addressEthBalance.Balance,
 		Address: addressEthBalance.Address,
 	}, nil
+}
+
+func (ub *UserBalanceRepo) WithdrawById(ctx context.Context, id int64) (*biz.UserWithdraw, error) {
+	var userWithdraw UserWithdraw
+	if err := ub.data.DB(ctx).Where("id=?", id).First(&userWithdraw).Error; err != nil {
+		return nil, errors.NotFound("USER_WITHDRAW_NOT_FOUND", "未查到记录不存在")
+	}
+
+	return &biz.UserWithdraw{
+		ID:        userWithdraw.ID,
+		UserId:    userWithdraw.UserId,
+		Amount:    userWithdraw.Amount,
+		Status:    userWithdraw.Status,
+		Tx:        userWithdraw.Tx,
+		CreatedAt: userWithdraw.CreatedAt,
+	}, nil
+}
+
+func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *biz.Pagination) ([]*biz.UserWithdraw, error) {
+	var userWithdraw []*UserWithdraw
+	instance := ub.data.DB(ctx)
+
+	if "" != status {
+		instance = instance.Where("status=?", status)
+	}
+
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Table("user_withdraw").
+		Order("created_at desc").
+		Find(&userWithdraw).Error; err != nil {
+		return nil, errors.NotFound("USER_WITHDRAW_NOT_FOUND", "未查到记录不存在")
+	}
+
+	res := make([]*biz.UserWithdraw, 0)
+	for _, item := range userWithdraw {
+		res = append(res, &biz.UserWithdraw{
+			ID:        item.ID,
+			Status:    item.Status,
+			Amount:    item.Amount,
+			Tx:        item.Tx,
+			CreatedAt: item.CreatedAt,
+		})
+	}
+
+	return res, nil
 }
 
 func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error) {
@@ -370,6 +424,20 @@ func (u *UserRepo) GetUserList(ctx context.Context) ([]*biz.User, error) {
 	}
 
 	return res, nil
+}
+
+func (u *UserRepo) GetUserById(ctx context.Context, userId int64) (*biz.User, error) {
+	var user *User
+	if err := u.data.DB(ctx).Where("ID=?", userId).Table("user").First(&user).Error; err != nil {
+		return nil, errors.NotFound("USER_NOT_FOUND", "用户不存在")
+	}
+
+	return &biz.User{
+		ID:                  user.ID,
+		Address:             user.Address,
+		ToAddress:           user.ToAddress,
+		ToAddressPrivateKey: user.ToAddressPrivateKey,
+	}, nil
 }
 
 func (u *UserRepo) GetUserListByUserIds(ctx context.Context, userIds ...int64) ([]*biz.User, error) {

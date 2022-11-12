@@ -16,6 +16,7 @@ service User {
 		};
 	};
 
+
 	rpc GetUser (GetUserRequest) returns (GetUserReply) {
 		option (google.api.http) = {
 			get: "/api/user"
@@ -79,6 +80,14 @@ service User {
 			get: "/api/user_proxy/config_list"
 		};
 	};
+
+	rpc UserDeposit (UserDepositRequest) returns (UserDepositReply){
+		option (google.api.http) = {
+			post: "/api/user_deposit"
+			body: "send_body"
+		};
+	};
+
 }
 
 message EthAuthorizeRequest {
@@ -111,6 +120,17 @@ message DepositRequest {
 	}
 
 	SendBody send_body = 1;
+}
+
+message UserDepositRequest {
+	message SendBody{
+	}
+
+	SendBody send_body = 1;
+}
+
+message UserDepositReply {
+	string result = 1;
 }
 
 message DepositReply {

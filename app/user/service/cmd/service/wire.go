@@ -6,11 +6,11 @@
 package main
 
 import (
-	"goal/app/user/service/internal/biz"
-	"goal/app/user/service/internal/conf"
-	"goal/app/user/service/internal/data"
-	"goal/app/user/service/internal/server"
-	"goal/app/user/service/internal/service"
+	"goal/user/internal/biz"
+	"goal/user/internal/conf"
+	"goal/user/internal/data"
+	"goal/user/internal/server"
+	"goal/user/internal/service"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"

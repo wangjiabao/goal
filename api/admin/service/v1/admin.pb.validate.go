@@ -3984,6 +3984,248 @@ var _ interface {
 	ErrorName() string
 } = GetUserListReplyValidationError{}
 
+// Validate checks the field values on GetUserWithdrawListRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetUserWithdrawListRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetUserWithdrawListRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetUserWithdrawListRequestMultiError, or nil if none found.
+func (m *GetUserWithdrawListRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetUserWithdrawListRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Page
+
+	// no validation rules for Status
+
+	if len(errors) > 0 {
+		return GetUserWithdrawListRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetUserWithdrawListRequestMultiError is an error wrapping multiple
+// validation errors returned by GetUserWithdrawListRequest.ValidateAll() if
+// the designated constraints aren't met.
+type GetUserWithdrawListRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetUserWithdrawListRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetUserWithdrawListRequestMultiError) AllErrors() []error { return m }
+
+// GetUserWithdrawListRequestValidationError is the validation error returned
+// by GetUserWithdrawListRequest.Validate if the designated constraints aren't met.
+type GetUserWithdrawListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserWithdrawListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserWithdrawListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserWithdrawListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserWithdrawListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserWithdrawListRequestValidationError) ErrorName() string {
+	return "GetUserWithdrawListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetUserWithdrawListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserWithdrawListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserWithdrawListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserWithdrawListRequestValidationError{}
+
+// Validate checks the field values on GetUserWithdrawListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetUserWithdrawListReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetUserWithdrawListReply with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetUserWithdrawListReplyMultiError, or nil if none found.
+func (m *GetUserWithdrawListReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetUserWithdrawListReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetUserWithdrawListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetUserWithdrawListReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetUserWithdrawListReplyValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetUserWithdrawListReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetUserWithdrawListReplyMultiError is an error wrapping multiple validation
+// errors returned by GetUserWithdrawListReply.ValidateAll() if the designated
+// constraints aren't met.
+type GetUserWithdrawListReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetUserWithdrawListReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetUserWithdrawListReplyMultiError) AllErrors() []error { return m }
+
+// GetUserWithdrawListReplyValidationError is the validation error returned by
+// GetUserWithdrawListReply.Validate if the designated constraints aren't met.
+type GetUserWithdrawListReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserWithdrawListReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserWithdrawListReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserWithdrawListReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserWithdrawListReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserWithdrawListReplyValidationError) ErrorName() string {
+	return "GetUserWithdrawListReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetUserWithdrawListReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserWithdrawListReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserWithdrawListReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserWithdrawListReplyValidationError{}
+
 // Validate checks the field values on GetUserProxyListRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -7532,22 +7774,22 @@ var _ interface {
 	ErrorName() string
 } = GameIndexStatisticsReplyValidationError{}
 
-// Validate checks the field values on UserDepositRequest with the rules
+// Validate checks the field values on UserWithdrawRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *UserDepositRequest) Validate() error {
+func (m *UserWithdrawRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on UserDepositRequest with the rules
+// ValidateAll checks the field values on UserWithdrawRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// UserDepositRequestMultiError, or nil if none found.
-func (m *UserDepositRequest) ValidateAll() error {
+// UserWithdrawRequestMultiError, or nil if none found.
+func (m *UserWithdrawRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *UserDepositRequest) validate(all bool) error {
+func (m *UserWithdrawRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -7558,7 +7800,7 @@ func (m *UserDepositRequest) validate(all bool) error {
 		switch v := interface{}(m.GetSendBody()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UserDepositRequestValidationError{
+				errors = append(errors, UserWithdrawRequestValidationError{
 					field:  "SendBody",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -7566,7 +7808,7 @@ func (m *UserDepositRequest) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, UserDepositRequestValidationError{
+				errors = append(errors, UserWithdrawRequestValidationError{
 					field:  "SendBody",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -7575,7 +7817,7 @@ func (m *UserDepositRequest) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return UserDepositRequestValidationError{
+			return UserWithdrawRequestValidationError{
 				field:  "SendBody",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -7584,19 +7826,19 @@ func (m *UserDepositRequest) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return UserDepositRequestMultiError(errors)
+		return UserWithdrawRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// UserDepositRequestMultiError is an error wrapping multiple validation errors
-// returned by UserDepositRequest.ValidateAll() if the designated constraints
-// aren't met.
-type UserDepositRequestMultiError []error
+// UserWithdrawRequestMultiError is an error wrapping multiple validation
+// errors returned by UserWithdrawRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UserWithdrawRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m UserDepositRequestMultiError) Error() string {
+func (m UserWithdrawRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -7605,11 +7847,11 @@ func (m UserDepositRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m UserDepositRequestMultiError) AllErrors() []error { return m }
+func (m UserWithdrawRequestMultiError) AllErrors() []error { return m }
 
-// UserDepositRequestValidationError is the validation error returned by
-// UserDepositRequest.Validate if the designated constraints aren't met.
-type UserDepositRequestValidationError struct {
+// UserWithdrawRequestValidationError is the validation error returned by
+// UserWithdrawRequest.Validate if the designated constraints aren't met.
+type UserWithdrawRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -7617,24 +7859,24 @@ type UserDepositRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e UserDepositRequestValidationError) Field() string { return e.field }
+func (e UserWithdrawRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UserDepositRequestValidationError) Reason() string { return e.reason }
+func (e UserWithdrawRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UserDepositRequestValidationError) Cause() error { return e.cause }
+func (e UserWithdrawRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UserDepositRequestValidationError) Key() bool { return e.key }
+func (e UserWithdrawRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UserDepositRequestValidationError) ErrorName() string {
-	return "UserDepositRequestValidationError"
+func (e UserWithdrawRequestValidationError) ErrorName() string {
+	return "UserWithdrawRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e UserDepositRequestValidationError) Error() string {
+func (e UserWithdrawRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -7646,14 +7888,14 @@ func (e UserDepositRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUserDepositRequest.%s: %s%s",
+		"invalid %sUserWithdrawRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UserDepositRequestValidationError{}
+var _ error = UserWithdrawRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -7661,24 +7903,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UserDepositRequestValidationError{}
+} = UserWithdrawRequestValidationError{}
 
-// Validate checks the field values on UserDepositReply with the rules defined
+// Validate checks the field values on UserWithdrawReply with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
-func (m *UserDepositReply) Validate() error {
+func (m *UserWithdrawReply) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on UserDepositReply with the rules
+// ValidateAll checks the field values on UserWithdrawReply with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// UserDepositReplyMultiError, or nil if none found.
-func (m *UserDepositReply) ValidateAll() error {
+// UserWithdrawReplyMultiError, or nil if none found.
+func (m *UserWithdrawReply) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *UserDepositReply) validate(all bool) error {
+func (m *UserWithdrawReply) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -7688,19 +7930,19 @@ func (m *UserDepositReply) validate(all bool) error {
 	// no validation rules for Result
 
 	if len(errors) > 0 {
-		return UserDepositReplyMultiError(errors)
+		return UserWithdrawReplyMultiError(errors)
 	}
 
 	return nil
 }
 
-// UserDepositReplyMultiError is an error wrapping multiple validation errors
-// returned by UserDepositReply.ValidateAll() if the designated constraints
+// UserWithdrawReplyMultiError is an error wrapping multiple validation errors
+// returned by UserWithdrawReply.ValidateAll() if the designated constraints
 // aren't met.
-type UserDepositReplyMultiError []error
+type UserWithdrawReplyMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m UserDepositReplyMultiError) Error() string {
+func (m UserWithdrawReplyMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -7709,11 +7951,11 @@ func (m UserDepositReplyMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m UserDepositReplyMultiError) AllErrors() []error { return m }
+func (m UserWithdrawReplyMultiError) AllErrors() []error { return m }
 
-// UserDepositReplyValidationError is the validation error returned by
-// UserDepositReply.Validate if the designated constraints aren't met.
-type UserDepositReplyValidationError struct {
+// UserWithdrawReplyValidationError is the validation error returned by
+// UserWithdrawReply.Validate if the designated constraints aren't met.
+type UserWithdrawReplyValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -7721,22 +7963,24 @@ type UserDepositReplyValidationError struct {
 }
 
 // Field function returns field value.
-func (e UserDepositReplyValidationError) Field() string { return e.field }
+func (e UserWithdrawReplyValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UserDepositReplyValidationError) Reason() string { return e.reason }
+func (e UserWithdrawReplyValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UserDepositReplyValidationError) Cause() error { return e.cause }
+func (e UserWithdrawReplyValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UserDepositReplyValidationError) Key() bool { return e.key }
+func (e UserWithdrawReplyValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UserDepositReplyValidationError) ErrorName() string { return "UserDepositReplyValidationError" }
+func (e UserWithdrawReplyValidationError) ErrorName() string {
+	return "UserWithdrawReplyValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e UserDepositReplyValidationError) Error() string {
+func (e UserWithdrawReplyValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -7748,14 +7992,14 @@ func (e UserDepositReplyValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUserDepositReply.%s: %s%s",
+		"invalid %sUserWithdrawReply.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UserDepositReplyValidationError{}
+var _ error = UserWithdrawReplyValidationError{}
 
 var _ interface {
 	Field() string
@@ -7763,7 +8007,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UserDepositReplyValidationError{}
+} = UserWithdrawReplyValidationError{}
 
 // Validate checks the field values on GamePlayGrantRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
@@ -9314,6 +9558,121 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetUserListReply_ItemValidationError{}
+
+// Validate checks the field values on GetUserWithdrawListReply_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetUserWithdrawListReply_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetUserWithdrawListReply_Item with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// GetUserWithdrawListReply_ItemMultiError, or nil if none found.
+func (m *GetUserWithdrawListReply_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetUserWithdrawListReply_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for ID
+
+	// no validation rules for Tx
+
+	// no validation rules for Address
+
+	// no validation rules for Status
+
+	// no validation rules for Amount
+
+	// no validation rules for CreatedAt
+
+	if len(errors) > 0 {
+		return GetUserWithdrawListReply_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetUserWithdrawListReply_ItemMultiError is an error wrapping multiple
+// validation errors returned by GetUserWithdrawListReply_Item.ValidateAll()
+// if the designated constraints aren't met.
+type GetUserWithdrawListReply_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetUserWithdrawListReply_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetUserWithdrawListReply_ItemMultiError) AllErrors() []error { return m }
+
+// GetUserWithdrawListReply_ItemValidationError is the validation error
+// returned by GetUserWithdrawListReply_Item.Validate if the designated
+// constraints aren't met.
+type GetUserWithdrawListReply_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetUserWithdrawListReply_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetUserWithdrawListReply_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetUserWithdrawListReply_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetUserWithdrawListReply_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetUserWithdrawListReply_ItemValidationError) ErrorName() string {
+	return "GetUserWithdrawListReply_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetUserWithdrawListReply_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetUserWithdrawListReply_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetUserWithdrawListReply_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetUserWithdrawListReply_ItemValidationError{}
 
 // Validate checks the field values on GetUserProxyListReply_Item with the
 // rules defined in the proto definition for this message. If any rules are
@@ -11504,42 +11863,44 @@ var _ interface {
 	ErrorName() string
 } = GameIndexStatisticsReply_ScoreValidationError{}
 
-// Validate checks the field values on UserDepositRequest_SendBody with the
+// Validate checks the field values on UserWithdrawRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *UserDepositRequest_SendBody) Validate() error {
+func (m *UserWithdrawRequest_SendBody) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on UserDepositRequest_SendBody with the
+// ValidateAll checks the field values on UserWithdrawRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// UserDepositRequest_SendBodyMultiError, or nil if none found.
-func (m *UserDepositRequest_SendBody) ValidateAll() error {
+// UserWithdrawRequest_SendBodyMultiError, or nil if none found.
+func (m *UserWithdrawRequest_SendBody) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *UserDepositRequest_SendBody) validate(all bool) error {
+func (m *UserWithdrawRequest_SendBody) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
+	// no validation rules for Id
+
 	if len(errors) > 0 {
-		return UserDepositRequest_SendBodyMultiError(errors)
+		return UserWithdrawRequest_SendBodyMultiError(errors)
 	}
 
 	return nil
 }
 
-// UserDepositRequest_SendBodyMultiError is an error wrapping multiple
-// validation errors returned by UserDepositRequest_SendBody.ValidateAll() if
+// UserWithdrawRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by UserWithdrawRequest_SendBody.ValidateAll() if
 // the designated constraints aren't met.
-type UserDepositRequest_SendBodyMultiError []error
+type UserWithdrawRequest_SendBodyMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m UserDepositRequest_SendBodyMultiError) Error() string {
+func (m UserWithdrawRequest_SendBodyMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -11548,12 +11909,12 @@ func (m UserDepositRequest_SendBodyMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m UserDepositRequest_SendBodyMultiError) AllErrors() []error { return m }
+func (m UserWithdrawRequest_SendBodyMultiError) AllErrors() []error { return m }
 
-// UserDepositRequest_SendBodyValidationError is the validation error returned
-// by UserDepositRequest_SendBody.Validate if the designated constraints
+// UserWithdrawRequest_SendBodyValidationError is the validation error returned
+// by UserWithdrawRequest_SendBody.Validate if the designated constraints
 // aren't met.
-type UserDepositRequest_SendBodyValidationError struct {
+type UserWithdrawRequest_SendBodyValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -11561,24 +11922,24 @@ type UserDepositRequest_SendBodyValidationError struct {
 }
 
 // Field function returns field value.
-func (e UserDepositRequest_SendBodyValidationError) Field() string { return e.field }
+func (e UserWithdrawRequest_SendBodyValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UserDepositRequest_SendBodyValidationError) Reason() string { return e.reason }
+func (e UserWithdrawRequest_SendBodyValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UserDepositRequest_SendBodyValidationError) Cause() error { return e.cause }
+func (e UserWithdrawRequest_SendBodyValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UserDepositRequest_SendBodyValidationError) Key() bool { return e.key }
+func (e UserWithdrawRequest_SendBodyValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UserDepositRequest_SendBodyValidationError) ErrorName() string {
-	return "UserDepositRequest_SendBodyValidationError"
+func (e UserWithdrawRequest_SendBodyValidationError) ErrorName() string {
+	return "UserWithdrawRequest_SendBodyValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e UserDepositRequest_SendBodyValidationError) Error() string {
+func (e UserWithdrawRequest_SendBodyValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -11590,14 +11951,14 @@ func (e UserDepositRequest_SendBodyValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUserDepositRequest_SendBody.%s: %s%s",
+		"invalid %sUserWithdrawRequest_SendBody.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UserDepositRequest_SendBodyValidationError{}
+var _ error = UserWithdrawRequest_SendBodyValidationError{}
 
 var _ interface {
 	Field() string
@@ -11605,4 +11966,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UserDepositRequest_SendBodyValidationError{}
+} = UserWithdrawRequest_SendBodyValidationError{}

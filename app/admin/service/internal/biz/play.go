@@ -190,6 +190,8 @@ type UserBalanceRepo interface {
 	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) error
 	GetAddressEthBalanceByAddress(ctx context.Context, address string) (*AddressEthBalance, error)
 	Deposit(ctx context.Context, userId int64, amount int64) (*UserBalance, error)
+	WithdrawList(ctx context.Context, status string, b *Pagination) ([]*UserWithdraw, error)
+	WithdrawById(ctx context.Context, id int64) (*UserWithdraw, error)
 	UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error)
 }
 

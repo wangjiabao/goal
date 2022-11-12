@@ -3,11 +3,13 @@ package biz
 import (
 	"context"
 	"crypto/ecdsa"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
-	v1 "goal/api/user/service/v1"
+	v1 "goal/user/api/user/service/v1"
+	"strconv"
 )
 
 type User struct {
@@ -46,6 +48,7 @@ type SystemConfigRepo interface {
 }
 
 type UserRepo interface {
+	GetUserList(ctx context.Context) ([]*User, error)
 	CreateUser(ctx context.Context, user *User) (*User, error)
 	GetUserByAddress(ctx context.Context, address string) (*User, error)
 	GetUserById(ctx context.Context, Id int64) (*User, error)
@@ -89,6 +92,10 @@ func NewUserUseCase(repo UserRepo, tx Transaction,
 		ubRepo:           ubRepo,
 		log:              log.NewHelper(logger),
 	}
+}
+
+func (u *UserUseCase) GetUserList(ctx context.Context) ([]*User, error) {
+	return u.repo.GetUserList(ctx)
 }
 
 func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAuthorizeRequest) (*User, error) {
@@ -217,6 +224,56 @@ func (uc *UserUseCase) Deposit(ctx context.Context, u *User, req *v1.DepositRequ
 	}, nil
 }
 
+func (u *UserUseCase) DepositHandle(ctx context.Context, balance string, address string, userId int64) (bool, error) {
+	var (
+		currentBalance, lastBalance int64
+		base                        int64 = 100000 // 基础精度0.00001 todo 加配置文件
+	)
+
+	addressEthBalance, err := u.ubRepo.GetAddressEthBalanceByAddress(ctx, address)
+	if err != nil {
+		return false, err
+	}
+	lenBalance := len(balance)
+	if lenBalance > 18 {
+		if currentBalance, err = strconv.ParseInt(balance[:lenBalance-18], 10, 64); err != nil {
+			return false, err
+		}
+	} else {
+		currentBalance = 0
+	}
+
+	if lastBalance, err = strconv.ParseInt(addressEthBalance.Balance, 10, 64); err != nil {
+		return false, err
+	}
+
+	fmt.Println(currentBalance, lastBalance)
+	if currentBalance <= lastBalance {
+		// 这里应该余额没变动
+		// 或者出现了项目方提现了金额，但是没有更新到系统，具体原因可能是项目方提现账户USD_TOKEN时没有更新这个账户的余额，现在没有这个给功能
+		return false, err
+	}
+
+	depositBalanceNow := (currentBalance - lastBalance) * base
+
+	fmt.Println(depositBalanceNow)
+	if err = u.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		_, err = u.ubRepo.Deposit(ctx, userId, depositBalanceNow) // todo 事务
+		if nil != err {
+			return err
+		}
+		_, err = u.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, strconv.FormatInt(currentBalance, 10))
+		if err != nil {
+			return err
+		}
+		return nil
+	}); nil != err {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func (uc *UserUseCase) Withdraw(ctx context.Context, u *User, req *v1.WithdrawRequest) (*v1.WithdrawReply, error) {
 	var base int64 = 100000 // 基础精度0.00001 todo 加配置文件
 	_, err := uc.ubRepo.Withdraw(ctx, u.ID, req.SendBody.Amount*base)
@@ -340,7 +397,6 @@ func (uc *UserUseCase) CreateProxy(ctx context.Context, u *User, req *v1.CreateP
 	)
 
 	// todo 后台比例
-	amount = req.SendBody.Amount
 	userProxy, err = uc.repo.GetUserProxyByUserId(ctx, u.ID)
 	if err == nil {
 		return nil, errors.New(500, "USER_PROXY_ALREADY", "已经是代理了")
@@ -352,18 +408,16 @@ func (uc *UserUseCase) CreateProxy(ctx context.Context, u *User, req *v1.CreateP
 	}
 	recommendProxyReward = systemConfig.Value
 
-	if "" != req.SendBody.Name {
-		systemConfig, err = uc.systemConfigRepo.GetSystemConfigByName(ctx, req.SendBody.Name)
-		if nil != err {
-			return nil, err
-		}
-		amount = systemConfig.Value * base
-		systemConfig, err = uc.systemConfigRepo.GetSystemConfigByName(ctx, req.SendBody.Name+"_rate")
-		if nil != err {
-			return nil, err
-		}
-		rate = systemConfig.Value
+	systemConfig, err = uc.systemConfigRepo.GetSystemConfigByName(ctx, req.SendBody.Name)
+	if nil != err {
+		return nil, err
 	}
+	amount = systemConfig.Value * base
+	systemConfig, err = uc.systemConfigRepo.GetSystemConfigByName(ctx, req.SendBody.Name+"_rate")
+	if nil != err {
+		return nil, err
+	}
+	rate = systemConfig.Value
 
 	// 查找上级是否大代理
 	userInfo, err = uc.uiRepo.GetUserInfoByUserId(ctx, u.ID)

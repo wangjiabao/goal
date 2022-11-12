@@ -1,9 +1,9 @@
 package server
 
 import (
-	v1 "goal/api/user/service/v1"
-	"goal/app/user/service/internal/conf"
-	"goal/app/user/service/internal/service"
+	v1 "goal/user/api/user/service/v1"
+	"goal/user/internal/conf"
+	"goal/user/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"

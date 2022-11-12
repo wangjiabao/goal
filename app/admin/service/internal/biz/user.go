@@ -17,14 +17,29 @@ type User struct {
 	CreatedAt           time.Time
 }
 
+type UserWithdraw struct {
+	ID        int64
+	UserId    int64
+	Amount    int64
+	Status    string
+	Tx        string
+	CreatedAt time.Time
+}
+
 type AddressEthBalance struct {
 	ID      int64
 	Address string
 	Balance string
 }
 
+type Pagination struct {
+	PageNum  int
+	PageSize int
+}
+
 type UserRepo interface {
 	GetUserList(ctx context.Context) ([]*User, error)
+	GetUserById(ctx context.Context, userId int64) (*User, error)
 	GetUserListByUserIds(ctx context.Context, userIds ...int64) ([]*User, error)
 	GetUserMap(ctx context.Context, userIds ...int64) (map[int64]*User, error)
 	GetUserProxyList(ctx context.Context, userId ...int64) ([]*UserProxy, error)
@@ -50,6 +65,10 @@ func NewUserUseCase(repo UserRepo, tx Transaction, uiRepo UserInfoRepo, ubRepo U
 
 func (u *UserUseCase) GetUserList(ctx context.Context) ([]*User, error) {
 	return u.repo.GetUserList(ctx)
+}
+
+func (u *UserUseCase) GetUserById(ctx context.Context, userId int64) (*User, error) {
+	return u.repo.GetUserById(ctx, userId)
 }
 
 func (u *UserUseCase) GetUsers(ctx context.Context) (*v1.GetUserListReply, error) {
@@ -165,6 +184,59 @@ func (u *UserUseCase) GetUserProxyList(ctx context.Context, req *v1.GetUserProxy
 	return res, nil
 }
 
+func (u *UserUseCase) GetUserWithById(ctx context.Context, id int64) (*UserWithdraw, error) {
+	return u.ubRepo.WithdrawById(ctx, id)
+}
+
+func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWithdrawListRequest) (*v1.GetUserWithdrawListReply, error) {
+	var (
+		userMap      map[int64]*User
+		userWithdraw []*UserWithdraw
+		userId       []int64
+		err          error
+		base         int64 = 100000
+	)
+
+	userWithdraw, err = u.ubRepo.WithdrawList(ctx, req.Status, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range userWithdraw {
+		userId = append(userId, v.UserId)
+	}
+
+	userMap, err = u.repo.GetUserMap(ctx, userId...)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &v1.GetUserWithdrawListReply{
+		Items: make([]*v1.GetUserWithdrawListReply_Item, 0),
+	}
+
+	for _, item := range userWithdraw {
+		tempAddress := ""
+		if v, ok := userMap[item.UserId]; ok {
+			tempAddress = v.Address
+		}
+		res.Items = append(res.Items, &v1.GetUserWithdrawListReply_Item{
+			Address:   tempAddress,
+			Status:    item.Status,
+			ID:        item.ID,
+			Amount:    item.Amount / base,
+			Tx:        item.Tx,
+			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
 func (u *UserUseCase) GetUserRecommendList(ctx context.Context, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {
 	var (
 		user              map[int64]*User
@@ -239,37 +311,34 @@ func (u *UserUseCase) Deposit(ctx context.Context, balance string, address strin
 	} else {
 		currentBalance = 0
 	}
-	lenLastBalance := len(addressEthBalance.Balance)
-	if lenLastBalance > 18 {
-		if lastBalance, err = strconv.ParseInt(addressEthBalance.Balance[:lenLastBalance-18], 10, 64); err != nil {
-			return false, err
-		}
-	} else {
-		lastBalance = 0
+
+	if lastBalance, err = strconv.ParseInt(addressEthBalance.Balance, 10, 64); err != nil {
+		return false, err
 	}
 
 	fmt.Println(currentBalance, lastBalance)
 	if currentBalance <= lastBalance {
+		// 这里应该余额没变动
+		// 或者出现了项目方提现了金额，但是没有更新到系统，具体原因可能是项目方提现账户USD_TOKEN时没有更新这个账户的余额，现在没有这个给功能
 		return false, err
 	}
 
 	depositBalanceNow := (currentBalance - lastBalance) * base
 
 	fmt.Println(depositBalanceNow)
-	//if err = u.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-	_, err = u.ubRepo.Deposit(ctx, userId, depositBalanceNow) // todo 事务
-	//if nil != err {
-	//	return err
-	//}
-	_, err = u.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, strconv.FormatInt(currentBalance, 10))
-	//if err != nil {
-	//	return err
-	//}
-	//return nil
-	//}); nil != err {
-	//	fmt.Println(4444)
-	//	return false, nil
-	//}
+	if err = u.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		_, err = u.ubRepo.Deposit(ctx, userId, depositBalanceNow) // todo 事务
+		if nil != err {
+			return err
+		}
+		_, err = u.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, strconv.FormatInt(currentBalance, 10))
+		if err != nil {
+			return err
+		}
+		return nil
+	}); nil != err {
+		return false, nil
+	}
 
 	return true, nil
 }

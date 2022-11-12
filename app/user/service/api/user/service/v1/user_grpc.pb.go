@@ -33,6 +33,7 @@ type UserClient interface {
 	CreateDownProxy(ctx context.Context, in *CreateDownProxyRequest, opts ...grpc.CallOption) (*CreateDownProxyReply, error)
 	GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error)
 	GetUserProxyConfigList(ctx context.Context, in *GetUserProxyConfigListRequest, opts ...grpc.CallOption) (*GetUserProxyConfigListReply, error)
+	UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...grpc.CallOption) (*UserDepositReply, error)
 }
 
 type userClient struct {
@@ -142,6 +143,15 @@ func (c *userClient) GetUserProxyConfigList(ctx context.Context, in *GetUserProx
 	return out, nil
 }
 
+func (c *userClient) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...grpc.CallOption) (*UserDepositReply, error) {
+	out := new(UserDepositReply)
+	err := c.cc.Invoke(ctx, "/api.user.service.v1.User/UserDeposit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServer is the server API for User service.
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
@@ -157,6 +167,7 @@ type UserServer interface {
 	CreateDownProxy(context.Context, *CreateDownProxyRequest) (*CreateDownProxyReply, error)
 	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
 	GetUserProxyConfigList(context.Context, *GetUserProxyConfigListRequest) (*GetUserProxyConfigListReply, error)
+	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 	mustEmbedUnimplementedUserServer()
 }
 
@@ -196,6 +207,9 @@ func (UnimplementedUserServer) GetUserProxyList(context.Context, *GetUserProxyLi
 }
 func (UnimplementedUserServer) GetUserProxyConfigList(context.Context, *GetUserProxyConfigListRequest) (*GetUserProxyConfigListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProxyConfigList not implemented")
+}
+func (UnimplementedUserServer) UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserDeposit not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
 
@@ -408,6 +422,24 @@ func _User_GetUserProxyConfigList_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _User_UserDeposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserDepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).UserDeposit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.user.service.v1.User/UserDeposit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).UserDeposit(ctx, req.(*UserDepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // User_ServiceDesc is the grpc.ServiceDesc for User service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -458,6 +490,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserProxyConfigList",
 			Handler:    _User_GetUserProxyConfigList_Handler,
+		},
+		{
+			MethodName: "UserDeposit",
+			Handler:    _User_UserDeposit_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

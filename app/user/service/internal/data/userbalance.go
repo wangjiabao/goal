@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
-	"goal/app/user/service/internal/biz"
+	"goal/user/internal/biz"
 	"gorm.io/gorm"
 	"time"
 )

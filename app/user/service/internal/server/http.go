@@ -7,9 +7,9 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	jwt2 "github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/handlers"
-	v1 "goal/api/user/service/v1"
-	"goal/app/user/service/internal/conf"
-	"goal/app/user/service/internal/service"
+	v1 "goal/user/api/user/service/v1"
+	"goal/user/internal/conf"
+	"goal/user/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -52,6 +52,7 @@ func NewHTTPServer(c *conf.Server, ac *conf.Auth, userService *service.UserServi
 func NewWhiteListMatcher() selector.MatchFunc {
 	whiteList := make(map[string]struct{})
 	whiteList["/api.user.service.v1.User/EthAuthorize"] = struct{}{}
+	whiteList["/api.user.service.v1.User/UserDeposit"] = struct{}{}
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
 			return false
