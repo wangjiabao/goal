@@ -2,10 +2,8 @@ package biz
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
-	"strconv"
 	"time"
 )
 
@@ -237,6 +235,47 @@ func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 	return res, nil
 }
 
+func (u *UserUseCase) UserWithdraw(ctx context.Context, withdraw *UserWithdraw, user *User) (bool, error) {
+	var (
+		err error
+	)
+
+	if err = u.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		err = u.ubRepo.Withdraw(ctx, user.ID, withdraw.Amount)
+		if nil != err {
+			return err
+		}
+		err = u.ubRepo.UpdateWithdraw(ctx, withdraw.ID, "pass", "")
+		if nil != err {
+			return err
+		}
+
+		return nil
+	}); nil != err {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (u *UserUseCase) UserWithdrawSuccess(ctx context.Context, withdraw *UserWithdraw, tx string) (bool, error) {
+	err := u.ubRepo.UpdateWithdraw(ctx, withdraw.ID, "success", tx)
+	if nil != err {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (u *UserUseCase) UserWithdrawFail(ctx context.Context, withdraw *UserWithdraw, tx string) (bool, error) {
+	err := u.ubRepo.UpdateWithdraw(ctx, withdraw.ID, "fail", tx)
+	if nil != err {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (u *UserUseCase) GetUserRecommendList(ctx context.Context, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {
 	var (
 		user              map[int64]*User
@@ -292,53 +331,3 @@ func (u *UserUseCase) GetUserInfo(ctx context.Context, req *v1.GetUserRequest) (
 //func (u *UserUseCase) GetAddressEthBalance(ctx context.Context, address string) (*AddressEthBalance, error) {
 //	return u.ubRepo.GetAddressEthBalanceByAddress(ctx, address)
 //}
-
-func (u *UserUseCase) Deposit(ctx context.Context, balance string, address string, userId int64) (bool, error) {
-	var (
-		currentBalance, lastBalance int64
-		base                        int64 = 100000 // 基础精度0.00001 todo 加配置文件
-	)
-
-	addressEthBalance, err := u.ubRepo.GetAddressEthBalanceByAddress(ctx, address)
-	if err != nil {
-		return false, err
-	}
-	lenBalance := len(balance)
-	if lenBalance > 18 {
-		if currentBalance, err = strconv.ParseInt(balance[:lenBalance-18], 10, 64); err != nil {
-			return false, err
-		}
-	} else {
-		currentBalance = 0
-	}
-
-	if lastBalance, err = strconv.ParseInt(addressEthBalance.Balance, 10, 64); err != nil {
-		return false, err
-	}
-
-	fmt.Println(currentBalance, lastBalance)
-	if currentBalance <= lastBalance {
-		// 这里应该余额没变动
-		// 或者出现了项目方提现了金额，但是没有更新到系统，具体原因可能是项目方提现账户USD_TOKEN时没有更新这个账户的余额，现在没有这个给功能
-		return false, err
-	}
-
-	depositBalanceNow := (currentBalance - lastBalance) * base
-
-	fmt.Println(depositBalanceNow)
-	if err = u.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		_, err = u.ubRepo.Deposit(ctx, userId, depositBalanceNow) // todo 事务
-		if nil != err {
-			return err
-		}
-		_, err = u.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, strconv.FormatInt(currentBalance, 10))
-		if err != nil {
-			return err
-		}
-		return nil
-	}); nil != err {
-		return false, nil
-	}
-
-	return true, nil
-}

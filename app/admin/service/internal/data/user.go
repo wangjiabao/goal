@@ -214,7 +214,7 @@ func (ub *UserBalanceRepo) GetAddressEthBalanceByAddress(ctx context.Context, ad
 
 func (ub *UserBalanceRepo) WithdrawById(ctx context.Context, id int64) (*biz.UserWithdraw, error) {
 	var userWithdraw UserWithdraw
-	if err := ub.data.DB(ctx).Where("id=?", id).First(&userWithdraw).Error; err != nil {
+	if err := ub.data.DB(ctx).Table("user_withdraw").Where("id=?", id).First(&userWithdraw).Error; err != nil {
 		return nil, errors.NotFound("USER_WITHDRAW_NOT_FOUND", "未查到记录不存在")
 	}
 
@@ -360,6 +360,46 @@ func (ub *UserBalanceRepo) Deposit(ctx context.Context, userId int64, amount int
 		UserId:  userBalance.UserId,
 		Balance: userBalance.Balance,
 	}, nil
+}
+
+// Withdraw 在事务中使用
+func (ub *UserBalanceRepo) Withdraw(ctx context.Context, userId int64, amount int64) error {
+	var err error
+	if res := ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=? and balance>=?", userId, amount).
+		Updates(map[string]interface{}{"balance": gorm.Expr("balance - ?", amount)}); 0 == res.RowsAffected || nil != res.Error {
+		return errors.NotFound("user balance err", "user balance error")
+	}
+
+	var userBalance UserBalance
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	if err != nil {
+		return err
+	}
+
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = userBalance.Balance
+	userBalanceRecode.UserId = userBalance.UserId
+	userBalanceRecode.Type = "withdraw"
+	userBalanceRecode.Reason = "user_withdraw"
+	userBalanceRecode.Amount = amount
+	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateWithdraw 在事务中使用
+func (ub *UserBalanceRepo) UpdateWithdraw(ctx context.Context, Id int64, status string, tx string) error {
+	if res := ub.data.DB(ctx).Table("user_withdraw").
+		Where("id=?", Id).
+		Updates(&UserWithdraw{Status: status, Tx: tx}); nil != res.Error {
+		return errors.NotFound("user balance err", "user withdraw error")
+	}
+
+	return nil
 }
 
 // GetUserInfoByUserId .

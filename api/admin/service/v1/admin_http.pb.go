@@ -584,6 +584,7 @@ const OperationUserGetUserList = "/api.admin.service.v1.User/GetUserList"
 const OperationUserGetUserProxyList = "/api.admin.service.v1.User/GetUserProxyList"
 const OperationUserGetUserRecommendList = "/api.admin.service.v1.User/GetUserRecommendList"
 const OperationUserGetUserWithdrawList = "/api.admin.service.v1.User/GetUserWithdrawList"
+const OperationUserUserDeposit = "/api.admin.service.v1.User/UserDeposit"
 const OperationUserUserWithdraw = "/api.admin.service.v1.User/UserWithdraw"
 
 type UserHTTPServer interface {
@@ -593,11 +594,13 @@ type UserHTTPServer interface {
 	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
 	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
 	GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error)
+	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 	UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error)
 }
 
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
+	r.POST("/api/goal_admin/user/deposit", _User_UserDeposit0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/user/withdraw", _User_UserWithdraw0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_list", _User_GetUserList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_proxy_list", _User_GetUserProxyList0_HTTP_Handler(srv))
@@ -605,6 +608,28 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r.GET("/api/goal_admin/user/{user_id}/recommend_user_list", _User_GetUserRecommendList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user/{user_id}", _User_GetUser0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_balance_record", _User_GetUserBalanceRecord0_HTTP_Handler(srv))
+}
+
+func _User_UserDeposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UserDepositRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserUserDeposit)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UserDeposit(ctx, req.(*UserDepositRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UserDepositReply)
+		return ctx.Result(200, reply)
+	}
 }
 
 func _User_UserWithdraw0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -756,6 +781,7 @@ type UserHTTPClient interface {
 	GetUserProxyList(ctx context.Context, req *GetUserProxyListRequest, opts ...http.CallOption) (rsp *GetUserProxyListReply, err error)
 	GetUserRecommendList(ctx context.Context, req *GetUserRecommendListRequest, opts ...http.CallOption) (rsp *GetUserRecommendListReply, err error)
 	GetUserWithdrawList(ctx context.Context, req *GetUserWithdrawListRequest, opts ...http.CallOption) (rsp *GetUserWithdrawListReply, err error)
+	UserDeposit(ctx context.Context, req *UserDepositRequest, opts ...http.CallOption) (rsp *UserDepositReply, err error)
 	UserWithdraw(ctx context.Context, req *UserWithdrawRequest, opts ...http.CallOption) (rsp *UserWithdrawReply, err error)
 }
 
@@ -839,6 +865,19 @@ func (c *UserHTTPClientImpl) GetUserWithdrawList(ctx context.Context, in *GetUse
 	opts = append(opts, http.Operation(OperationUserGetUserWithdrawList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...http.CallOption) (*UserDepositReply, error) {
+	var out UserDepositReply
+	pattern := "/api/goal_admin/user/deposit"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserUserDeposit))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

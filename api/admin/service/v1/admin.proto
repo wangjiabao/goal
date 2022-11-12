@@ -105,6 +105,13 @@ service Admin {
 }
 
 service User {
+	rpc UserDeposit (UserDepositRequest) returns (UserDepositReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/user/deposit"
+			body: "send_body"
+		};
+	};
+
 	rpc UserWithdraw (UserWithdrawRequest) returns (UserWithdrawReply){
 		option (google.api.http) = {
 			post: "/api/goal_admin/user/withdraw"
@@ -735,6 +742,17 @@ message GameIndexStatisticsReply {
 		string content = 1;
 		int64 total = 2;
 	}
+}
+
+message UserDepositRequest {
+	message SendBody{
+	}
+
+	SendBody send_body = 1;
+}
+
+message UserDepositReply {
+	string result = 1;
 }
 
 message UserWithdrawRequest {

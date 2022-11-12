@@ -3,7 +3,6 @@ package biz
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
@@ -189,9 +188,11 @@ type UserBalanceRepo interface {
 	GetUserBalanceRecord(ctx context.Context) ([]*UserBalanceRecord, error)
 	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) error
 	GetAddressEthBalanceByAddress(ctx context.Context, address string) (*AddressEthBalance, error)
+	Withdraw(ctx context.Context, userId int64, amount int64) error
 	Deposit(ctx context.Context, userId int64, amount int64) (*UserBalance, error)
 	WithdrawList(ctx context.Context, status string, b *Pagination) ([]*UserWithdraw, error)
 	WithdrawById(ctx context.Context, id int64) (*UserWithdraw, error)
+	UpdateWithdraw(ctx context.Context, Id int64, status string, tx string) error
 	UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error)
 }
 
@@ -596,7 +597,7 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 		return false
 	}
 	rateThird = systemConfig["recommend_rate_third"].Value
-	fmt.Println(rateThird, rateSecond)
+
 	playGameScoreUserRel, err = p.playGameScoreUserRelRepo.GetPlayGameScoreUserRelByPlayIds(ctx, playIds...)
 	if err != nil {
 		return false

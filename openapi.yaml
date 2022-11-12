@@ -591,6 +591,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/goal_admin/user/deposit:
+        post:
+            tags:
+                - User
+            operationId: User_UserDeposit
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UserDepositRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserDepositReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/goal_admin/user/withdraw:
         post:
             tags:
@@ -1507,6 +1531,14 @@ components:
                     type: string
                 status:
                     type: string
+        UserDepositReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        UserDepositRequest_SendBody:
+            type: object
+            properties: {}
         UserWithdrawReply:
             type: object
             properties:

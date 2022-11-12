@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	"crypto/ecdsa"
-	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-kratos/kratos/v2/errors"
@@ -224,13 +223,13 @@ func (uc *UserUseCase) Deposit(ctx context.Context, u *User, req *v1.DepositRequ
 	}, nil
 }
 
-func (u *UserUseCase) DepositHandle(ctx context.Context, balance string, address string, userId int64) (bool, error) {
+func (uc *UserUseCase) DepositHandle(ctx context.Context, balance string, address string, userId int64) (bool, error) {
 	var (
 		currentBalance, lastBalance int64
 		base                        int64 = 100000 // 基础精度0.00001 todo 加配置文件
 	)
 
-	addressEthBalance, err := u.ubRepo.GetAddressEthBalanceByAddress(ctx, address)
+	addressEthBalance, err := uc.ubRepo.GetAddressEthBalanceByAddress(ctx, address)
 	if err != nil {
 		return false, err
 	}
@@ -247,7 +246,6 @@ func (u *UserUseCase) DepositHandle(ctx context.Context, balance string, address
 		return false, err
 	}
 
-	fmt.Println(currentBalance, lastBalance)
 	if currentBalance <= lastBalance {
 		// 这里应该余额没变动
 		// 或者出现了项目方提现了金额，但是没有更新到系统，具体原因可能是项目方提现账户USD_TOKEN时没有更新这个账户的余额，现在没有这个给功能
@@ -256,13 +254,12 @@ func (u *UserUseCase) DepositHandle(ctx context.Context, balance string, address
 
 	depositBalanceNow := (currentBalance - lastBalance) * base
 
-	fmt.Println(depositBalanceNow)
-	if err = u.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		_, err = u.ubRepo.Deposit(ctx, userId, depositBalanceNow) // todo 事务
+	if err = uc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		_, err = uc.ubRepo.Deposit(ctx, userId, depositBalanceNow) // todo 事务
 		if nil != err {
 			return err
 		}
-		_, err = u.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, strconv.FormatInt(currentBalance, 10))
+		_, err = uc.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, strconv.FormatInt(currentBalance, 10))
 		if err != nil {
 			return err
 		}

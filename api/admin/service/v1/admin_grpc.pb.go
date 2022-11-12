@@ -576,6 +576,7 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {
+	UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...grpc.CallOption) (*UserDepositReply, error)
 	UserWithdraw(ctx context.Context, in *UserWithdrawRequest, opts ...grpc.CallOption) (*UserWithdrawReply, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListReply, error)
 	GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error)
@@ -591,6 +592,15 @@ type userClient struct {
 
 func NewUserClient(cc grpc.ClientConnInterface) UserClient {
 	return &userClient{cc}
+}
+
+func (c *userClient) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...grpc.CallOption) (*UserDepositReply, error) {
+	out := new(UserDepositReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/UserDeposit", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *userClient) UserWithdraw(ctx context.Context, in *UserWithdrawRequest, opts ...grpc.CallOption) (*UserWithdrawReply, error) {
@@ -660,6 +670,7 @@ func (c *userClient) GetUserBalanceRecord(ctx context.Context, in *GetUserBalanc
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility
 type UserServer interface {
+	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 	UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error)
 	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
@@ -674,6 +685,9 @@ type UserServer interface {
 type UnimplementedUserServer struct {
 }
 
+func (UnimplementedUserServer) UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserDeposit not implemented")
+}
 func (UnimplementedUserServer) UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserWithdraw not implemented")
 }
@@ -706,6 +720,24 @@ type UnsafeUserServer interface {
 
 func RegisterUserServer(s grpc.ServiceRegistrar, srv UserServer) {
 	s.RegisterService(&User_ServiceDesc, srv)
+}
+
+func _User_UserDeposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserDepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).UserDeposit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/UserDeposit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).UserDeposit(ctx, req.(*UserDepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _User_UserWithdraw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -841,6 +873,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "api.admin.service.v1.User",
 	HandlerType: (*UserServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "UserDeposit",
+			Handler:    _User_UserDeposit_Handler,
+		},
 		{
 			MethodName: "UserWithdraw",
 			Handler:    _User_UserWithdraw_Handler,
