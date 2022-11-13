@@ -137,6 +137,11 @@ service User {
 		};
 	};
 
+	rpc GetUserDepositList (GetUserDepositListRequest) returns (GetUserDepositListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/user_deposit_list"
+		};
+	};
 
 	rpc GetUserRecommendList (GetUserRecommendListRequest) returns (GetUserRecommendListReply) {
 		option (google.api.http) = {
@@ -153,6 +158,13 @@ service User {
 	rpc GetUserBalanceRecord (GetUserBalanceRecordRequest) returns (GetUserBalanceRecordReply) {
 		option (google.api.http) = {
 			get: "/api/goal_admin/user_balance_record"
+		};
+	};
+
+	rpc UpdateUserBalanceRecord (UpdateUserBalanceRecordRequest) returns (UpdateUserBalanceRecordReply) {
+		option (google.api.http) = {
+			post: "/api/goal_admin/update_user_balance_record"
+			body: "send_body"
 		};
 	};
 }
@@ -494,6 +506,7 @@ message GetUserWithdrawListRequest {
 }
 
 message GetUserWithdrawListReply {
+	int64 count = 2;
 	repeated Item items = 1;
 	message Item {
 		int64 ID = 1;
@@ -502,6 +515,24 @@ message GetUserWithdrawListReply {
 		string status = 2;
 		int64 amount = 3;
 		string createdAt = 4;
+	}
+}
+
+message GetUserBalanceRecordRequest {
+	int64 page = 1;
+	string reason = 2;
+}
+
+message GetUserBalanceRecordReply {
+	int64 count = 2;
+	repeated Item items = 1;
+	message Item {
+		string address = 7;
+		int64 balance = 1;
+		int64 amount = 2;
+		string reason = 3;
+		string type = 4;
+		string CreatedAt = 6;
 	}
 }
 
@@ -518,13 +549,14 @@ message GetUserProxyListReply {
 	}
 }
 
-message GetUserBalanceRecordRequest {
+message GetUserDepositListRequest {
 	int64 page = 1;
 	string reason = 2;
 	string type = 3;
 }
 
-message GetUserBalanceRecordReply {
+message GetUserDepositListReply {
+	int64 count = 2;
 	repeated Item items = 1;
 	message Item {
 		string address = 7;
@@ -534,6 +566,20 @@ message GetUserBalanceRecordReply {
 		string type = 4;
 		string CreatedAt = 6;
 	}
+}
+
+
+message UpdateUserBalanceRecordRequest {
+	message SendBody{
+		int64 user_id = 1;
+		int64 amount = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message UpdateUserBalanceRecordReply {
+	string result = 1;
 }
 
 message CreatePlayGameScoreRequest {

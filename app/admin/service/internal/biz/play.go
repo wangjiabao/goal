@@ -187,12 +187,13 @@ type UserBalanceRepo interface {
 	TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) (int64, error)
 	CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
-	GetUserBalanceRecord(ctx context.Context, reason string, balanceType string, b *Pagination) ([]*UserBalanceRecord, error)
+	GetUserBalanceRecord(ctx context.Context, reason string, b *Pagination) ([]*UserBalanceRecord, error, int64)
 	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) (int64, error)
 	GetAddressEthBalanceByAddress(ctx context.Context, address string) (*AddressEthBalance, error)
+	UpdateUserBalance(ctx context.Context, userId int64, amount int64) (bool, error)
 	Withdraw(ctx context.Context, userId int64, amount int64) error
 	Deposit(ctx context.Context, userId int64, amount int64) (*UserBalance, error)
-	WithdrawList(ctx context.Context, status string, b *Pagination) ([]*UserWithdraw, error)
+	WithdrawList(ctx context.Context, status string, b *Pagination) ([]*UserWithdraw, error, int64)
 	WithdrawById(ctx context.Context, id int64) (*UserWithdraw, error)
 	UpdateWithdraw(ctx context.Context, Id int64, status string, tx string) error
 	UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error)

@@ -580,20 +580,24 @@ func (c *AdminHTTPClientImpl) UpdateConfig(ctx context.Context, in *UpdateConfig
 
 const OperationUserGetUser = "/api.admin.service.v1.User/GetUser"
 const OperationUserGetUserBalanceRecord = "/api.admin.service.v1.User/GetUserBalanceRecord"
+const OperationUserGetUserDepositList = "/api.admin.service.v1.User/GetUserDepositList"
 const OperationUserGetUserList = "/api.admin.service.v1.User/GetUserList"
 const OperationUserGetUserProxyList = "/api.admin.service.v1.User/GetUserProxyList"
 const OperationUserGetUserRecommendList = "/api.admin.service.v1.User/GetUserRecommendList"
 const OperationUserGetUserWithdrawList = "/api.admin.service.v1.User/GetUserWithdrawList"
+const OperationUserUpdateUserBalanceRecord = "/api.admin.service.v1.User/UpdateUserBalanceRecord"
 const OperationUserUserDeposit = "/api.admin.service.v1.User/UserDeposit"
 const OperationUserUserWithdraw = "/api.admin.service.v1.User/UserWithdraw"
 
 type UserHTTPServer interface {
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	GetUserBalanceRecord(context.Context, *GetUserBalanceRecordRequest) (*GetUserBalanceRecordReply, error)
+	GetUserDepositList(context.Context, *GetUserDepositListRequest) (*GetUserDepositListReply, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error)
 	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
 	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
 	GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error)
+	UpdateUserBalanceRecord(context.Context, *UpdateUserBalanceRecordRequest) (*UpdateUserBalanceRecordReply, error)
 	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 	UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error)
 }
@@ -605,9 +609,11 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r.GET("/api/goal_admin/user_list", _User_GetUserList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_proxy_list", _User_GetUserProxyList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_withdraw_list", _User_GetUserWithdrawList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/user_deposit_list", _User_GetUserDepositList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user/{user_id}/recommend_user_list", _User_GetUserRecommendList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user/{user_id}", _User_GetUser0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_balance_record", _User_GetUserBalanceRecord0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/update_user_balance_record", _User_UpdateUserBalanceRecord0_HTTP_Handler(srv))
 }
 
 func _User_UserDeposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -711,6 +717,25 @@ func _User_GetUserWithdrawList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.C
 	}
 }
 
+func _User_GetUserDepositList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetUserDepositListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserGetUserDepositList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetUserDepositList(ctx, req.(*GetUserDepositListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetUserDepositListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _User_GetUserRecommendList0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GetUserRecommendListRequest
@@ -774,13 +799,37 @@ func _User_GetUserBalanceRecord0_HTTP_Handler(srv UserHTTPServer) func(ctx http.
 	}
 }
 
+func _User_UpdateUserBalanceRecord0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateUserBalanceRecordRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserUpdateUserBalanceRecord)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateUserBalanceRecord(ctx, req.(*UpdateUserBalanceRecordRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateUserBalanceRecordReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type UserHTTPClient interface {
 	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserReply, err error)
 	GetUserBalanceRecord(ctx context.Context, req *GetUserBalanceRecordRequest, opts ...http.CallOption) (rsp *GetUserBalanceRecordReply, err error)
+	GetUserDepositList(ctx context.Context, req *GetUserDepositListRequest, opts ...http.CallOption) (rsp *GetUserDepositListReply, err error)
 	GetUserList(ctx context.Context, req *GetUserListRequest, opts ...http.CallOption) (rsp *GetUserListReply, err error)
 	GetUserProxyList(ctx context.Context, req *GetUserProxyListRequest, opts ...http.CallOption) (rsp *GetUserProxyListReply, err error)
 	GetUserRecommendList(ctx context.Context, req *GetUserRecommendListRequest, opts ...http.CallOption) (rsp *GetUserRecommendListReply, err error)
 	GetUserWithdrawList(ctx context.Context, req *GetUserWithdrawListRequest, opts ...http.CallOption) (rsp *GetUserWithdrawListReply, err error)
+	UpdateUserBalanceRecord(ctx context.Context, req *UpdateUserBalanceRecordRequest, opts ...http.CallOption) (rsp *UpdateUserBalanceRecordReply, err error)
 	UserDeposit(ctx context.Context, req *UserDepositRequest, opts ...http.CallOption) (rsp *UserDepositReply, err error)
 	UserWithdraw(ctx context.Context, req *UserWithdrawRequest, opts ...http.CallOption) (rsp *UserWithdrawReply, err error)
 }
@@ -811,6 +860,19 @@ func (c *UserHTTPClientImpl) GetUserBalanceRecord(ctx context.Context, in *GetUs
 	pattern := "/api/goal_admin/user_balance_record"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUserBalanceRecord))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) GetUserDepositList(ctx context.Context, in *GetUserDepositListRequest, opts ...http.CallOption) (*GetUserDepositListReply, error) {
+	var out GetUserDepositListReply
+	pattern := "/api/goal_admin/user_deposit_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserGetUserDepositList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -865,6 +927,19 @@ func (c *UserHTTPClientImpl) GetUserWithdrawList(ctx context.Context, in *GetUse
 	opts = append(opts, http.Operation(OperationUserGetUserWithdrawList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) UpdateUserBalanceRecord(ctx context.Context, in *UpdateUserBalanceRecordRequest, opts ...http.CallOption) (*UpdateUserBalanceRecordReply, error) {
+	var out UpdateUserBalanceRecordReply
+	pattern := "/api/goal_admin/update_user_balance_record"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserUpdateUserBalanceRecord))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -179,23 +179,24 @@ func (ub *UserBalanceRepo) GetUserBalance(ctx context.Context, userId int64) (*b
 	}, nil
 }
 
-func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context, reason string, balanceType string, b *biz.Pagination) ([]*biz.UserBalanceRecord, error) {
-	var userBalanceRecord []*UserBalanceRecord
+func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context, reason string, b *biz.Pagination) ([]*biz.UserBalanceRecord, error, int64) {
+	var (
+		userBalanceRecord []*UserBalanceRecord
+		count             int64
+	)
+
 	instance := ub.data.DB(ctx).Table("user_balance_record")
 	if "" != reason {
 		instance = instance.Where("reason=?", reason)
 	}
 
-	if "" != balanceType {
-		instance = instance.Where("type=?", balanceType)
-	}
-
+	instance = instance.Count(&count)
 	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Find(&userBalanceRecord).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.NotFound("USER_BALANCE_NOT_FOUND", "用户余额记录不存在")
+			return nil, errors.NotFound("USER_BALANCE_NOT_FOUND", "用户余额记录不存在"), 0
 		}
 
-		return nil, errors.New(500, "USER_BALANCE_NOT_FOUND", err.Error())
+		return nil, errors.New(500, "USER_BALANCE_NOT_FOUND", err.Error()), 0
 	}
 
 	res := make([]*biz.UserBalanceRecord, 0)
@@ -210,7 +211,7 @@ func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context, reason stri
 		})
 	}
 
-	return res, nil
+	return res, nil, count
 }
 
 func (ub *UserBalanceRepo) GetAddressEthBalanceByAddress(ctx context.Context, address string) (*biz.AddressEthBalance, error) {
@@ -246,18 +247,22 @@ func (ub *UserBalanceRepo) WithdrawById(ctx context.Context, id int64) (*biz.Use
 	}, nil
 }
 
-func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *biz.Pagination) ([]*biz.UserWithdraw, error) {
-	var userWithdraw []*UserWithdraw
-	instance := ub.data.DB(ctx)
+func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *biz.Pagination) ([]*biz.UserWithdraw, error, int64) {
+	var (
+		count        int64
+		userWithdraw []*UserWithdraw
+	)
+	instance := ub.data.DB(ctx).Table("user_withdraw")
 
 	if "" != status {
 		instance = instance.Where("status=?", status)
 	}
 
-	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Table("user_withdraw").
+	instance = instance.Count(&count)
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).
 		Order("created_at desc").
 		Find(&userWithdraw).Error; err != nil {
-		return nil, errors.NotFound("USER_WITHDRAW_NOT_FOUND", "未查到记录不存在")
+		return nil, errors.NotFound("USER_WITHDRAW_NOT_FOUND", "未查到记录不存在"), 0
 	}
 
 	res := make([]*biz.UserWithdraw, 0)
@@ -271,7 +276,7 @@ func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *b
 		})
 	}
 
-	return res, nil
+	return res, nil, count
 }
 
 func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error) {
@@ -359,6 +364,17 @@ func (ub *UserBalanceRepo) TransferIntoUserGoalRecommendReward(ctx context.Conte
 	}
 
 	return userBalanceRecode.ID, nil
+}
+
+func (ub *UserBalanceRepo) UpdateUserBalance(ctx context.Context, userId int64, amount int64) (bool, error) {
+	var err error
+	if err = ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		Update("balance", amount).Error; nil != err {
+		return false, errors.NotFound("user balance err", "user balance not found")
+	}
+
+	return true, nil
 }
 
 // Deposit 在事务中使用

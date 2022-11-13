@@ -96,6 +96,67 @@ func (u *UserUseCase) GetUsers(ctx context.Context) (*v1.GetUserListReply, error
 	return res, nil
 }
 
+func (u *UserUseCase) UpdateUserBalanceRecord(ctx context.Context, req *v1.UpdateUserBalanceRecordRequest) (*v1.UpdateUserBalanceRecordReply, error) {
+	var base int64 = 100000 // 基础精度0.00001 todo 加配置文件
+	_, err := u.ubRepo.UpdateUserBalance(ctx, req.SendBody.UserId, req.SendBody.Amount*base)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.UpdateUserBalanceRecordReply{
+		Result: "成功",
+	}, nil
+}
+func (u *UserUseCase) GetUserDepositList(ctx context.Context, req *v1.GetUserDepositListRequest) (*v1.GetUserDepositListReply, error) {
+	var (
+		user              map[int64]*User
+		userBalanceRecord []*UserBalanceRecord
+		base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		userId            []int64
+		err               error
+		count             int64
+	)
+
+	userBalanceRecord, err, count = u.ubRepo.GetUserBalanceRecord(ctx, "user_deposit", &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range userBalanceRecord {
+		userId = append(userId, v.UserId)
+	}
+
+	user, err = u.repo.GetUserMap(ctx, userId...)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &v1.GetUserDepositListReply{
+		Count: count,
+		Items: make([]*v1.GetUserDepositListReply_Item, 0),
+	}
+
+	for _, item := range userBalanceRecord {
+		tempAddress := ""
+		if v, ok := user[item.UserId]; ok {
+			tempAddress = v.Address
+		}
+		res.Items = append(res.Items, &v1.GetUserDepositListReply_Item{
+			Address:   tempAddress,
+			Balance:   item.Balance / base,
+			Type:      item.Type,
+			Amount:    item.Amount / base,
+			Reason:    item.Reason,
+			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
 func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserBalanceRecordRequest) (*v1.GetUserBalanceRecordReply, error) {
 	var (
 		user              map[int64]*User
@@ -103,9 +164,10 @@ func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserB
 		base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		userId            []int64
 		err               error
+		count             int64
 	)
 
-	userBalanceRecord, err = u.ubRepo.GetUserBalanceRecord(ctx, req.Reason, req.Type, &Pagination{
+	userBalanceRecord, err, count = u.ubRepo.GetUserBalanceRecord(ctx, req.Reason, &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
 	})
@@ -123,6 +185,7 @@ func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserB
 	}
 
 	res := &v1.GetUserBalanceRecordReply{
+		Count: count,
 		Items: make([]*v1.GetUserBalanceRecordReply_Item, 0),
 	}
 
@@ -196,9 +259,10 @@ func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 		userId       []int64
 		err          error
 		base         int64 = 100000
+		count        int64
 	)
 
-	userWithdraw, err = u.ubRepo.WithdrawList(ctx, req.Status, &Pagination{
+	userWithdraw, err, count = u.ubRepo.WithdrawList(ctx, req.Status, &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
 	})
@@ -217,6 +281,7 @@ func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 	}
 
 	res := &v1.GetUserWithdrawListReply{
+		Count: count,
 		Items: make([]*v1.GetUserWithdrawListReply_Item, 0),
 	}
 

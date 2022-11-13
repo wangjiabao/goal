@@ -94,8 +94,8 @@ func NewUserUseCase(repo UserRepo, tx Transaction,
 	}
 }
 
-func (u *UserUseCase) GetUserList(ctx context.Context) ([]*User, error) {
-	return u.repo.GetUserList(ctx)
+func (uc *UserUseCase) GetUserList(ctx context.Context) ([]*User, error) {
+	return uc.repo.GetUserList(ctx)
 }
 
 func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAuthorizeRequest) (*User, error) {

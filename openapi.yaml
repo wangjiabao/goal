@@ -621,6 +621,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/goal_admin/update_user_balance_record:
+        post:
+            tags:
+                - User
+            operationId: User_UpdateUserBalanceRecord
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateUserBalanceRecordRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateUserBalanceRecordReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/goal_admin/user/deposit:
         post:
             tags:
@@ -734,6 +758,34 @@ paths:
                   in: query
                   schema:
                     type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserBalanceRecordReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/user_deposit_list:
+        get:
+            tags:
+                - User
+            operationId: User_GetUserDepositList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: reason
+                  in: query
+                  schema:
+                    type: string
                 - name: type
                   in: query
                   schema:
@@ -744,7 +796,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetUserBalanceRecordReply'
+                                $ref: '#/components/schemas/GetUserDepositListReply'
                 default:
                     description: Default error response
                     content:
@@ -1366,11 +1418,41 @@ components:
         GetUserBalanceRecordReply:
             type: object
             properties:
+                count:
+                    type: integer
+                    format: int64
                 items:
                     type: array
                     items:
                         $ref: '#/components/schemas/GetUserBalanceRecordReply_Item'
         GetUserBalanceRecordReply_Item:
+            type: object
+            properties:
+                address:
+                    type: string
+                balance:
+                    type: integer
+                    format: int64
+                amount:
+                    type: integer
+                    format: int64
+                reason:
+                    type: string
+                type:
+                    type: string
+                CreatedAt:
+                    type: string
+        GetUserDepositListReply:
+            type: object
+            properties:
+                count:
+                    type: integer
+                    format: int64
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetUserDepositListReply_Item'
+        GetUserDepositListReply_Item:
             type: object
             properties:
                 address:
@@ -1449,6 +1531,9 @@ components:
         GetUserWithdrawListReply:
             type: object
             properties:
+                count:
+                    type: integer
+                    format: int64
                 items:
                     type: array
                     items:
@@ -1595,6 +1680,20 @@ components:
                     type: string
                 status:
                     type: string
+        UpdateUserBalanceRecordReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        UpdateUserBalanceRecordRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: int64
+                amount:
+                    type: integer
+                    format: int64
         UserDepositReply:
             type: object
             properties:

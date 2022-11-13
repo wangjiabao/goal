@@ -132,7 +132,7 @@ func (g *GameRepo) UpdateGame(ctx context.Context, gc *biz.Game) (*biz.Game, err
 
 func (g *GameRepo) GetGameList(ctx context.Context) ([]*biz.Game, error) {
 	var game []*Game
-	if err := g.data.DB(ctx).Table("soccer_game").Find(&game).Error; err != nil {
+	if err := g.data.DB(ctx).Table("soccer_game").Order("created_at desc").Find(&game).Error; err != nil {
 		return nil, errors.NotFound("TEAMS_NOT_FOUND", "比赛不存在")
 	}
 

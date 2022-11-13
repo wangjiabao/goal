@@ -237,8 +237,16 @@ func (u *UserService) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 	return u.uc.GetUserWithdrawList(ctx, req)
 }
 
+func (u *UserService) GetUserDepositList(ctx context.Context, req *v1.GetUserDepositListRequest) (*v1.GetUserDepositListReply, error) {
+	return u.uc.GetUserDepositList(ctx, req)
+}
+
 func (u *UserService) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserBalanceRecordRequest) (*v1.GetUserBalanceRecordReply, error) {
 	return u.uc.GetUserBalanceRecord(ctx, req)
+}
+
+func (u *UserService) UpdateUserBalanceRecord(ctx context.Context, req *v1.UpdateUserBalanceRecordRequest) (*v1.UpdateUserBalanceRecordReply, error) {
+	return u.uc.UpdateUserBalanceRecord(ctx, req)
 }
 
 func (u *UserService) GetUserRecommendList(ctx context.Context, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {
