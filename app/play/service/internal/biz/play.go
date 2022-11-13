@@ -132,6 +132,7 @@ type PlayRepo interface {
 	CreatePlay(ctx context.Context, pc *Play) (*Play, error)
 	GetAdminCreatePlayListByType(ctx context.Context, playType string) ([]*Play, error)
 	GetPlayById(ctx context.Context, playId int64) (*Play, error)
+	GetAdminCreatePlayByType(ctx context.Context, playType string) (*Play, error)
 	GetUserByUserIds(ctx context.Context, ids ...int64) ([]*User, error)
 }
 
@@ -778,6 +779,22 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 
 		fee := pay / feeRate // 扣除手续费
 		pay -= fee
+		playGameScoreUserRel, err = p.playGameScoreUserRelRepo.CreatePlayGameScoreUserRel(ctx, &PlayGameScoreUserRel{
+			ID:      0,
+			UserId:  userId,
+			PlayId:  play.ID,
+			Content: strconv.FormatInt(req.SendBody.RedScore, 10) + ":" + strconv.FormatInt(req.SendBody.BlueScore, 10),
+			Pay:     pay,
+			Status:  "no_rewarded",
+		})
+		if err != nil {
+			return err
+		}
+		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameScoreUserRel.ID)
+		if err != nil {
+			return err
+		}
+
 		for _, uv := range upUserProxy {
 			var uvFee int64
 			if 0 >= uv.Rate {
@@ -817,23 +834,6 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 			if fee < 0 {
 				break // 分红余额已经不足
 			}
-		}
-
-		playGameScoreUserRel, err = p.playGameScoreUserRelRepo.CreatePlayGameScoreUserRel(ctx, &PlayGameScoreUserRel{
-			ID:      0,
-			UserId:  userId,
-			PlayId:  play.ID,
-			Content: strconv.FormatInt(req.SendBody.RedScore, 10) + ":" + strconv.FormatInt(req.SendBody.BlueScore, 10),
-			Pay:     pay,
-			Status:  "no_rewarded",
-		})
-		if err != nil {
-			return err
-		}
-
-		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameScoreUserRel.ID)
-		if err != nil {
-			return err
 		}
 
 		return nil
@@ -938,6 +938,23 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 
 		fee := pay / feeRate // 扣除手续费
 		pay -= fee
+		playGameTeamResultUserRel, err = p.playGameTeamResultUserRelRepo.CreatePlayGameTeamResultUserRel(ctx, &PlayGameTeamResultUserRel{
+			ID:      0,
+			UserId:  userId,
+			PlayId:  play.ID,
+			Content: gameResult,
+			Pay:     pay,
+			Status:  "no_rewarded",
+		})
+		if err != nil {
+			return err
+		}
+
+		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamResultUserRel.ID)
+		if err != nil {
+			return err
+		}
+
 		for _, uv := range upUserProxy {
 			var uvFee int64
 			if 0 >= uv.Rate {
@@ -979,23 +996,6 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 			}
 		}
 
-		playGameTeamResultUserRel, err = p.playGameTeamResultUserRelRepo.CreatePlayGameTeamResultUserRel(ctx, &PlayGameTeamResultUserRel{
-			ID:      0,
-			UserId:  userId,
-			PlayId:  play.ID,
-			Content: gameResult,
-			Pay:     pay,
-			Status:  "no_rewarded",
-		})
-		if err != nil {
-			return err
-		}
-
-		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamResultUserRel.ID)
-		if err != nil {
-			return err
-		}
-
 		return nil
 	}); nil != err {
 		return nil, err
@@ -1030,6 +1030,17 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 
 	if "team_sort_eight" != play.Type && "team_sort_three" != play.Type && "team_sort_sixteen" != play.Type {
 		return nil, errors.New(500, "PLAY_ERROR", "玩法类型不匹配")
+	}
+
+	if "team_sort_three" == play.Type {
+		tmpPlay, tmpErr := p.playRepo.GetAdminCreatePlayByType(ctx, "team_sort_eight")
+		if nil != tmpErr {
+			return nil, tmpErr
+		}
+
+		if tmpPlay.EndTime.Before(time.Now()) {
+			return nil, errors.New(500, "TIME_ERROR", "八强已出，不能参与前三强竞猜")
+		}
 	}
 
 	if play.EndTime.Before(time.Now()) {
@@ -1079,6 +1090,23 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 
 		fee := pay / feeRate // 扣除手续费
 		pay -= fee
+		playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.CreatePlayGameTeamSortUserRel(ctx, &PlayGameTeamSortUserRel{
+			ID:      0,
+			UserId:  userId,
+			PlayId:  play.ID,
+			SortId:  req.SendBody.SortId,
+			Content: req.SendBody.Content,
+			Pay:     pay,
+			Status:  "no_rewarded",
+		})
+		if err != nil {
+			return err
+		}
+
+		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamSortUserRel.ID)
+		if err != nil {
+			return err
+		}
 		for _, uv := range upUserProxy {
 			var uvFee int64
 			if 0 >= uv.Rate {
@@ -1119,24 +1147,6 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 			if fee < 0 {
 				break // 分红余额已经不足
 			}
-		}
-
-		playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.CreatePlayGameTeamSortUserRel(ctx, &PlayGameTeamSortUserRel{
-			ID:      0,
-			UserId:  userId,
-			PlayId:  play.ID,
-			SortId:  req.SendBody.SortId,
-			Content: req.SendBody.Content,
-			Pay:     pay,
-			Status:  "no_rewarded",
-		})
-		if err != nil {
-			return err
-		}
-
-		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamSortUserRel.ID)
-		if err != nil {
-			return err
 		}
 
 		return nil
@@ -1221,6 +1231,25 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 
 		fee := pay / feeRate // 扣除手续费
 		pay -= fee
+		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.CreatePlayGameTeamGoalUserRel(ctx, &PlayGameTeamGoalUserRel{
+			ID:     0,
+			UserId: userId,
+			PlayId: play.ID,
+			TeamId: req.SendBody.TeamId,
+			Type:   req.SendBody.PlayType,
+			Goal:   req.SendBody.Goal,
+			Pay:    pay,
+			Status: "no_rewarded",
+		})
+		if err != nil {
+			return err
+		}
+
+		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamGoalUserRel.ID)
+		if err != nil {
+			return err
+		}
+
 		for _, uv := range upUserProxy {
 			var uvFee int64
 			if 0 >= uv.Rate {
@@ -1262,25 +1291,6 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 			if fee < 0 {
 				break // 分红余额已经不足
 			}
-		}
-
-		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.CreatePlayGameTeamGoalUserRel(ctx, &PlayGameTeamGoalUserRel{
-			ID:     0,
-			UserId: userId,
-			PlayId: play.ID,
-			TeamId: req.SendBody.TeamId,
-			Type:   req.SendBody.PlayType,
-			Goal:   req.SendBody.Goal,
-			Pay:    pay,
-			Status: "no_rewarded",
-		})
-		if err != nil {
-			return err
-		}
-
-		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamGoalUserRel.ID)
-		if err != nil {
-			return err
 		}
 
 		return nil

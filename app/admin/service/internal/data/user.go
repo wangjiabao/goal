@@ -458,7 +458,7 @@ func (ui *UserInfoRepo) GetUserInfoListByRecommendCode(ctx context.Context, reco
 	var userInfo []*UserInfo
 	if err := ui.data.DB(ctx).
 		Table("user_info").
-		Where("recommend_code Like ?", recommendCode+"%").
+		Where("recommend_code=?", recommendCode).
 		Find(&userInfo).Error; err != nil {
 		return nil, errors.NotFound("USER_INFO_NOT_FOUND", "用户信息不存在")
 	}

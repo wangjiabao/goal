@@ -238,6 +238,19 @@ func (p *PlayRepo) GetAdminCreatePlayListByType(ctx context.Context, playType st
 	return pl, nil
 }
 
+func (p *PlayRepo) GetAdminCreatePlayByType(ctx context.Context, playType string) (*biz.Play, error) {
+	var play *Play
+	if result := p.data.DB(ctx).Table("goal_play").Where(&Play{CreateUserId: 1, CreateUserType: "admin", Type: playType}).First(&play); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询玩法失败")
+	}
+
+	return &biz.Play{
+		ID:        play.ID,
+		StartTime: play.StartTime,
+		EndTime:   play.EndTime,
+	}, nil
+}
+
 func (p *PlayRepo) GetAdminCreatePlayList(ctx context.Context) ([]*biz.Play, error) {
 	var l []*Play
 	if result := p.data.DB(ctx).Table("goal_play").Where(&Play{CreateUserId: 1, CreateUserType: "admin"}).Find(&l); result.Error != nil {

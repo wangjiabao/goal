@@ -306,7 +306,8 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 	}
 
 	res := &v1.GameIndexStatisticsReply{
-		GameId:            0,
+		GameId:            game.ID,
+		GameName:          game.Name,
 		GoalAllPlayId:     0,
 		GoalAllTotal:      0,
 		GoalAllRedTotal:   0,

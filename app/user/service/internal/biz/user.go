@@ -61,6 +61,7 @@ type UserInfoRepo interface {
 	GetUserInfoByUserId(ctx context.Context, userId int64) (*UserInfo, error)
 	CreateUserInfo(ctx context.Context, u *User, recommendCode string) (*UserInfo, error)
 	GetUserInfoByMyRecommendCode(ctx context.Context, myRecommendCode string) (*UserInfo, error)
+	GetUserInfoByCode(ctx context.Context, code string) (*UserInfo, error)
 	GetUserInfoListByRecommendCode(ctx context.Context, recommendCode string) ([]*UserInfo, error)
 }
 
@@ -108,20 +109,23 @@ func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAut
 		err               error
 	)
 
-	recommendCode := req.SendBody.Code // 查询推荐码
-	if 0 != len(recommendCode) {
-		userInfo, err = uc.uiRepo.GetUserInfoByMyRecommendCode(ctx, recommendCode)
-		if err != nil {
-			return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
-		}
+	code := req.SendBody.Code // 查询推荐码
+	if 0 == len(code) {
+		return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
 	}
+
+	userInfo, err = uc.uiRepo.GetUserInfoByCode(ctx, code)
+	if err != nil {
+		return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+	}
+
 	if privateKey, publicAddress = ethAccount(); 0 == len(privateKey) || 0 == len(publicAddress) {
 		return nil, errors.New(500, "USER_ERROR", "生成账户失败，请重试")
 	}
 
 	user, err = uc.repo.GetUserByAddress(ctx, u.Address) // 查询用户
 	if err != nil {
-		err = uc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		if err = uc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 			u.ToAddressPrivateKey = privateKey
 			u.ToAddress = publicAddress
 			user, err = uc.repo.CreateUser(ctx, u) // 用户创建
@@ -129,7 +133,7 @@ func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAut
 				return err
 			}
 
-			userInfo, err = uc.uiRepo.CreateUserInfo(ctx, user, recommendCode) // 创建用户信息
+			userInfo, err = uc.uiRepo.CreateUserInfo(ctx, user, userInfo.MyRecommendCode) // 创建用户信息
 			if err != nil {
 				return err
 			}
@@ -144,7 +148,9 @@ func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAut
 				return err
 			}
 			return nil
-		})
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	return user, nil
@@ -193,7 +199,7 @@ func (uc *UserUseCase) GetUserWithInfoAndBalance(ctx context.Context, u *User) (
 		Address:         user.Address,
 		Balance:         userBalance.Balance / base,
 		Avatar:          userInfo.Avatar,
-		MyRecommendCode: userInfo.MyRecommendCode,
+		MyRecommendCode: userInfo.Code,
 		ToAddress:       user.ToAddress,
 	}, nil
 }

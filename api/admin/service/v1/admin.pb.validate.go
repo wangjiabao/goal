@@ -7695,6 +7695,8 @@ func (m *GameIndexStatisticsReply) validate(all bool) error {
 
 	// no validation rules for GameId
 
+	// no validation rules for GameName
+
 	// no validation rules for GoalAllPlayId
 
 	// no validation rules for GoalAllTotal

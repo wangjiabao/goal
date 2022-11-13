@@ -203,6 +203,7 @@ func (ui *UserInfoRepo) GetUserInfoByUserId(ctx context.Context, userId int64) (
 		Avatar:          userInfo.Avatar,
 		UserId:          userInfo.UserId,
 		MyRecommendCode: userInfo.MyRecommendCode,
+		Code:            userInfo.Code,
 		RecommendCode:   userInfo.RecommendCode,
 	}, nil
 }
@@ -211,6 +212,26 @@ func (ui *UserInfoRepo) GetUserInfoByUserId(ctx context.Context, userId int64) (
 func (ui *UserInfoRepo) GetUserInfoByMyRecommendCode(ctx context.Context, myRecommendCode string) (*biz.UserInfo, error) {
 	var userInfo UserInfo
 	if err := ui.data.db.Where(&UserInfo{MyRecommendCode: myRecommendCode}).Table("user_info").First(&userInfo).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("USER_NOT_FOUND", "user not found")
+		}
+
+		return nil, errors.New(500, "USER_NOT_FOUND", err.Error())
+	}
+
+	return &biz.UserInfo{
+		ID:              userInfo.ID,
+		Name:            userInfo.Name,
+		Avatar:          userInfo.Avatar,
+		UserId:          userInfo.UserId,
+		MyRecommendCode: userInfo.MyRecommendCode,
+	}, nil
+}
+
+// GetUserInfoByCode .
+func (ui *UserInfoRepo) GetUserInfoByCode(ctx context.Context, code string) (*biz.UserInfo, error) {
+	var userInfo UserInfo
+	if err := ui.data.db.Where(&UserInfo{Code: code}).Table("user_info").First(&userInfo).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.NotFound("USER_NOT_FOUND", "user not found")
 		}

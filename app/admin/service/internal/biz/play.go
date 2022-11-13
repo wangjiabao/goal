@@ -140,6 +140,7 @@ type PlayRepo interface {
 	GetPlayListByIds(ctx context.Context, ids ...int64) ([]*Play, error)
 	GetPlayById(ctx context.Context, id int64) (*Play, error)
 	CreatePlay(ctx context.Context, pc *Play) (*Play, error)
+	GetAdminCreatePlayByType(ctx context.Context, playType string) (*Play, error)
 }
 
 type PlayGameRelRepo interface {
@@ -1163,6 +1164,11 @@ func (p *PlayUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 	sort, err = p.sortRepo.GetGameSortById(ctx, req.SendBody.SortId) // 获取排名截至日期以校验创建的玩法
 	if nil != err {
 		return nil, err
+	}
+
+	tmpPlaySort, tmpErr := p.playRepo.GetAdminCreatePlayByType(ctx, sort.Type)
+	if nil == tmpErr || nil != tmpPlaySort {
+		return nil, errors.New(500, "TIME_ERROR", "已存在玩法")
 	}
 
 	startTime, err = time.Parse("2006-01-02 15:04:05", req.SendBody.StartTime) // 时间进行格式校验

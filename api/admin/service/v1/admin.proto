@@ -707,7 +707,7 @@ message GameIndexStatisticsRequest {
 
 message GameIndexStatisticsReply {
 	int64 gameId = 1;
-
+	string gameName = 28;
 	int64 goalAllPlayId = 2;
 	int64 goalAllTotal = 19;
 	int64 goalAllRedTotal = 20;

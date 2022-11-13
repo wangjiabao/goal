@@ -33,7 +33,7 @@ func NewUserService(uc *biz.UserUseCase, logger log.Logger, ca *conf.Auth) *User
 func (u *UserService) EthAuthorize(ctx context.Context, req *v1.EthAuthorizeRequest) (*v1.EthAuthorizeReply, error) {
 	// TODO 以太坊验证用户真实性
 	userAddress := req.SendBody.Address // 以太坊账户
-	if "" == userAddress {
+	if "" == userAddress || 20 > len(userAddress) {
 		return nil, errors.New(500, "CREATE_TOKEN_ERROR", "账户地址参数错误")
 	}
 

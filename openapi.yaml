@@ -1011,6 +1011,8 @@ components:
                 gameId:
                     type: integer
                     format: int64
+                gameName:
+                    type: string
                 goalAllPlayId:
                     type: integer
                     format: int64
