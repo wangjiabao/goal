@@ -1563,7 +1563,39 @@ func (m *DisplayGameIndexReply) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for GameId
+	for idx, item := range m.GetItems() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, DisplayGameIndexReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, DisplayGameIndexReplyValidationError{
+						field:  fmt.Sprintf("Items[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return DisplayGameIndexReplyValidationError{
+					field:  fmt.Sprintf("Items[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	if len(errors) > 0 {
 		return DisplayGameIndexReplyMultiError(errors)
@@ -4488,6 +4520,12 @@ func (m *GetUserBalanceRecordRequest) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Page
+
+	// no validation rules for Reason
+
+	// no validation rules for Type
+
 	if len(errors) > 0 {
 		return GetUserBalanceRecordRequestMultiError(errors)
 	}
@@ -6355,6 +6393,243 @@ var _ interface {
 	ErrorName() string
 } = CreatePlayGameReplyValidationError{}
 
+// Validate checks the field values on DeleteDisplayGameIndexRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DeleteDisplayGameIndexRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteDisplayGameIndexRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// DeleteDisplayGameIndexRequestMultiError, or nil if none found.
+func (m *DeleteDisplayGameIndexRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteDisplayGameIndexRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, DeleteDisplayGameIndexRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, DeleteDisplayGameIndexRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DeleteDisplayGameIndexRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return DeleteDisplayGameIndexRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// DeleteDisplayGameIndexRequestMultiError is an error wrapping multiple
+// validation errors returned by DeleteDisplayGameIndexRequest.ValidateAll()
+// if the designated constraints aren't met.
+type DeleteDisplayGameIndexRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteDisplayGameIndexRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteDisplayGameIndexRequestMultiError) AllErrors() []error { return m }
+
+// DeleteDisplayGameIndexRequestValidationError is the validation error
+// returned by DeleteDisplayGameIndexRequest.Validate if the designated
+// constraints aren't met.
+type DeleteDisplayGameIndexRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteDisplayGameIndexRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteDisplayGameIndexRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteDisplayGameIndexRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteDisplayGameIndexRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteDisplayGameIndexRequestValidationError) ErrorName() string {
+	return "DeleteDisplayGameIndexRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteDisplayGameIndexRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteDisplayGameIndexRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteDisplayGameIndexRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteDisplayGameIndexRequestValidationError{}
+
+// Validate checks the field values on DeleteDisplayGameIndexReply with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DeleteDisplayGameIndexReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteDisplayGameIndexReply with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DeleteDisplayGameIndexReplyMultiError, or nil if none found.
+func (m *DeleteDisplayGameIndexReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteDisplayGameIndexReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Result
+
+	if len(errors) > 0 {
+		return DeleteDisplayGameIndexReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// DeleteDisplayGameIndexReplyMultiError is an error wrapping multiple
+// validation errors returned by DeleteDisplayGameIndexReply.ValidateAll() if
+// the designated constraints aren't met.
+type DeleteDisplayGameIndexReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteDisplayGameIndexReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteDisplayGameIndexReplyMultiError) AllErrors() []error { return m }
+
+// DeleteDisplayGameIndexReplyValidationError is the validation error returned
+// by DeleteDisplayGameIndexReply.Validate if the designated constraints
+// aren't met.
+type DeleteDisplayGameIndexReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteDisplayGameIndexReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteDisplayGameIndexReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteDisplayGameIndexReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteDisplayGameIndexReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteDisplayGameIndexReplyValidationError) ErrorName() string {
+	return "DeleteDisplayGameIndexReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteDisplayGameIndexReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteDisplayGameIndexReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteDisplayGameIndexReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteDisplayGameIndexReplyValidationError{}
+
 // Validate checks the field values on CreatePlaySortRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -7313,6 +7588,8 @@ func (m *GameIndexStatisticsRequest) validate(all bool) error {
 	}
 
 	var errors []error
+
+	// no validation rules for GameId
 
 	if len(errors) > 0 {
 		return GameIndexStatisticsRequestMultiError(errors)
@@ -8914,6 +9191,110 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UpdateSortRequest_SendBodyValidationError{}
+
+// Validate checks the field values on DisplayGameIndexReply_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DisplayGameIndexReply_Item) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DisplayGameIndexReply_Item with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DisplayGameIndexReply_ItemMultiError, or nil if none found.
+func (m *DisplayGameIndexReply_Item) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DisplayGameIndexReply_Item) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for GameId
+
+	if len(errors) > 0 {
+		return DisplayGameIndexReply_ItemMultiError(errors)
+	}
+
+	return nil
+}
+
+// DisplayGameIndexReply_ItemMultiError is an error wrapping multiple
+// validation errors returned by DisplayGameIndexReply_Item.ValidateAll() if
+// the designated constraints aren't met.
+type DisplayGameIndexReply_ItemMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DisplayGameIndexReply_ItemMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DisplayGameIndexReply_ItemMultiError) AllErrors() []error { return m }
+
+// DisplayGameIndexReply_ItemValidationError is the validation error returned
+// by DisplayGameIndexReply_Item.Validate if the designated constraints aren't met.
+type DisplayGameIndexReply_ItemValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DisplayGameIndexReply_ItemValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DisplayGameIndexReply_ItemValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DisplayGameIndexReply_ItemValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DisplayGameIndexReply_ItemValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DisplayGameIndexReply_ItemValidationError) ErrorName() string {
+	return "DisplayGameIndexReply_ItemValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DisplayGameIndexReply_ItemValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDisplayGameIndexReply_Item.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DisplayGameIndexReply_ItemValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DisplayGameIndexReply_ItemValidationError{}
 
 // Validate checks the field values on GetUserRecommendListReply_Item with the
 // rules defined in the proto definition for this message. If any rules are
@@ -10907,6 +11288,114 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CreatePlayGameRequest_SendBodyValidationError{}
+
+// Validate checks the field values on DeleteDisplayGameIndexRequest_SendBody
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *DeleteDisplayGameIndexRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// DeleteDisplayGameIndexRequest_SendBody with the rules defined in the proto
+// definition for this message. If any rules are violated, the result is a
+// list of violation errors wrapped in
+// DeleteDisplayGameIndexRequest_SendBodyMultiError, or nil if none found.
+func (m *DeleteDisplayGameIndexRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteDisplayGameIndexRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for GameId
+
+	if len(errors) > 0 {
+		return DeleteDisplayGameIndexRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// DeleteDisplayGameIndexRequest_SendBodyMultiError is an error wrapping
+// multiple validation errors returned by
+// DeleteDisplayGameIndexRequest_SendBody.ValidateAll() if the designated
+// constraints aren't met.
+type DeleteDisplayGameIndexRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteDisplayGameIndexRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteDisplayGameIndexRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// DeleteDisplayGameIndexRequest_SendBodyValidationError is the validation
+// error returned by DeleteDisplayGameIndexRequest_SendBody.Validate if the
+// designated constraints aren't met.
+type DeleteDisplayGameIndexRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteDisplayGameIndexRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteDisplayGameIndexRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteDisplayGameIndexRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteDisplayGameIndexRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteDisplayGameIndexRequest_SendBodyValidationError) ErrorName() string {
+	return "DeleteDisplayGameIndexRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteDisplayGameIndexRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteDisplayGameIndexRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteDisplayGameIndexRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteDisplayGameIndexRequest_SendBodyValidationError{}
 
 // Validate checks the field values on CreatePlaySortRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are

@@ -900,6 +900,7 @@ func (c *UserHTTPClientImpl) UserWithdraw(ctx context.Context, in *UserWithdrawR
 const OperationGameCreateGame = "/api.admin.service.v1.Game/CreateGame"
 const OperationGameCreateSort = "/api.admin.service.v1.Game/CreateSort"
 const OperationGameCreateTeam = "/api.admin.service.v1.Game/CreateTeam"
+const OperationGameDeleteDisplayGameIndex = "/api.admin.service.v1.Game/DeleteDisplayGameIndex"
 const OperationGameDisplayGameIndex = "/api.admin.service.v1.Game/DisplayGameIndex"
 const OperationGameGameIndexStatistics = "/api.admin.service.v1.Game/GameIndexStatistics"
 const OperationGameGetGame = "/api.admin.service.v1.Game/GetGame"
@@ -914,6 +915,7 @@ type GameHTTPServer interface {
 	CreateGame(context.Context, *CreateGameRequest) (*CreateGameReply, error)
 	CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error)
 	CreateTeam(context.Context, *CreateTeamRequest) (*CreateTeamReply, error)
+	DeleteDisplayGameIndex(context.Context, *DeleteDisplayGameIndexRequest) (*DeleteDisplayGameIndexReply, error)
 	DisplayGameIndex(context.Context, *DisplayGameIndexRequest) (*DisplayGameIndexReply, error)
 	GameIndexStatistics(context.Context, *GameIndexStatisticsRequest) (*GameIndexStatisticsReply, error)
 	GetGame(context.Context, *GetGameRequest) (*GetGameReply, error)
@@ -933,6 +935,7 @@ func RegisterGameHTTPServer(s *http.Server, srv GameHTTPServer) {
 	r.GET("/api/goal_admin/games", _Game_GetGameList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/display_game/index", _Game_DisplayGameIndex0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/display_game/index", _Game_SaveDisplayGameIndex0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/display_game/index_delete", _Game_DeleteDisplayGameIndex0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/sort/create", _Game_CreateSort0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/sort/update", _Game_UpdateSort0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/sorts", _Game_GetGameSortList0_HTTP_Handler(srv))
@@ -1067,6 +1070,28 @@ func _Game_SaveDisplayGameIndex0_HTTP_Handler(srv GameHTTPServer) func(ctx http.
 	}
 }
 
+func _Game_DeleteDisplayGameIndex0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeleteDisplayGameIndexRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGameDeleteDisplayGameIndex)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeleteDisplayGameIndex(ctx, req.(*DeleteDisplayGameIndexRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeleteDisplayGameIndexReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _Game_CreateSort0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in CreateSortRequest
@@ -1194,6 +1219,7 @@ type GameHTTPClient interface {
 	CreateGame(ctx context.Context, req *CreateGameRequest, opts ...http.CallOption) (rsp *CreateGameReply, err error)
 	CreateSort(ctx context.Context, req *CreateSortRequest, opts ...http.CallOption) (rsp *CreateSortReply, err error)
 	CreateTeam(ctx context.Context, req *CreateTeamRequest, opts ...http.CallOption) (rsp *CreateTeamReply, err error)
+	DeleteDisplayGameIndex(ctx context.Context, req *DeleteDisplayGameIndexRequest, opts ...http.CallOption) (rsp *DeleteDisplayGameIndexReply, err error)
 	DisplayGameIndex(ctx context.Context, req *DisplayGameIndexRequest, opts ...http.CallOption) (rsp *DisplayGameIndexReply, err error)
 	GameIndexStatistics(ctx context.Context, req *GameIndexStatisticsRequest, opts ...http.CallOption) (rsp *GameIndexStatisticsReply, err error)
 	GetGame(ctx context.Context, req *GetGameRequest, opts ...http.CallOption) (rsp *GetGameReply, err error)
@@ -1244,6 +1270,19 @@ func (c *GameHTTPClientImpl) CreateTeam(ctx context.Context, in *CreateTeamReque
 	pattern := "/api/goal_admin/team/create"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationGameCreateTeam))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *GameHTTPClientImpl) DeleteDisplayGameIndex(ctx context.Context, in *DeleteDisplayGameIndexRequest, opts ...http.CallOption) (*DeleteDisplayGameIndexReply, error) {
+	var out DeleteDisplayGameIndexReply
+	pattern := "/api/goal_admin/display_game/index_delete"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationGameDeleteDisplayGameIndex))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {

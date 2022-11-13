@@ -13,7 +13,7 @@ type DisplayGame struct {
 }
 
 type DisplayGameRepo interface {
-	GetDisplayGameByType(ctx context.Context, displayGameType string) (*DisplayGame, error)
+	GetDisplayGameByType(ctx context.Context, displayGameType string) ([]*DisplayGame, error)
 }
 
 type DisplayGameUseCase struct {
@@ -33,46 +33,62 @@ func NewDisplayGameUseCase(repo DisplayGameRepo, gameRepo GameRepo, teamRepo Tea
 
 func (dg *DisplayGameUseCase) GetDisplayGame(ctx context.Context, disPlayGameType string) (*v1.DisplayGameReply, error) {
 	var (
-		game        *Game
-		disPlayGame *DisplayGame
+		games       map[int64]*Game
+		disPlayGame []*DisplayGame
+		gameIds     []int64
+		teamIds     []int64
 		teams       map[int64]*Team
 		err         error
 	)
 
-	disPlayGame, err = dg.displayGameRepo.GetDisplayGameByType(ctx, disPlayGameType)
+	disPlayGame, err = dg.displayGameRepo.GetDisplayGameByType(ctx, "index")
 	if err != nil {
 		return nil, err
 	}
+	for _, v := range disPlayGame {
+		gameIds = append(gameIds, v.GameId)
+	}
 
-	game, err = dg.gameRepo.GetGameById(ctx, disPlayGame.GameId)
+	games, err = dg.gameRepo.GetGameByIds(ctx, gameIds...)
 	if err != nil {
 		return nil, err
 	}
+	for _, v := range games {
+		teamIds = append(teamIds, v.RedTeamId, v.BlueTeamId)
+	}
 
-	teams, err = dg.teamRepo.GetTeamByIds(ctx, game.RedTeamId, game.BlueTeamId)
+	teams, err = dg.teamRepo.GetTeamByIds(ctx, teamIds...)
 	if err != nil {
 		return nil, err
 	}
 
 	res := &v1.DisplayGameReply{
-		GameId: disPlayGame.GameId,
-		Name:   game.Name,
-		Teams:  make([]*v1.DisplayGameReply_Team, 0),
+		Games: make([]*v1.DisplayGameReply_Game, 0),
 	}
 
-	if v, ok := teams[game.RedTeamId]; ok {
-		res.Teams = append(res.Teams, &v1.DisplayGameReply_Team{
-			TeamId:   v.ID,
-			TeamName: v.Name,
-			TeamType: "red",
-		})
-	}
+	for _, game := range games {
 
-	if v, ok := teams[game.BlueTeamId]; ok {
-		res.Teams = append(res.Teams, &v1.DisplayGameReply_Team{
-			TeamId:   v.ID,
-			TeamName: v.Name,
-			TeamType: "blue",
+		tmpTeam := make([]*v1.DisplayGameReply_Game_Team, 0)
+		if v, ok := teams[game.RedTeamId]; ok {
+			tmpTeam = append(tmpTeam, &v1.DisplayGameReply_Game_Team{
+				TeamId:   v.ID,
+				TeamName: v.Name,
+				TeamType: "red",
+			})
+		}
+
+		if v, ok := teams[game.BlueTeamId]; ok {
+			tmpTeam = append(tmpTeam, &v1.DisplayGameReply_Game_Team{
+				TeamId:   v.ID,
+				TeamName: v.Name,
+				TeamType: "blue",
+			})
+		}
+
+		res.Games = append(res.Games, &v1.DisplayGameReply_Game{
+			GameId: game.ID,
+			Name:   game.Name,
+			Teams:  tmpTeam,
 		})
 	}
 

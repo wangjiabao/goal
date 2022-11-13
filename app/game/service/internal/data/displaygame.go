@@ -29,9 +29,9 @@ func NewDisplayGameRepo(data *Data, logger log.Logger) biz.DisplayGameRepo {
 	}
 }
 
-func (d *DisplayGameRepo) GetDisplayGameByType(ctx context.Context, displayGameType string) (*biz.DisplayGame, error) {
-	var displayGame DisplayGame
-	if err := d.data.db.Where(&DisplayGame{Type: displayGameType}).Table("display_game").First(&displayGame).Error; err != nil {
+func (d *DisplayGameRepo) GetDisplayGameByType(ctx context.Context, displayGameType string) ([]*biz.DisplayGame, error) {
+	var displayGame []*DisplayGame
+	if err := d.data.db.Where(&DisplayGame{Type: displayGameType}).Table("display_game").Find(&displayGame).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.NotFound("DISPLAY_GAME_NOT_FOUND", "display game not found")
 		}
@@ -39,9 +39,13 @@ func (d *DisplayGameRepo) GetDisplayGameByType(ctx context.Context, displayGameT
 		return nil, errors.New(500, "DISPLAY_GAME_NOT_FOUND", err.Error())
 	}
 
-	return &biz.DisplayGame{
-		ID:     displayGame.ID,
-		GameId: displayGame.GameId,
-		Type:   displayGame.Type,
-	}, nil
+	res := make([]*biz.DisplayGame, 0)
+	for _, v := range displayGame {
+		res = append(res, &biz.DisplayGame{
+			ID:     v.ID,
+			GameId: v.GameId,
+			Type:   v.Type,
+		})
+	}
+	return res, nil
 }

@@ -183,10 +183,11 @@ type PlayGameTeamSortUserRelRepo interface {
 }
 
 type UserBalanceRepo interface {
-	TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) error
+	TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) (int64, error)
+	CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
-	GetUserBalanceRecord(ctx context.Context) ([]*UserBalanceRecord, error)
-	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) error
+	GetUserBalanceRecord(ctx context.Context, reason string, balanceType string, b *Pagination) ([]*UserBalanceRecord, error)
+	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) (int64, error)
 	GetAddressEthBalanceByAddress(ctx context.Context, address string) (*AddressEthBalance, error)
 	Withdraw(ctx context.Context, userId int64, amount int64) error
 	Deposit(ctx context.Context, userId int64, amount int64) (*UserBalance, error)
@@ -367,6 +368,8 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 		ok                      bool
 		rateZero                int64
 		rateFirst               int64
+		recommendRecordId       int64
+		goalBalanceRecordId     int64
 		rateSecond              int64
 		rateThird               int64
 	)
@@ -524,28 +527,43 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 					var tmpPerAmount int64
 					if 0 == k {
 						tmpPerAmount = perAmount * rateThird / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, playSort.Type, winV.Id); nil != err {
+							return err
 						}
 					} else if 1 == k {
 						tmpPerAmount = perAmount * rateSecond / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
 						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, playSort.Type, winV.Id); nil != err {
+							return err
+						}
+
 					} else if 2 == k {
 						tmpPerAmount = perAmount * rateFirst / 1000
 						tmpPerAmount += perAmount * rateZero / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, playSort.Type, winV.Id); nil != err {
+							return err
 						}
 					}
 					perAmount -= tmpPerAmount
 				}
 
-				if res := p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != res {
-					return res
+				if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != err {
+					return err
 				}
-
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, playSort.Type, winV.Id); nil != err {
+					return err
+				}
 				if res := p.playGameTeamSortUserRelRepo.SetRewarded(ctx, winV.Id); nil != res {
 					return res
 				}
@@ -572,6 +590,8 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 		rateFirst            int64
 		rateSecond           int64
 		rateThird            int64
+		recommendRecordId    int64
+		goalBalanceRecordId  int64
 	)
 	for _, v := range play {
 		playIds = append(playIds, v.ID)
@@ -654,26 +674,41 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 					var tmpPerAmount int64
 					if 0 == k {
 						tmpPerAmount = perAmount * rateThird / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_score", winV.ID); nil != err {
+							return err
 						}
 					} else if 1 == k {
 						tmpPerAmount = perAmount * rateSecond / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_score", winV.ID); nil != err {
+							return err
 						}
 					} else if 2 == k {
 						tmpPerAmount = perAmount * rateFirst / 1000
 						tmpPerAmount += perAmount * rateZero / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_score", winV.ID); nil != err {
+							return err
 						}
 					}
 					perAmount -= tmpPerAmount
 				}
 
-				if res := p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != res {
-					return res
+				if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != err {
+					return err
+				}
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_score", winV.ID); nil != err {
+					return err
 				}
 
 				if res := p.playGameScoreUserRelRepo.SetRewarded(ctx, winV.ID); nil != res {
@@ -703,6 +738,8 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 		rateFirst                 int64
 		rateSecond                int64
 		rateThird                 int64
+		goalBalanceRecordId       int64
+		recommendRecordId         int64
 	)
 
 	for _, v := range play {
@@ -794,27 +831,43 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 					var tmpPerAmount int64
 					if 0 == k {
 						tmpPerAmount = perAmount * rateThird / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_team_result", winV.ID); nil != err {
+							return err
 						}
 					} else if 1 == k {
 						tmpPerAmount = perAmount * rateSecond / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_team_result", winV.ID); nil != err {
+							return err
 						}
 					} else if 2 == k {
 						tmpPerAmount = perAmount * rateFirst / 1000
 						tmpPerAmount += perAmount * rateZero / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_team_result", winV.ID); nil != err {
+							return err
 						}
 					}
 					perAmount -= tmpPerAmount
 				}
 
 				perAmount += winV.Pay // 押注的钱原路返回
-				if res := p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != res {
-					return res
+
+				if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != err {
+					return err
+				}
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_team_result", winV.ID); nil != err {
+					return err
 				}
 
 				if res := p.playGameTeamResultUserRelRepo.SetRewarded(ctx, winV.ID); nil != res {
@@ -844,6 +897,8 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 		rateFirst               int64
 		rateSecond              int64
 		rateThird               int64
+		recommendRecordId       int64
+		goalBalanceRecordId     int64
 	)
 
 	for _, v := range play {
@@ -978,26 +1033,41 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 					var tmpPerAmount int64
 					if 0 == k {
 						tmpPerAmount = perAmount * rateThird / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, winV.Type, winV.ID); nil != err {
+							return err
 						}
 					} else if 1 == k {
 						tmpPerAmount = perAmount * rateSecond / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, winV.Type, winV.ID); nil != err {
+							return err
 						}
 					} else if 2 == k {
 						tmpPerAmount = perAmount * rateFirst / 1000
 						tmpPerAmount += perAmount * rateZero / 1000
-						if res := p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != res {
-							return res
+						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+							return err
+						}
+
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, winV.Type, winV.ID); nil != err {
+							return err
 						}
 					}
 					perAmount -= tmpPerAmount
 				}
 
-				if res := p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != res {
-					return res
+				if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != err {
+					return err
+				}
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, winV.Type, winV.ID); nil != err {
+					return err
 				}
 
 				if res := p.playGameTeamGoalUserRelRepo.SetRewarded(ctx, winV.ID); nil != res {

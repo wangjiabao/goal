@@ -47,6 +47,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/goal_admin/display_game/index_delete:
+        post:
+            tags:
+                - Game
+            operationId: Game_DeleteDisplayGameIndex
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DeleteDisplayGameIndexRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeleteDisplayGameIndexReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/goal_admin/game/create:
         post:
             tags:
@@ -168,6 +192,12 @@ paths:
             tags:
                 - Game
             operationId: Game_GameIndexStatistics
+            parameters:
+                - name: gameId
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
             responses:
                 "200":
                     description: OK
@@ -694,6 +724,20 @@ paths:
             tags:
                 - User
             operationId: User_GetUserBalanceRecord
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: reason
+                  in: query
+                  schema:
+                    type: string
+                - name: type
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -937,7 +981,25 @@ components:
             properties:
                 name:
                     type: string
+        DeleteDisplayGameIndexReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        DeleteDisplayGameIndexRequest_SendBody:
+            type: object
+            properties:
+                gameId:
+                    type: integer
+                    format: int64
         DisplayGameIndexReply:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/DisplayGameIndexReply_Item'
+        DisplayGameIndexReply_Item:
             type: object
             properties:
                 gameId:

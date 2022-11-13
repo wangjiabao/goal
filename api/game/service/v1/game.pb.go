@@ -73,9 +73,7 @@ type DisplayGameReply struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	GameId int64                    `protobuf:"varint,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
-	Name   string                   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Teams  []*DisplayGameReply_Team `protobuf:"bytes,3,rep,name=teams,proto3" json:"teams,omitempty"`
+	Games []*DisplayGameReply_Game `protobuf:"bytes,1,rep,name=games,proto3" json:"games,omitempty"`
 }
 
 func (x *DisplayGameReply) Reset() {
@@ -110,23 +108,9 @@ func (*DisplayGameReply) Descriptor() ([]byte, []int) {
 	return file_api_game_service_v1_game_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *DisplayGameReply) GetGameId() int64 {
+func (x *DisplayGameReply) GetGames() []*DisplayGameReply_Game {
 	if x != nil {
-		return x.GameId
-	}
-	return 0
-}
-
-func (x *DisplayGameReply) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *DisplayGameReply) GetTeams() []*DisplayGameReply_Team {
-	if x != nil {
-		return x.Teams
+		return x.Games
 	}
 	return nil
 }
@@ -386,18 +370,18 @@ func (x *GetTeamListReply) GetTeams() []*GetTeamListReply_Team {
 	return nil
 }
 
-type DisplayGameReply_Team struct {
+type DisplayGameReply_Game struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TeamId   int64  `protobuf:"varint,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
-	TeamName string `protobuf:"bytes,2,opt,name=team_name,json=teamName,proto3" json:"team_name,omitempty"`
-	TeamType string `protobuf:"bytes,3,opt,name=team_type,json=teamType,proto3" json:"team_type,omitempty"`
+	GameId int64                         `protobuf:"varint,1,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
+	Name   string                        `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Teams  []*DisplayGameReply_Game_Team `protobuf:"bytes,3,rep,name=teams,proto3" json:"teams,omitempty"`
 }
 
-func (x *DisplayGameReply_Team) Reset() {
-	*x = DisplayGameReply_Team{}
+func (x *DisplayGameReply_Game) Reset() {
+	*x = DisplayGameReply_Game{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_api_game_service_v1_game_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -405,13 +389,13 @@ func (x *DisplayGameReply_Team) Reset() {
 	}
 }
 
-func (x *DisplayGameReply_Team) String() string {
+func (x *DisplayGameReply_Game) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DisplayGameReply_Team) ProtoMessage() {}
+func (*DisplayGameReply_Game) ProtoMessage() {}
 
-func (x *DisplayGameReply_Team) ProtoReflect() protoreflect.Message {
+func (x *DisplayGameReply_Game) ProtoReflect() protoreflect.Message {
 	mi := &file_api_game_service_v1_game_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -423,26 +407,89 @@ func (x *DisplayGameReply_Team) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DisplayGameReply_Team.ProtoReflect.Descriptor instead.
-func (*DisplayGameReply_Team) Descriptor() ([]byte, []int) {
+// Deprecated: Use DisplayGameReply_Game.ProtoReflect.Descriptor instead.
+func (*DisplayGameReply_Game) Descriptor() ([]byte, []int) {
 	return file_api_game_service_v1_game_proto_rawDescGZIP(), []int{1, 0}
 }
 
-func (x *DisplayGameReply_Team) GetTeamId() int64 {
+func (x *DisplayGameReply_Game) GetGameId() int64 {
+	if x != nil {
+		return x.GameId
+	}
+	return 0
+}
+
+func (x *DisplayGameReply_Game) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DisplayGameReply_Game) GetTeams() []*DisplayGameReply_Game_Team {
+	if x != nil {
+		return x.Teams
+	}
+	return nil
+}
+
+type DisplayGameReply_Game_Team struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TeamId   int64  `protobuf:"varint,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
+	TeamName string `protobuf:"bytes,2,opt,name=team_name,json=teamName,proto3" json:"team_name,omitempty"`
+	TeamType string `protobuf:"bytes,3,opt,name=team_type,json=teamType,proto3" json:"team_type,omitempty"`
+}
+
+func (x *DisplayGameReply_Game_Team) Reset() {
+	*x = DisplayGameReply_Game_Team{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_game_service_v1_game_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DisplayGameReply_Game_Team) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DisplayGameReply_Game_Team) ProtoMessage() {}
+
+func (x *DisplayGameReply_Game_Team) ProtoReflect() protoreflect.Message {
+	mi := &file_api_game_service_v1_game_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DisplayGameReply_Game_Team.ProtoReflect.Descriptor instead.
+func (*DisplayGameReply_Game_Team) Descriptor() ([]byte, []int) {
+	return file_api_game_service_v1_game_proto_rawDescGZIP(), []int{1, 0, 0}
+}
+
+func (x *DisplayGameReply_Game_Team) GetTeamId() int64 {
 	if x != nil {
 		return x.TeamId
 	}
 	return 0
 }
 
-func (x *DisplayGameReply_Team) GetTeamName() string {
+func (x *DisplayGameReply_Game_Team) GetTeamName() string {
 	if x != nil {
 		return x.TeamName
 	}
 	return ""
 }
 
-func (x *DisplayGameReply_Team) GetTeamType() string {
+func (x *DisplayGameReply_Game_Team) GetTeamType() string {
 	if x != nil {
 		return x.TeamType
 	}
@@ -466,7 +513,7 @@ type GetGameListReply_Item struct {
 func (x *GetGameListReply_Item) Reset() {
 	*x = GetGameListReply_Item{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_game_service_v1_game_proto_msgTypes[9]
+		mi := &file_api_game_service_v1_game_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -479,7 +526,7 @@ func (x *GetGameListReply_Item) String() string {
 func (*GetGameListReply_Item) ProtoMessage() {}
 
 func (x *GetGameListReply_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_api_game_service_v1_game_proto_msgTypes[9]
+	mi := &file_api_game_service_v1_game_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,7 +604,7 @@ type GetGameListReply_Item_Team struct {
 func (x *GetGameListReply_Item_Team) Reset() {
 	*x = GetGameListReply_Item_Team{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_game_service_v1_game_proto_msgTypes[10]
+		mi := &file_api_game_service_v1_game_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -570,7 +617,7 @@ func (x *GetGameListReply_Item_Team) String() string {
 func (*GetGameListReply_Item_Team) ProtoMessage() {}
 
 func (x *GetGameListReply_Item_Team) ProtoReflect() protoreflect.Message {
-	mi := &file_api_game_service_v1_game_proto_msgTypes[10]
+	mi := &file_api_game_service_v1_game_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -621,7 +668,7 @@ type GetGameSortListReply_Sort struct {
 func (x *GetGameSortListReply_Sort) Reset() {
 	*x = GetGameSortListReply_Sort{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_game_service_v1_game_proto_msgTypes[11]
+		mi := &file_api_game_service_v1_game_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -634,7 +681,7 @@ func (x *GetGameSortListReply_Sort) String() string {
 func (*GetGameSortListReply_Sort) ProtoMessage() {}
 
 func (x *GetGameSortListReply_Sort) ProtoReflect() protoreflect.Message {
-	mi := &file_api_game_service_v1_game_proto_msgTypes[11]
+	mi := &file_api_game_service_v1_game_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -690,7 +737,7 @@ type GetTeamListReply_Team struct {
 func (x *GetTeamListReply_Team) Reset() {
 	*x = GetTeamListReply_Team{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_game_service_v1_game_proto_msgTypes[12]
+		mi := &file_api_game_service_v1_game_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -703,7 +750,7 @@ func (x *GetTeamListReply_Team) String() string {
 func (*GetTeamListReply_Team) ProtoMessage() {}
 
 func (x *GetTeamListReply_Team) ProtoReflect() protoreflect.Message {
-	mi := &file_api_game_service_v1_game_proto_msgTypes[12]
+	mi := &file_api_game_service_v1_game_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -743,15 +790,20 @@ var file_api_game_service_v1_game_proto_rawDesc = []byte{
 	0x69, 0x2f, 0x61, 0x6e, 0x6e, 0x6f, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x22, 0x28, 0x0a, 0x12, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x47, 0x61,
 	0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70,
-	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0xdc, 0x01,
+	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0xac, 0x02,
 	0x0a, 0x10, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70,
-	0x6c, 0x79, 0x12, 0x17, 0x0a, 0x07, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x06, 0x67, 0x61, 0x6d, 0x65, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e,
-	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12,
-	0x40, 0x0a, 0x05, 0x74, 0x65, 0x61, 0x6d, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2a,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x47, 0x61, 0x6d, 0x65,
-	0x52, 0x65, 0x70, 0x6c, 0x79, 0x2e, 0x54, 0x65, 0x61, 0x6d, 0x52, 0x05, 0x74, 0x65, 0x61, 0x6d,
+	0x6c, 0x79, 0x12, 0x40, 0x0a, 0x05, 0x67, 0x61, 0x6d, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x2a, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x47,
+	0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x2e, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x05, 0x67,
+	0x61, 0x6d, 0x65, 0x73, 0x1a, 0xd5, 0x01, 0x0a, 0x04, 0x47, 0x61, 0x6d, 0x65, 0x12, 0x17, 0x0a,
+	0x07, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06,
+	0x67, 0x61, 0x6d, 0x65, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x45, 0x0a, 0x05, 0x74, 0x65,
+	0x61, 0x6d, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2f, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x67, 0x61, 0x6d, 0x65, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e,
+	0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x47, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x70, 0x6c, 0x79,
+	0x2e, 0x47, 0x61, 0x6d, 0x65, 0x2e, 0x54, 0x65, 0x61, 0x6d, 0x52, 0x05, 0x74, 0x65, 0x61, 0x6d,
 	0x73, 0x1a, 0x59, 0x0a, 0x04, 0x54, 0x65, 0x61, 0x6d, 0x12, 0x17, 0x0a, 0x07, 0x74, 0x65, 0x61,
 	0x6d, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x74, 0x65, 0x61, 0x6d,
 	0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x65, 0x61, 0x6d, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18,
@@ -862,7 +914,7 @@ func file_api_game_service_v1_game_proto_rawDescGZIP() []byte {
 	return file_api_game_service_v1_game_proto_rawDescData
 }
 
-var file_api_game_service_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_api_game_service_v1_game_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_api_game_service_v1_game_proto_goTypes = []interface{}{
 	(*DisplayGameRequest)(nil),         // 0: api.game.service.v1.DisplayGameRequest
 	(*DisplayGameReply)(nil),           // 1: api.game.service.v1.DisplayGameReply
@@ -872,31 +924,33 @@ var file_api_game_service_v1_game_proto_goTypes = []interface{}{
 	(*GetGameSortListReply)(nil),       // 5: api.game.service.v1.GetGameSortListReply
 	(*GetTeamListRequest)(nil),         // 6: api.game.service.v1.GetTeamListRequest
 	(*GetTeamListReply)(nil),           // 7: api.game.service.v1.GetTeamListReply
-	(*DisplayGameReply_Team)(nil),      // 8: api.game.service.v1.DisplayGameReply.Team
-	(*GetGameListReply_Item)(nil),      // 9: api.game.service.v1.GetGameListReply.Item
-	(*GetGameListReply_Item_Team)(nil), // 10: api.game.service.v1.GetGameListReply.Item.Team
-	(*GetGameSortListReply_Sort)(nil),  // 11: api.game.service.v1.GetGameSortListReply.Sort
-	(*GetTeamListReply_Team)(nil),      // 12: api.game.service.v1.GetTeamListReply.Team
+	(*DisplayGameReply_Game)(nil),      // 8: api.game.service.v1.DisplayGameReply.Game
+	(*DisplayGameReply_Game_Team)(nil), // 9: api.game.service.v1.DisplayGameReply.Game.Team
+	(*GetGameListReply_Item)(nil),      // 10: api.game.service.v1.GetGameListReply.Item
+	(*GetGameListReply_Item_Team)(nil), // 11: api.game.service.v1.GetGameListReply.Item.Team
+	(*GetGameSortListReply_Sort)(nil),  // 12: api.game.service.v1.GetGameSortListReply.Sort
+	(*GetTeamListReply_Team)(nil),      // 13: api.game.service.v1.GetTeamListReply.Team
 }
 var file_api_game_service_v1_game_proto_depIdxs = []int32{
-	8,  // 0: api.game.service.v1.DisplayGameReply.teams:type_name -> api.game.service.v1.DisplayGameReply.Team
-	9,  // 1: api.game.service.v1.GetGameListReply.items:type_name -> api.game.service.v1.GetGameListReply.Item
-	11, // 2: api.game.service.v1.GetGameSortListReply.sorts:type_name -> api.game.service.v1.GetGameSortListReply.Sort
-	12, // 3: api.game.service.v1.GetTeamListReply.teams:type_name -> api.game.service.v1.GetTeamListReply.Team
-	10, // 4: api.game.service.v1.GetGameListReply.Item.teams:type_name -> api.game.service.v1.GetGameListReply.Item.Team
-	0,  // 5: api.game.service.v1.Game.DisplayGame:input_type -> api.game.service.v1.DisplayGameRequest
-	2,  // 6: api.game.service.v1.Game.GetGameList:input_type -> api.game.service.v1.GetGameListRequest
-	6,  // 7: api.game.service.v1.Game.GetTeamList:input_type -> api.game.service.v1.GetTeamListRequest
-	4,  // 8: api.game.service.v1.Game.GetGameSortList:input_type -> api.game.service.v1.GetGameSortListRequest
-	1,  // 9: api.game.service.v1.Game.DisplayGame:output_type -> api.game.service.v1.DisplayGameReply
-	3,  // 10: api.game.service.v1.Game.GetGameList:output_type -> api.game.service.v1.GetGameListReply
-	7,  // 11: api.game.service.v1.Game.GetTeamList:output_type -> api.game.service.v1.GetTeamListReply
-	5,  // 12: api.game.service.v1.Game.GetGameSortList:output_type -> api.game.service.v1.GetGameSortListReply
-	9,  // [9:13] is the sub-list for method output_type
-	5,  // [5:9] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	8,  // 0: api.game.service.v1.DisplayGameReply.games:type_name -> api.game.service.v1.DisplayGameReply.Game
+	10, // 1: api.game.service.v1.GetGameListReply.items:type_name -> api.game.service.v1.GetGameListReply.Item
+	12, // 2: api.game.service.v1.GetGameSortListReply.sorts:type_name -> api.game.service.v1.GetGameSortListReply.Sort
+	13, // 3: api.game.service.v1.GetTeamListReply.teams:type_name -> api.game.service.v1.GetTeamListReply.Team
+	9,  // 4: api.game.service.v1.DisplayGameReply.Game.teams:type_name -> api.game.service.v1.DisplayGameReply.Game.Team
+	11, // 5: api.game.service.v1.GetGameListReply.Item.teams:type_name -> api.game.service.v1.GetGameListReply.Item.Team
+	0,  // 6: api.game.service.v1.Game.DisplayGame:input_type -> api.game.service.v1.DisplayGameRequest
+	2,  // 7: api.game.service.v1.Game.GetGameList:input_type -> api.game.service.v1.GetGameListRequest
+	6,  // 8: api.game.service.v1.Game.GetTeamList:input_type -> api.game.service.v1.GetTeamListRequest
+	4,  // 9: api.game.service.v1.Game.GetGameSortList:input_type -> api.game.service.v1.GetGameSortListRequest
+	1,  // 10: api.game.service.v1.Game.DisplayGame:output_type -> api.game.service.v1.DisplayGameReply
+	3,  // 11: api.game.service.v1.Game.GetGameList:output_type -> api.game.service.v1.GetGameListReply
+	7,  // 12: api.game.service.v1.Game.GetTeamList:output_type -> api.game.service.v1.GetTeamListReply
+	5,  // 13: api.game.service.v1.Game.GetGameSortList:output_type -> api.game.service.v1.GetGameSortListReply
+	10, // [10:14] is the sub-list for method output_type
+	6,  // [6:10] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_api_game_service_v1_game_proto_init() }
@@ -1002,7 +1056,7 @@ func file_api_game_service_v1_game_proto_init() {
 			}
 		}
 		file_api_game_service_v1_game_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DisplayGameReply_Team); i {
+			switch v := v.(*DisplayGameReply_Game); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1014,7 +1068,7 @@ func file_api_game_service_v1_game_proto_init() {
 			}
 		}
 		file_api_game_service_v1_game_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetGameListReply_Item); i {
+			switch v := v.(*DisplayGameReply_Game_Team); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1026,7 +1080,7 @@ func file_api_game_service_v1_game_proto_init() {
 			}
 		}
 		file_api_game_service_v1_game_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetGameListReply_Item_Team); i {
+			switch v := v.(*GetGameListReply_Item); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1038,7 +1092,7 @@ func file_api_game_service_v1_game_proto_init() {
 			}
 		}
 		file_api_game_service_v1_game_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetGameSortListReply_Sort); i {
+			switch v := v.(*GetGameListReply_Item_Team); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1050,6 +1104,18 @@ func file_api_game_service_v1_game_proto_init() {
 			}
 		}
 		file_api_game_service_v1_game_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetGameSortListReply_Sort); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_game_service_v1_game_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetTeamListReply_Team); i {
 			case 0:
 				return &v.state
@@ -1068,7 +1134,7 @@ func file_api_game_service_v1_game_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_game_service_v1_game_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

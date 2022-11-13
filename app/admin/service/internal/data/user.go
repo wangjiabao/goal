@@ -34,6 +34,15 @@ type User struct {
 	UpdatedAt           time.Time `gorm:"type:datetime;not null"`
 }
 
+type BalanceRecordIdRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	RecordId  int64     `gorm:"type:int;not null"`
+	RelType   string    `gorm:"type:varchar(100)"`
+	RelId     int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type UserBalanceRecord struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	UserId    int64     `gorm:"type:int;not null"`
@@ -170,9 +179,18 @@ func (ub *UserBalanceRepo) GetUserBalance(ctx context.Context, userId int64) (*b
 	}, nil
 }
 
-func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context) ([]*biz.UserBalanceRecord, error) {
+func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context, reason string, balanceType string, b *biz.Pagination) ([]*biz.UserBalanceRecord, error) {
 	var userBalanceRecord []*UserBalanceRecord
-	if err := ub.data.DB(ctx).Table("user_balance_record").Find(&userBalanceRecord).Error; err != nil {
+	instance := ub.data.DB(ctx).Table("user_balance_record")
+	if "" != reason {
+		instance = instance.Where("reason=?", reason)
+	}
+
+	if "" != balanceType {
+		instance = instance.Where("type=?", balanceType)
+	}
+
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Find(&userBalanceRecord).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.NotFound("USER_BALANCE_NOT_FOUND", "用户余额记录不存在")
 		}
@@ -271,19 +289,19 @@ func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, addres
 }
 
 // TransferIntoUserGoalReward 在事务中使用，中奖
-func (ub *UserBalanceRepo) TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) error {
+func (ub *UserBalanceRepo) TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) (int64, error) {
 	var err error
 	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
 		// UpdateColumn("balance", gorm.Expr("balance + ?", pay))
 		Updates(map[string]interface{}{"balance": gorm.Expr("balance + ?", amount)}).Error; nil != err {
-		return errors.NotFound("user balance err", "user balance not found")
+		return 0, errors.NotFound("user balance err", "user balance not found")
 	}
 
 	var userBalance UserBalance
 	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var userBalanceRecode UserBalanceRecord
@@ -294,6 +312,19 @@ func (ub *UserBalanceRepo) TransferIntoUserGoalReward(ctx context.Context, userI
 	userBalanceRecode.Amount = amount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
+		return 0, err
+	}
+
+	return userBalanceRecode.ID, nil
+}
+
+func (ub *UserBalanceRepo) CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error {
+	var balanceRecordIdRel BalanceRecordIdRel
+	balanceRecordIdRel.RecordId = recordId
+	balanceRecordIdRel.RelType = relType
+	balanceRecordIdRel.RelId = id
+	err := ub.data.DB(ctx).Table("balance_record_id_rel").Create(&balanceRecordIdRel).Error
+	if err != nil {
 		return err
 	}
 
@@ -301,19 +332,19 @@ func (ub *UserBalanceRepo) TransferIntoUserGoalReward(ctx context.Context, userI
 }
 
 // TransferIntoUserGoalRecommendReward 在事务中使用
-func (ub *UserBalanceRepo) TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) error {
+func (ub *UserBalanceRepo) TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) (int64, error) {
 	var err error
 	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
 		// UpdateColumn("balance", gorm.Expr("balance + ?", pay))
 		Updates(map[string]interface{}{"balance": gorm.Expr("balance + ?", amount)}).Error; nil != err {
-		return errors.NotFound("user balance err", "user balance not found")
+		return 0, errors.NotFound("user balance err", "user balance not found")
 	}
 
 	var userBalance UserBalance
 	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	var userBalanceRecode UserBalanceRecord
@@ -324,10 +355,10 @@ func (ub *UserBalanceRepo) TransferIntoUserGoalRecommendReward(ctx context.Conte
 	userBalanceRecode.Amount = amount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return userBalanceRecode.ID, nil
 }
 
 // Deposit 在事务中使用

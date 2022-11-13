@@ -920,6 +920,7 @@ type GameClient interface {
 	GetGameList(ctx context.Context, in *GetGameListRequest, opts ...grpc.CallOption) (*GetGameListReply, error)
 	DisplayGameIndex(ctx context.Context, in *DisplayGameIndexRequest, opts ...grpc.CallOption) (*DisplayGameIndexReply, error)
 	SaveDisplayGameIndex(ctx context.Context, in *SaveDisplayGameIndexRequest, opts ...grpc.CallOption) (*SaveDisplayGameIndexReply, error)
+	DeleteDisplayGameIndex(ctx context.Context, in *DeleteDisplayGameIndexRequest, opts ...grpc.CallOption) (*DeleteDisplayGameIndexReply, error)
 	CreateSort(ctx context.Context, in *CreateSortRequest, opts ...grpc.CallOption) (*CreateSortReply, error)
 	UpdateSort(ctx context.Context, in *UpdateSortRequest, opts ...grpc.CallOption) (*UpdateSortReply, error)
 	GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...grpc.CallOption) (*GetGameSortListReply, error)
@@ -990,6 +991,15 @@ func (c *gameClient) SaveDisplayGameIndex(ctx context.Context, in *SaveDisplayGa
 	return out, nil
 }
 
+func (c *gameClient) DeleteDisplayGameIndex(ctx context.Context, in *DeleteDisplayGameIndexRequest, opts ...grpc.CallOption) (*DeleteDisplayGameIndexReply, error) {
+	out := new(DeleteDisplayGameIndexReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/DeleteDisplayGameIndex", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gameClient) CreateSort(ctx context.Context, in *CreateSortRequest, opts ...grpc.CallOption) (*CreateSortReply, error) {
 	out := new(CreateSortReply)
 	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Game/CreateSort", in, out, opts...)
@@ -1054,6 +1064,7 @@ type GameServer interface {
 	GetGameList(context.Context, *GetGameListRequest) (*GetGameListReply, error)
 	DisplayGameIndex(context.Context, *DisplayGameIndexRequest) (*DisplayGameIndexReply, error)
 	SaveDisplayGameIndex(context.Context, *SaveDisplayGameIndexRequest) (*SaveDisplayGameIndexReply, error)
+	DeleteDisplayGameIndex(context.Context, *DeleteDisplayGameIndexRequest) (*DeleteDisplayGameIndexReply, error)
 	CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error)
 	UpdateSort(context.Context, *UpdateSortRequest) (*UpdateSortReply, error)
 	GetGameSortList(context.Context, *GetGameSortListRequest) (*GetGameSortListReply, error)
@@ -1084,6 +1095,9 @@ func (UnimplementedGameServer) DisplayGameIndex(context.Context, *DisplayGameInd
 }
 func (UnimplementedGameServer) SaveDisplayGameIndex(context.Context, *SaveDisplayGameIndexRequest) (*SaveDisplayGameIndexReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveDisplayGameIndex not implemented")
+}
+func (UnimplementedGameServer) DeleteDisplayGameIndex(context.Context, *DeleteDisplayGameIndexRequest) (*DeleteDisplayGameIndexReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDisplayGameIndex not implemented")
 }
 func (UnimplementedGameServer) CreateSort(context.Context, *CreateSortRequest) (*CreateSortReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSort not implemented")
@@ -1220,6 +1234,24 @@ func _Game_SaveDisplayGameIndex_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GameServer).SaveDisplayGameIndex(ctx, req.(*SaveDisplayGameIndexRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Game_DeleteDisplayGameIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDisplayGameIndexRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServer).DeleteDisplayGameIndex(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Game/DeleteDisplayGameIndex",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServer).DeleteDisplayGameIndex(ctx, req.(*DeleteDisplayGameIndexRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1362,6 +1394,10 @@ var Game_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveDisplayGameIndex",
 			Handler:    _Game_SaveDisplayGameIndex_Handler,
+		},
+		{
+			MethodName: "DeleteDisplayGameIndex",
+			Handler:    _Game_DeleteDisplayGameIndex_Handler,
 		},
 		{
 			MethodName: "CreateSort",

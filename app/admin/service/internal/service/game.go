@@ -45,6 +45,10 @@ func (g *GameService) SaveDisplayGameIndex(ctx context.Context, req *v1.SaveDisp
 	return g.uc.SaveDisplayGameIndex(ctx, req)
 }
 
+func (g *GameService) DeleteDisplayGameIndex(ctx context.Context, req *v1.DeleteDisplayGameIndexRequest) (*v1.DeleteDisplayGameIndexReply, error) {
+	return g.uc.DeleteDisplayGameIndex(ctx, req)
+}
+
 func (g *GameService) GetGameSortList(ctx context.Context, req *v1.GetGameSortListRequest) (*v1.GetGameSortListReply, error) {
 	return g.suc.GetGameSortList(ctx)
 }

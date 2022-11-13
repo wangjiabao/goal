@@ -26,12 +26,25 @@ type RoomUserRel struct {
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
 
+type RoomGameRel struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	GameId    int64     `gorm:"type:int;not null"`
+	RoomId    int64     `gorm:"type:int;not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type RoomRepo struct {
 	data *Data
 	log  *log.Helper
 }
 
 type RoomUserRelRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+type RoomGameRelRepo struct {
 	data *Data
 	log  *log.Helper
 }
@@ -45,6 +58,13 @@ func NewRoomRepo(data *Data, logger log.Logger) biz.RoomRepo {
 
 func NewRoomUserRelRepo(data *Data, logger log.Logger) biz.RoomUserRelRepo {
 	return &RoomUserRelRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func NewRoomGameRelRepo(data *Data, logger log.Logger) biz.RoomGameRelRepo {
+	return &RoomGameRelRepo{
 		data: data,
 		log:  log.NewHelper(logger),
 	}
@@ -201,6 +221,35 @@ func (r *RoomUserRelRepo) CreateRoomUserRel(ctx context.Context, userId int64, r
 		ID:     roomUserRel.ID,
 		UserId: roomUserRel.UserId,
 		RoomId: roomUserRel.RoomId,
+	}, nil
+}
+
+// CreateRoomGameRel .
+func (r *RoomGameRelRepo) CreateRoomGameRel(ctx context.Context, gameId int64, roomId int64) (*biz.RoomGameRel, error) {
+	var roomGameRel RoomGameRel
+	roomGameRel.GameId = gameId
+	roomGameRel.RoomId = roomId
+	res := r.data.DB(ctx).Table("room_game_rel").Create(&roomGameRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_ROOM_USER_REL_ERROR", "房间和比赛关系创建失败")
+	}
+
+	return &biz.RoomGameRel{
+		ID:     roomGameRel.ID,
+		GameId: roomGameRel.GameId,
+		RoomId: roomGameRel.RoomId,
+	}, nil
+}
+
+func (r *RoomGameRelRepo) GetRoomGame(ctx context.Context, roomId int64) (*biz.RoomGameRel, error) {
+	var roomGameRel RoomGameRel
+	if result := r.data.DB(ctx).Table("room_game_rel").Where(&RoomUserRel{RoomId: roomId}).First(&roomGameRel); result.Error != nil {
+		return nil, errors.InternalServer("ROOM_USER_REL_NOT_FOUND", "查询房间比赛关系失败")
+	}
+
+	return &biz.RoomGameRel{
+		RoomId: roomGameRel.RoomId,
+		GameId: roomGameRel.GameId,
 	}, nil
 }
 

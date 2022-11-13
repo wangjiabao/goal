@@ -39,13 +39,16 @@ message DisplayGameRequest {
 }
 
 message DisplayGameReply {
-	int64 game_id = 1;
-	string name = 2;
+	repeated Game games = 1;
+	message Game  {
+			int64 game_id = 1;
+			string name = 2;
 	repeated Team teams = 3;
-	message Team {
-		int64 team_id = 1;
-		string team_name = 2;
-		string team_type = 3;
+			message Team {
+				int64 team_id = 1;
+				string team_name = 2;
+				string team_type = 3;
+			}
 	}
 }
 

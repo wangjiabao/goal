@@ -169,6 +169,27 @@ func (g *GameRepo) GetDisplayGame() (*biz.DisplayGame, error) {
 	}, nil
 }
 
+func (g *GameRepo) GetDisplayGameList() ([]*biz.DisplayGame, error) {
+	var displayGame []*DisplayGame
+	if err := g.data.db.Table("display_game").Find(&displayGame).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("DISPLAY_GAME_NOT_FOUND", "display game not found")
+		}
+
+		return nil, errors.New(500, "DISPLAY_GAME_NOT_FOUND", err.Error())
+	}
+
+	res := make([]*biz.DisplayGame, 0)
+	for _, v := range displayGame {
+		res = append(res, &biz.DisplayGame{
+			ID:     v.ID,
+			GameId: v.GameId,
+		})
+	}
+
+	return res, nil
+}
+
 // CreateDisplayGame .
 func (g *GameRepo) CreateDisplayGame(ctx context.Context, gameId int64) (*biz.DisplayGame, error) {
 	var displayGame DisplayGame
@@ -182,6 +203,17 @@ func (g *GameRepo) CreateDisplayGame(ctx context.Context, gameId int64) (*biz.Di
 	return &biz.DisplayGame{
 		GameId: displayGame.GameId,
 	}, nil
+}
+
+// DeleteDisplayGame .
+func (g *GameRepo) DeleteDisplayGame(ctx context.Context, gameId int64) (bool, error) {
+	var displayGame DisplayGame
+	res := g.data.DB(ctx).Table("display_game").Where("game_id=?", gameId).Delete(&displayGame)
+	if res.Error != nil {
+		return false, errors.New(500, "CREATE_PLAY_ERROR", "删除首页展示比赛失败")
+	}
+
+	return true, nil
 }
 
 // UpdateDisplayGame .

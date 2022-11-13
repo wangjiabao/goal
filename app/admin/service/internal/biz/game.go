@@ -37,8 +37,10 @@ type GameRepo interface {
 	UpdateGame(ctx context.Context, gc *Game) (*Game, error)
 	GetGameList(ctx context.Context) ([]*Game, error)
 	GetDisplayGame() (*DisplayGame, error)
+	GetDisplayGameList() ([]*DisplayGame, error)
 	UpdateDisplayGame(ctx context.Context, displayGame *DisplayGame, gameId int64) (*DisplayGame, error)
 	CreateDisplayGame(ctx context.Context, gameId int64) (*DisplayGame, error)
+	DeleteDisplayGame(ctx context.Context, gameId int64) (bool, error)
 }
 
 type GameUseCase struct {
@@ -218,30 +220,40 @@ func (g *GameUseCase) GetGameByGameId(ctx context.Context, req *v1.GetGameReques
 }
 
 func (g *GameUseCase) GetDisplayGameIndex(ctx context.Context) (*v1.DisplayGameIndexReply, error) {
-	disPlayGame, err := g.gameRepo.GetDisplayGame()
+	disPlayGame, err := g.gameRepo.GetDisplayGameList()
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.DisplayGameIndexReply{
+	res := &v1.DisplayGameIndexReply{
+		Items: make([]*v1.DisplayGameIndexReply_Item, 0),
+	}
+
+	for _, v := range disPlayGame {
+		res.Items = append(res.Items, &v1.DisplayGameIndexReply_Item{
+			GameId: v.GameId,
+		})
+	}
+	return res, nil
+}
+
+func (g *GameUseCase) SaveDisplayGameIndex(ctx context.Context, req *v1.SaveDisplayGameIndexRequest) (*v1.SaveDisplayGameIndexReply, error) {
+	disPlayGame, err := g.gameRepo.CreateDisplayGame(ctx, req.SendBody.GameId)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.SaveDisplayGameIndexReply{
 		GameId: disPlayGame.GameId,
 	}, nil
 }
 
-func (g *GameUseCase) SaveDisplayGameIndex(ctx context.Context, req *v1.SaveDisplayGameIndexRequest) (*v1.SaveDisplayGameIndexReply, error) {
-	disPlayGame, err := g.gameRepo.GetDisplayGame()
-	if nil == disPlayGame {
-		disPlayGame, err = g.gameRepo.CreateDisplayGame(ctx, req.SendBody.GameId)
-	} else {
-		disPlayGame, err = g.gameRepo.UpdateDisplayGame(ctx, disPlayGame, req.SendBody.GameId)
-	}
-
+func (g *GameUseCase) DeleteDisplayGameIndex(ctx context.Context, req *v1.DeleteDisplayGameIndexRequest) (*v1.DeleteDisplayGameIndexReply, error) {
+	_, err := g.gameRepo.DeleteDisplayGame(ctx, req.SendBody.GameId)
 	if err != nil {
 		return nil, err
 	}
-
-	return &v1.SaveDisplayGameIndexReply{
-		GameId: disPlayGame.GameId,
+	return &v1.DeleteDisplayGameIndexReply{
+		Result: "成功",
 	}, nil
 }
 
@@ -249,7 +261,6 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 	var (
 		err                               error
 		game                              *Game
-		disPlayGame                       *DisplayGame
 		playIds                           []int64
 		play                              []*Play
 		playGameRel                       []*PlayGameRel
@@ -266,16 +277,15 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 		base                              int64 = 100000 // 基础精度0.00001 todo 加配置文件
 	)
 
-	disPlayGame, err = g.gameRepo.GetDisplayGame()
 	if err != nil {
 		return nil, err
 	}
-	game, err = g.gameRepo.GetGameById(ctx, disPlayGame.GameId)
+	game, err = g.gameRepo.GetGameById(ctx, req.GameId)
 	if err != nil {
 		return nil, err
 	}
 
-	playGameRel, _ = g.playGameRelRepo.GetPlayGameRelByGameId(ctx, disPlayGame.GameId)
+	playGameRel, _ = g.playGameRelRepo.GetPlayGameRelByGameId(ctx, req.GameId)
 	for _, v := range playGameRel {
 		playIds = append(playIds, v.PlayId)
 	}

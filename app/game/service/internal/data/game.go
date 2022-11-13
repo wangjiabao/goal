@@ -52,6 +52,29 @@ func (g *GameRepo) GetGameById(ctx context.Context, gameId int64) (*biz.Game, er
 	}, nil
 }
 
+func (g *GameRepo) GetGameByIds(ctx context.Context, ids ...int64) (map[int64]*biz.Game, error) {
+	var game []*Game
+	if err := g.data.DB(ctx).Table("soccer_game").Where("id IN (?)", ids).Find(&game).Error; err != nil {
+		return nil, errors.NotFound("GAME_NOT_FOUND", "比赛不存在")
+	}
+
+	res := make(map[int64]*biz.Game, 0)
+	for _, item := range game {
+		res[item.ID] = &biz.Game{
+			ID:            item.ID,
+			Name:          item.Name,
+			RedTeamId:     item.RedTeamId,
+			BlueTeamId:    item.BlueTeamId,
+			StartTime:     item.StartTime,
+			EndTime:       item.EndTime,
+			UpEndTime:     item.UpEndTime,
+			DownStartTime: item.DownStartTime,
+		}
+	}
+
+	return res, nil
+}
+
 func (g *GameRepo) GetGameList(ctx context.Context) ([]*biz.Game, error) {
 	var game []*Game
 	if err := g.data.DB(ctx).Table("soccer_game").Find(&game).Error; err != nil {

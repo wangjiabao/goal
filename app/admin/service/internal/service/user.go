@@ -238,7 +238,7 @@ func (u *UserService) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 }
 
 func (u *UserService) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserBalanceRecordRequest) (*v1.GetUserBalanceRecordReply, error) {
-	return u.uc.GetUserBalanceRecord(ctx)
+	return u.uc.GetUserBalanceRecord(ctx, req)
 }
 
 func (u *UserService) GetUserRecommendList(ctx context.Context, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {

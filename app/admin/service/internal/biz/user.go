@@ -96,7 +96,7 @@ func (u *UserUseCase) GetUsers(ctx context.Context) (*v1.GetUserListReply, error
 	return res, nil
 }
 
-func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context) (*v1.GetUserBalanceRecordReply, error) {
+func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserBalanceRecordRequest) (*v1.GetUserBalanceRecordReply, error) {
 	var (
 		user              map[int64]*User
 		userBalanceRecord []*UserBalanceRecord
@@ -105,7 +105,10 @@ func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context) (*v1.GetUserBala
 		err               error
 	)
 
-	userBalanceRecord, err = u.ubRepo.GetUserBalanceRecord(ctx)
+	userBalanceRecord, err = u.ubRepo.GetUserBalanceRecord(ctx, req.Reason, req.Type, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +135,7 @@ func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context) (*v1.GetUserBala
 			Address:   tempAddress,
 			Balance:   item.Balance / base,
 			Type:      item.Type,
-			Amount:    item.Amount,
+			Amount:    item.Amount / base,
 			Reason:    item.Reason,
 			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
 		})

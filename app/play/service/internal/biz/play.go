@@ -151,9 +151,10 @@ type PlayRoomRelRepo interface {
 }
 
 type UserBalanceRepo interface {
-	Pay(ctx context.Context, userId int64, pay int64) error
+	Pay(ctx context.Context, userId int64, pay int64) (int64, error)
+	CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
-	TransferIntoUserPlayProxyReward(ctx context.Context, userId int64, amount int64) error
+	TransferIntoUserPlayProxyReward(ctx context.Context, userId int64, amount int64) (int64, error)
 }
 
 type UserProxyRepo interface {
@@ -716,6 +717,7 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		downUserProxy        map[int64][]*UserProxy
 		systemConfig         *SystemConfig
 		err                  error
+		recordId             int64
 		feeRate              int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                 int64 = 100000 // 基础精度0.00001
 		payLimit             int64 = 100    // 限额
@@ -769,7 +771,7 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 	 * 因此在事务中update余额时在条件中多加一条保证大于等于扣减的数额即可。
 	 */
 	if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		err = p.userBalanceRepo.Pay(ctx, userId, pay) // 余额扣除，先扣后加以防，给用户是代理余额增长了
+		recordId, err = p.userBalanceRepo.Pay(ctx, userId, pay) // 余额扣除，先扣后加以防，给用户是代理余额增长了
 		if err != nil {
 			return err
 		}
@@ -788,8 +790,12 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 					if 0 >= v.Rate {
 						continue
 					}
-					vFee = uvFee / (100 / v.Rate)                                                // 本次转给小代理金额
-					err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+					vFee = uvFee / (100 / v.Rate)                                                          // 本次转给小代理金额
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+					if err != nil {
+						return err
+					}
+					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameScoreUserRel.ID)
 					if err != nil {
 						return err
 					}
@@ -799,11 +805,14 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 					}
 				}
 			}
-			err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
+			recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
 			if err != nil {
 				return err
 			}
-
+			err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameScoreUserRel.ID)
+			if err != nil {
+				return err
+			}
 			fee -= uvFee
 			if fee < 0 {
 				break // 分红余额已经不足
@@ -821,6 +830,12 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		if err != nil {
 			return err
 		}
+
+		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameScoreUserRel.ID)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}); nil != err {
 		return nil, err
@@ -842,6 +857,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		systemConfig                  *SystemConfig
 		upUserProxy                   []*UserProxy
 		downUserProxy                 map[int64][]*UserProxy
+		recordId                      int64
 		err                           error
 		feeRate                       int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                          int64 = 100000 // 基础精度0.00001 todo 加配置文件
@@ -915,7 +931,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 	 * 因此在事务中update余额时在条件中多加一条保证大于等于扣减的数额即可。
 	 */
 	if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		err = p.userBalanceRepo.Pay(ctx, userId, pay) // 余额扣除，先扣后加以防，给用户是代理余额增长了
+		recordId, err = p.userBalanceRepo.Pay(ctx, userId, pay) // 余额扣除，先扣后加以防，给用户是代理余额增长了
 		if err != nil {
 			return err
 		}
@@ -934,8 +950,12 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 					if 0 >= v.Rate {
 						continue
 					}
-					vFee = uvFee / (100 / v.Rate)                                                // 本次转给小代理金额
-					err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+					vFee = uvFee / (100 / v.Rate)                                                          // 本次转给小代理金额
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+					if err != nil {
+						return err
+					}
+					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamResultUserRel.ID)
 					if err != nil {
 						return err
 					}
@@ -945,11 +965,14 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 					}
 				}
 			}
-			err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
+			recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
 			if err != nil {
 				return err
 			}
-
+			err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamResultUserRel.ID)
+			if err != nil {
+				return err
+			}
 			fee -= uvFee
 			if fee < 0 {
 				break // 分红余额已经不足
@@ -967,6 +990,12 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		if err != nil {
 			return err
 		}
+
+		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamResultUserRel.ID)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}); nil != err {
 		return nil, err
@@ -986,6 +1015,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		upUserProxy             []*UserProxy
 		downUserProxy           map[int64][]*UserProxy
 		err                     error
+		recordId                int64
 		systemConfig            *SystemConfig
 		feeRate                 int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                    int64 = 100000 // 基础精度0.00001 todo 加配置文件
@@ -1042,7 +1072,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 	 * 因此在事务中update余额时在条件中多加一条保证大于等于扣减的数额即可。
 	 */
 	if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		err = p.userBalanceRepo.Pay(ctx, userId, pay) // 余额扣除，先扣后加以防，给用户是代理余额增长了
+		recordId, err = p.userBalanceRepo.Pay(ctx, userId, pay) // 余额扣除，先扣后加以防，给用户是代理余额增长了
 		if err != nil {
 			return err
 		}
@@ -1061,8 +1091,13 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 					if 0 >= v.Rate {
 						continue
 					}
-					vFee = uvFee / (100 / v.Rate)                                                // 本次转给小代理金额
-					err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+					vFee = uvFee / (100 / v.Rate)                                                          // 本次转给小代理金额
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+					if err != nil {
+						return err
+					}
+
+					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamSortUserRel.ID)
 					if err != nil {
 						return err
 					}
@@ -1072,11 +1107,14 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 					}
 				}
 			}
-			err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
+			recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
 			if err != nil {
 				return err
 			}
-
+			err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamSortUserRel.ID)
+			if err != nil {
+				return err
+			}
 			fee -= uvFee
 			if fee < 0 {
 				break // 分红余额已经不足
@@ -1095,6 +1133,12 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		if err != nil {
 			return err
 		}
+
+		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamSortUserRel.ID)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}); nil != err {
 		return nil, err
@@ -1115,6 +1159,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		downUserProxy           map[int64][]*UserProxy
 		systemConfig            *SystemConfig
 		err                     error
+		recordId                int64
 		feeRate                 int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                    int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		payLimit                int64 = 100    // 限额 todo 后台可以设置
@@ -1169,7 +1214,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 	 * 因此在事务中update余额时在条件中多加一条保证大于等于扣减的数额即可。
 	 */
 	if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		err = p.userBalanceRepo.Pay(ctx, userId, pay) // 余额扣除，先扣后加以防，给用户是代理余额增长了
+		recordId, err = p.userBalanceRepo.Pay(ctx, userId, pay) // 余额扣除，先扣后加以防，给用户是代理余额增长了
 		if err != nil {
 			return err
 		}
@@ -1188,8 +1233,12 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 					if 0 >= v.Rate {
 						continue
 					}
-					vFee = uvFee / (100 / v.Rate)                                                // 本次转给小代理金额
-					err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+					vFee = uvFee / (100 / v.Rate)                                                          // 本次转给小代理金额
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+					if err != nil {
+						return err
+					}
+					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamGoalUserRel.ID)
 					if err != nil {
 						return err
 					}
@@ -1199,7 +1248,12 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 					}
 				}
 			}
-			err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
+			recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
+			if err != nil {
+				return err
+			}
+
+			err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamGoalUserRel.ID)
 			if err != nil {
 				return err
 			}
@@ -1223,6 +1277,12 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		if err != nil {
 			return err
 		}
+
+		err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamGoalUserRel.ID)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}); nil != err {
 		return nil, err

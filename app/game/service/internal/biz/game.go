@@ -20,6 +20,7 @@ type Game struct {
 
 type GameRepo interface {
 	GetGameById(ctx context.Context, gameId int64) (*Game, error)
+	GetGameByIds(ctx context.Context, ids ...int64) (map[int64]*Game, error)
 	GetGameList(ctx context.Context) ([]*Game, error)
 }
 

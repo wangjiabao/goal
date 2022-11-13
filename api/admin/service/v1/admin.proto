@@ -197,6 +197,13 @@ service Game {
 		};
 	};
 
+	rpc DeleteDisplayGameIndex (DeleteDisplayGameIndexRequest) returns (DeleteDisplayGameIndexReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/display_game/index_delete"
+			body: "send_body"
+		};
+	};
+
 	rpc CreateSort (CreateSortRequest) returns (CreateSortReply){
 		option (google.api.http) = {
 			post: "/api/goal_admin/sort/create"
@@ -336,7 +343,10 @@ message DisplayGameIndexRequest {
 }
 
 message DisplayGameIndexReply {
-	int64 game_id = 1;
+	repeated Item items = 1;
+	message Item {
+		int64 game_id = 1;
+	}
 }
 
 message GetGameRequest {
@@ -509,7 +519,9 @@ message GetUserProxyListReply {
 }
 
 message GetUserBalanceRecordRequest {
-
+	int64 page = 1;
+	string reason = 2;
+	string type = 3;
 }
 
 message GetUserBalanceRecordReply {
@@ -625,6 +637,18 @@ message CreatePlayGameReply {
 	int64 play_id = 1;
 }
 
+message DeleteDisplayGameIndexRequest {
+	message SendBody{
+		int64 game_id = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message DeleteDisplayGameIndexReply {
+	string result = 1;
+}
+
 message CreatePlaySortRequest {
 	message SendBody{
 		string start_time = 1;
@@ -678,6 +702,7 @@ message CreateTeamReply {
 }
 
 message GameIndexStatisticsRequest {
+	int64 game_id = 1;
 }
 
 message GameIndexStatisticsReply {

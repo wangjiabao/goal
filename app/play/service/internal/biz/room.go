@@ -29,6 +29,13 @@ type RoomUserRel struct {
 	RoomId int64
 	UserId int64
 }
+
+type RoomGameRel struct {
+	ID     int64
+	RoomId int64
+	GameId int64
+}
+
 type RoomRepo interface {
 	GetRoomByAccount(ctx context.Context, account string) (*Room, error)
 	GetRoomByID(ctx context.Context, roomId int64) (*Room, error)
@@ -45,6 +52,11 @@ type RoomUserRelRepo interface {
 	GetRoomByUserId(ctx context.Context, userId int64) ([]*RoomUserRel, error)
 }
 
+type RoomGameRelRepo interface {
+	GetRoomGame(ctx context.Context, roomId int64) (*RoomGameRel, error)
+	CreateRoomGameRel(ctx context.Context, gameId int64, roomId int64) (*RoomGameRel, error)
+}
+
 type RoomUseCase struct {
 	roomRepo        RoomRepo
 	playRepo        PlayRepo
@@ -53,13 +65,14 @@ type RoomUseCase struct {
 	playRoomRelRepo PlayRoomRelRepo
 	roomUserRelRepo RoomUserRelRepo
 	playGameRelRepo PlayGameRelRepo
+	roomGameRelRepo RoomGameRelRepo
 	playSortRelRepo PlaySortRelRepo
 	tx              Transaction
 	log             *log.Helper
 }
 
-func NewRoomUseCase(repo RoomRepo, roomUserRelRepo RoomUserRelRepo, playRepo PlayRepo, gameRepo GameRepo, playSortRelRepo PlaySortRelRepo, playRoomRelRepo PlayRoomRelRepo, playGameRelRepo PlayGameRelRepo, sortRepo SortRepo, tx Transaction, logger log.Logger) *RoomUseCase {
-	return &RoomUseCase{roomRepo: repo, playRepo: playRepo, roomUserRelRepo: roomUserRelRepo, gameRepo: gameRepo, playSortRelRepo: playSortRelRepo, playRoomRelRepo: playRoomRelRepo, playGameRelRepo: playGameRelRepo, sortRepo: sortRepo, tx: tx, log: log.NewHelper(logger)}
+func NewRoomUseCase(repo RoomRepo, roomUserRelRepo RoomUserRelRepo, roomGameRelRepo RoomGameRelRepo, playRepo PlayRepo, gameRepo GameRepo, playSortRelRepo PlaySortRelRepo, playRoomRelRepo PlayRoomRelRepo, playGameRelRepo PlayGameRelRepo, sortRepo SortRepo, tx Transaction, logger log.Logger) *RoomUseCase {
+	return &RoomUseCase{roomRepo: repo, playRepo: playRepo, roomGameRelRepo: roomGameRelRepo, roomUserRelRepo: roomUserRelRepo, gameRepo: gameRepo, playSortRelRepo: playSortRelRepo, playRoomRelRepo: playRoomRelRepo, playGameRelRepo: playGameRelRepo, sortRepo: sortRepo, tx: tx, log: log.NewHelper(logger)}
 }
 
 // GetRoomUserRel 获取房间内用户
@@ -120,6 +133,7 @@ func (r *RoomUseCase) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest)
 		userId      int64
 		room        *Room
 		roomUserRel *RoomUserRel
+		roomGameRel *RoomGameRel
 		err         error
 	)
 
@@ -150,12 +164,18 @@ func (r *RoomUseCase) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest)
 			return err
 		}
 
+		roomGameRel, err = r.roomGameRelRepo.CreateRoomGameRel(ctx, req.SendBody.GameId, room.ID)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
 	return &v1.CreateRoomReply{
 		Account:  room.Account,
 		RoomId:   room.ID,
+		GameId:   req.SendBody.GameId,
 		RoomType: room.Type,
 	}, err
 }
@@ -165,6 +185,7 @@ func (r *RoomUseCase) RoomInfo(ctx context.Context, req *v1.RoomInfoRequest) (*v
 	var (
 		room           *Room
 		roomUserRel    []*RoomUserRel
+		roomGameRel    *RoomGameRel
 		createRoomUser bool = false
 		userIds        []int64
 		users          map[int64]*User
@@ -185,6 +206,11 @@ func (r *RoomUseCase) RoomInfo(ctx context.Context, req *v1.RoomInfoRequest) (*v
 		return nil, errors.New(500, "ROOM_USER_ERROR", "房间信息错误")
 	}
 
+	roomGameRel, err = r.roomGameRelRepo.GetRoomGame(ctx, room.ID)
+	if nil != err {
+		return nil, errors.New(500, "ROOM_USER_ERROR", "房间信息错误")
+	}
+
 	for _, v := range roomUserRel {
 		userIds = append(userIds, v.UserId)
 	}
@@ -197,6 +223,7 @@ func (r *RoomUseCase) RoomInfo(ctx context.Context, req *v1.RoomInfoRequest) (*v
 
 	res := &v1.RoomInfoReply{
 		CreatedRoomUser: createRoomUser,
+		GameId:          roomGameRel.GameId,
 		Users:           make([]*v1.RoomInfoReply_User, 0),
 	}
 
@@ -207,6 +234,7 @@ func (r *RoomUseCase) RoomInfo(ctx context.Context, req *v1.RoomInfoRequest) (*v
 		}
 		res.Users = append(res.Users, &v1.RoomInfoReply_User{
 			Address: tmpAddress,
+			ID:      v.UserId,
 		})
 	}
 

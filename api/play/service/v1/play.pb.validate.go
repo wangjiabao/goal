@@ -2065,6 +2065,8 @@ func (m *CreateRoomReply) validate(all bool) error {
 
 	// no validation rules for RoomType
 
+	// no validation rules for GameId
+
 	if len(errors) > 0 {
 		return CreateRoomReplyMultiError(errors)
 	}
@@ -3448,6 +3450,8 @@ func (m *RoomInfoReply) validate(all bool) error {
 
 	// no validation rules for CreatedRoomUser
 
+	// no validation rules for GameId
+
 	for idx, item := range m.GetUsers() {
 		_, _ = idx, item
 
@@ -4351,6 +4355,8 @@ func (m *CreateRoomRequest_SendBody) validate(all bool) error {
 	}
 
 	var errors []error
+
+	// no validation rules for GameId
 
 	// no validation rules for RoomType
 
