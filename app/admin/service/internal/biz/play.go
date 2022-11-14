@@ -3,6 +3,7 @@ package biz
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
@@ -18,6 +19,17 @@ type Play struct {
 	Type           string
 	StartTime      time.Time
 	EndTime        time.Time
+}
+
+type LastTermPool struct {
+	ID             int64
+	GameId         int64
+	OriginGameId   int64
+	PlayId         int64
+	OriginPlayId   int64
+	Total          int64
+	PlayType       string
+	OriginPlayType string
 }
 
 type PlayGameRel struct {
@@ -127,6 +139,7 @@ type UserInfo struct {
 
 type RoomRepo interface {
 	GetRoomList(ctx context.Context) ([]*Room, error)
+	GetPlayRoomByPlayId(ctx context.Context, playId int64) (*PlayRoomRel, error)
 }
 
 type SystemConfigRepo interface {
@@ -140,11 +153,15 @@ type PlayRepo interface {
 	GetPlayListByIds(ctx context.Context, ids ...int64) ([]*Play, error)
 	GetPlayById(ctx context.Context, id int64) (*Play, error)
 	CreatePlay(ctx context.Context, pc *Play) (*Play, error)
-	GetAdminCreatePlayByType(ctx context.Context, playType string) (*Play, error)
+	GetAdminCreatePlayByType(ctx context.Context, playType string) ([]*Play, error)
+	GetAdminCreatePlayBySortType(ctx context.Context, playType string) (*Play, error)
+	GetLastTermPoolByPlayIdAndType(ctx context.Context, playId int64, playType string) (*LastTermPool, error)
+	CreateLastTermPool(ctx context.Context, lastTermPool *LastTermPool) (*LastTermPool, error)
 }
 
 type PlayGameRelRepo interface {
 	GetPlayGameRelByGameId(ctx context.Context, gameId int64) ([]*PlayGameRel, error)
+	GetPlayGameRelByGameIdAndPlayIds(ctx context.Context, gameId int64, playIds ...int64) (*PlayGameRel, error)
 	CreatePlayGameRel(ctx context.Context, rel *PlayGameRel) (*PlayGameRel, error)
 }
 
@@ -153,6 +170,7 @@ type PlayRoomRelRepo interface {
 }
 
 type PlaySortRelRepo interface {
+	GetPlaySortRelBySortIdAndPlayIds(ctx context.Context, sortId int64, playId ...int64) (*PlaySortRel, error)
 	GetPlaySortRelBySortId(ctx context.Context, sortId int64) ([]*PlaySortRel, error)
 	CreatePlaySortRel(ctx context.Context, rel *PlaySortRel) (*PlaySortRel, error)
 }
@@ -172,7 +190,7 @@ type PlayGameTeamResultUserRelRepo interface {
 }
 
 type PlayGameTeamGoalUserRelRepo interface {
-	GetPlayGameTeamGoalUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamGoalUserRel, error)
+	GetPlayGameTeamGoalUserRelByPlayIdsAndType(ctx context.Context, playType string, playIds ...int64) (map[int64][]*PlayGameTeamGoalUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
 	GetPlayGameTeamGoalUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameTeamGoalUserRel, error)
 	CreatePlayGameTeamGoalUserRel(ctx context.Context, pr *PlayGameTeamGoalUserRel) (*PlayGameTeamGoalUserRel, error)
@@ -185,6 +203,7 @@ type PlayGameTeamSortUserRelRepo interface {
 
 type UserBalanceRepo interface {
 	TransferIntoUserGoalReward(ctx context.Context, userId int64, amount int64) (int64, error)
+	TransferIntoUserBack(ctx context.Context, userId int64, amount int64) (int64, error)
 	CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
 	GetUserBalanceRecord(ctx context.Context, reason string, b *Pagination) ([]*UserBalanceRecord, error, int64)
@@ -285,10 +304,6 @@ func (p *PlayUseCase) GamePlayGrant(ctx context.Context, req *v1.GamePlayGrantRe
 		return nil, err
 	}
 
-	if !strings.EqualFold("end", game.Status) {
-		return nil, errors.New(500, "TIME_ERROR", "比赛未结束")
-	}
-
 	playGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameId(ctx, game.ID)
 	if err != nil {
 		return nil, err
@@ -311,9 +326,10 @@ func (p *PlayUseCase) GamePlayGrant(ctx context.Context, req *v1.GamePlayGrantRe
 			playGameGoal = append(playGameGoal, v)
 		}
 	}
-
-	p.grantTypeGameScore(ctx, game, playGameScore)
-	p.grantTypeGameResult(ctx, game, playGameResult)
+	if strings.EqualFold("end", game.Status) && game.EndTime.Before(time.Now().UTC()) {
+		p.grantTypeGameScore(ctx, game, playGameScore)
+		p.grantTypeGameResult(ctx, game, playGameResult)
+	}
 	p.grantTypeGameGoal(ctx, game, playGameGoal)
 
 	return &v1.GamePlayGrantReply{
@@ -418,7 +434,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 		}
 	}
 
-	for _, playUserRel := range playGameTeamSortUserRel {
+	for playId, playUserRel := range playGameTeamSortUserRel {
 		// 每一场玩法，数据都是一个玩法类型
 		var (
 			winNoRewardedPlayGameTeamResultUserRel []*struct {
@@ -429,7 +445,45 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 			} // 猜中未发放奖励的用户
 			poolAmount     int64 // 每个玩法的奖池
 			winTotalAmount int64 // 中奖人的钱总额
+			kPlay          *Play
 		)
+
+		kPlay, err = p.playRepo.GetPlayById(ctx, playId)
+		if nil == play {
+			continue
+		}
+
+		// 不足两人退钱
+		tmpTotalUserIdMap := make(map[int64]int64, 0)
+		var tmpBackedUser []*PlayGameTeamSortUserRel
+		for _, v := range playUserRel {
+			if 999999999 != v.UserId {
+				tmpTotalUserIdMap[v.UserId] = v.UserId
+			}
+			if strings.EqualFold("no_rewarded", v.Status) {
+				tmpBackedUser = append(tmpBackedUser, v)
+			}
+		}
+		if 2 > len(tmpTotalUserIdMap) {
+			for _, v := range tmpBackedUser {
+				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+						return err
+					}
+					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, playSort.Type, v.ID); nil != err {
+						return err
+					}
+					if res := p.playGameTeamSortUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+						return res
+					}
+					return nil
+				}); nil != err {
+					continue
+				}
+			}
+
+			continue
+		}
 
 		// 解析中奖人
 		for _, v := range playUserRel {
@@ -498,9 +552,128 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 			poolAmount += v.Pay
 		}
 
+		// 加入下一期奖池，注意后续再次结算再有中奖的，不能撤回加入下一期池子
+		if 0 == winTotalAmount {
+			var playRoomRel *PlayRoomRel
+
+			// 开房间的退回
+			var tmpRoomBackedUser []*PlayGameTeamSortUserRel
+			playRoomRel, err = p.roomRepo.GetPlayRoomByPlayId(ctx, kPlay.ID)
+			if nil != playRoomRel && strings.EqualFold("admin", kPlay.CreateUserType) {
+				for _, v := range playUserRel {
+					if 999999999 != v.UserId {
+						if strings.EqualFold("no_rewarded", v.Status) {
+							tmpRoomBackedUser = append(tmpRoomBackedUser, v)
+						}
+					}
+				}
+				for _, v := range tmpRoomBackedUser {
+					if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+						if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+							return err
+						}
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, playSort.Type, v.ID); nil != err {
+							return err
+						}
+
+						if res := p.playGameTeamSortUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+							return res
+						}
+						return nil
+					}); nil != err {
+						continue
+					}
+				}
+			} else {
+				var (
+					lastTermPool           *LastTermPool
+					nextSort               *Sort
+					adminCreatePlay        []*Play
+					adminCreatePlaySortRel *PlaySortRel
+					adminCreatePlayIds     []int64
+				)
+				if strings.EqualFold("team_sort_sixteen", kPlay.Type) {
+					nextSort, err = p.sortRepo.GetNexGameSort(ctx, playSort.EndTime)
+					if nil == nextSort || nil != err {
+						return false
+					}
+					adminCreatePlay, err = p.playRepo.GetAdminCreatePlayByType(ctx, "team_sort_eight")
+					for _, v := range adminCreatePlay {
+						adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+					}
+					adminCreatePlaySortRel, err = p.playSortRelRepo.GetPlaySortRelBySortIdAndPlayIds(ctx, nextSort.ID, adminCreatePlayIds...)
+					if nil == adminCreatePlaySortRel || nil != err {
+						return false
+					}
+					if nil != nextSort {
+						var nextTermPool *LastTermPool
+						nextTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, adminCreatePlaySortRel.PlayId, "team_sort_eight")
+						if nil == nextTermPool {
+							_, err = p.playRepo.CreateLastTermPool(ctx, &LastTermPool{
+								GameId:         adminCreatePlaySortRel.SortId,
+								OriginGameId:   playSort.ID,
+								PlayId:         adminCreatePlaySortRel.PlayId,
+								OriginPlayId:   playId,
+								Total:          poolAmount,
+								PlayType:       "team_sort_eight",
+								OriginPlayType: "team_sort_sixteen",
+							})
+							if nil != err {
+								return false
+							}
+						}
+					}
+
+				} else if strings.EqualFold("team_sort_eight", kPlay.Type) {
+					lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, "team_sort_eight")
+					if nil != lastTermPool {
+						poolAmount += lastTermPool.Total
+					}
+					nextSort, err = p.sortRepo.GetNexGameSort(ctx, playSort.EndTime)
+					if nil == nextSort || nil != err {
+						return false
+					}
+					adminCreatePlay, err = p.playRepo.GetAdminCreatePlayByType(ctx, "team_sort_three")
+					for _, v := range adminCreatePlay {
+						adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+					}
+					adminCreatePlaySortRel, err = p.playSortRelRepo.GetPlaySortRelBySortIdAndPlayIds(ctx, nextSort.ID, adminCreatePlayIds...)
+					if nil == adminCreatePlaySortRel || nil != err {
+						return false
+					}
+
+					var nextTermPool *LastTermPool
+					nextTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, adminCreatePlaySortRel.PlayId, "team_sort_three")
+					if nil == nextTermPool {
+						_, err = p.playRepo.CreateLastTermPool(ctx, &LastTermPool{
+							GameId:         adminCreatePlaySortRel.SortId,
+							OriginGameId:   playSort.ID,
+							PlayId:         adminCreatePlaySortRel.PlayId,
+							OriginPlayId:   playId,
+							Total:          poolAmount,
+							PlayType:       "team_sort_three",
+							OriginPlayType: "team_sort_eight",
+						})
+						if nil != err {
+							return false
+						}
+					}
+				}
+			}
+
+			continue
+		}
+
 		sizeofWin := int64(len(winNoRewardedPlayGameTeamResultUserRel))
 		if 0 == sizeofWin {
 			continue
+		}
+
+		// 上一期的奖池
+		var lastTermPool *LastTermPool
+		lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, kPlay.Type)
+		if nil != lastTermPool {
+			poolAmount += lastTermPool.Total
 		}
 
 		poolAmount = poolAmount * rate / 100
@@ -625,13 +798,52 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 		return false
 	}
 
-	for _, playUserRel := range playGameScoreUserRel {
+	for playId, playUserRel := range playGameScoreUserRel {
 		// 每一场玩法，开始统计
 		var (
 			winNoRewardedPlayGameScoreUserRel []*PlayGameScoreUserRel // 猜中未发放奖励的用户
 			poolAmount                        int64                   // 每个玩法的奖池
 			winTotalAmount                    int64                   // 中奖人的钱总额
+			kPlay                             *Play
 		)
+
+		kPlay, err = p.playRepo.GetPlayById(ctx, playId)
+		if nil == play {
+			continue
+		}
+
+		// 不足两人退钱，排除加池子
+		tmpTotalUserIdMap := make(map[int64]int64, 0)
+		var tmpBackedUser []*PlayGameScoreUserRel
+		for _, v := range playUserRel {
+			if 999999999 != v.UserId {
+				tmpTotalUserIdMap[v.UserId] = v.UserId
+			}
+			if strings.EqualFold("no_rewarded", v.Status) {
+				tmpBackedUser = append(tmpBackedUser, v)
+			}
+		}
+
+		if 2 > len(tmpTotalUserIdMap) {
+			for _, v := range tmpBackedUser {
+				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+						return err
+					}
+					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_score", v.ID); nil != err {
+						return err
+					}
+					if res := p.playGameScoreUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+						return res
+					}
+					return nil
+				}); nil != err {
+					continue
+				}
+			}
+
+			continue
+		}
 
 		for _, v := range playUserRel {
 			poolAmount += v.Pay
@@ -645,12 +857,101 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 			}
 		}
 
-		sizeofWin := int64(len(winNoRewardedPlayGameScoreUserRel))
-		if 0 == sizeofWin {
-			// todo 可以原路退回
+		// 加入下一期奖池，注意后续再次结算再有中奖的，不能撤回加入下一期池子
+		if 0 == winTotalAmount {
+			var playRoomRel *PlayRoomRel
+
+			// 开房间的退回
+			var tmpRoomBackedUser []*PlayGameScoreUserRel
+			playRoomRel, err = p.roomRepo.GetPlayRoomByPlayId(ctx, kPlay.ID)
+			if nil != playRoomRel && strings.EqualFold("admin", kPlay.CreateUserType) {
+				for _, v := range playUserRel {
+					if 999999999 != v.UserId {
+						if strings.EqualFold("no_rewarded", v.Status) {
+							tmpRoomBackedUser = append(tmpRoomBackedUser, v)
+						}
+					}
+				}
+				for _, v := range tmpRoomBackedUser {
+					if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+						if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+							return err
+						}
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_sore", v.ID); nil != err {
+							return err
+						}
+
+						if res := p.playGameScoreUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+							return res
+						}
+						return nil
+					}); nil != err {
+						continue
+					}
+				}
+			} else {
+				var (
+					lastTermPool           *LastTermPool
+					nextGame               *Game
+					adminCreatePlay        []*Play
+					adminCreatePlayGameRel *PlayGameRel
+					adminCreatePlayIds     []int64
+				)
+				if strings.EqualFold("game_score", kPlay.Type) {
+					lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, "game_score")
+					if nil != lastTermPool {
+						poolAmount += lastTermPool.Total
+					}
+					nextGame, err = p.gameRepo.GetNextGame(ctx, game.EndTime)
+					if nil == nextGame || nil != err {
+						return false
+					}
+					adminCreatePlay, err = p.playRepo.GetAdminCreatePlayByType(ctx, "game_score")
+					for _, v := range adminCreatePlay {
+						adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+					}
+
+					adminCreatePlayGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameIdAndPlayIds(ctx, nextGame.ID, adminCreatePlayIds...)
+					if nil == adminCreatePlayGameRel || nil != err {
+						return false
+					}
+					if nil != nextGame {
+						var nextTermPool *LastTermPool
+						nextTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, adminCreatePlayGameRel.PlayId, kPlay.Type)
+						if nil == nextTermPool {
+							_, err = p.playRepo.CreateLastTermPool(ctx, &LastTermPool{
+								GameId:         adminCreatePlayGameRel.GameId,
+								OriginGameId:   game.ID,
+								PlayId:         adminCreatePlayGameRel.PlayId,
+								OriginPlayId:   playId,
+								Total:          poolAmount,
+								PlayType:       "game_score",
+								OriginPlayType: "game_score",
+							})
+							if nil != err {
+								return false
+							}
+						}
+					}
+				}
+			}
+
 			continue
 		}
 
+		sizeofWin := int64(len(winNoRewardedPlayGameScoreUserRel))
+		if 0 == sizeofWin {
+			continue
+		}
+
+		// 上一期的奖池
+		var lastTermPool *LastTermPool
+		lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, kPlay.Type)
+		if nil != lastTermPool {
+			poolAmount += lastTermPool.Total
+		}
+
+		fmt.Println(poolAmount)
 		for _, winV := range winNoRewardedPlayGameScoreUserRel {
 			var (
 				recommendUserIds []int64
@@ -782,13 +1083,52 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 	}
 	rateThird = systemConfig["recommend_rate_third"].Value
 
-	for _, playUserRel := range playGameTeamResultUserRel {
+	for playId, playUserRel := range playGameTeamResultUserRel {
 		// 每一场玩法
 		var (
 			winNoRewardedPlayGameTeamResultUserRel []*PlayGameTeamResultUserRel // 猜中未发放奖励的用户
 			poolAmount                             int64                        // 每个玩法的奖池
 			winTotalAmount                         int64                        // 中奖人的钱总额
+			kPlay                                  *Play
 		)
+
+		kPlay, err = p.playRepo.GetPlayById(ctx, playId)
+		if nil == play {
+			continue
+		}
+
+		// 不足两人退钱
+		tmpTotalUserIdMap := make(map[int64]int64, 0)
+		var tmpBackedUser []*PlayGameTeamResultUserRel
+		for _, v := range playUserRel {
+			if 999999999 != v.UserId {
+				tmpTotalUserIdMap[v.UserId] = v.UserId
+			}
+			if strings.EqualFold("no_rewarded", v.Status) {
+				tmpBackedUser = append(tmpBackedUser, v)
+			}
+		}
+		if 2 > len(tmpTotalUserIdMap) {
+			for _, v := range tmpBackedUser {
+				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+						return err
+					}
+					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_team_result", v.ID); nil != err {
+						return err
+					}
+					if res := p.playGameTeamResultUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+						return res
+					}
+					return nil
+				}); nil != err {
+					continue
+				}
+			}
+
+			continue
+		}
+
 		for _, v := range playUserRel {
 			if strings.EqualFold(content, v.Content) { // 判断是否猜中
 				if 999999999 != v.UserId {
@@ -802,9 +1142,97 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 			poolAmount += v.Pay
 		}
 
+		// 加入下一期奖池，注意后续再次结算再有中奖的，不能撤回加入下一期池子
+		if 0 == winTotalAmount {
+			var playRoomRel *PlayRoomRel
+
+			// 开房间的退回
+			var tmpRoomBackedUser []*PlayGameTeamResultUserRel
+			playRoomRel, err = p.roomRepo.GetPlayRoomByPlayId(ctx, kPlay.ID)
+			if nil != playRoomRel && strings.EqualFold("admin", kPlay.CreateUserType) {
+				for _, v := range playUserRel {
+					if 999999999 != v.UserId {
+						if strings.EqualFold("no_rewarded", v.Status) {
+							tmpRoomBackedUser = append(tmpRoomBackedUser, v)
+						}
+					}
+				}
+				for _, v := range tmpRoomBackedUser {
+					if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+						if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+							return err
+						}
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_team_result", v.ID); nil != err {
+							return err
+						}
+
+						if res := p.playGameTeamResultUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+							return res
+						}
+						return nil
+					}); nil != err {
+						continue
+					}
+				}
+			} else {
+				var (
+					lastTermPool           *LastTermPool
+					nextGame               *Game
+					adminCreatePlay        []*Play
+					adminCreatePlayGameRel *PlayGameRel
+					adminCreatePlayIds     []int64
+				)
+				if strings.EqualFold("game_team_result", kPlay.Type) {
+					lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, "game_team_result")
+					if nil != lastTermPool {
+						poolAmount += lastTermPool.Total
+					}
+					nextGame, err = p.gameRepo.GetNextGame(ctx, game.EndTime)
+					if nil == nextGame || nil != err {
+						return false
+					}
+					adminCreatePlay, err = p.playRepo.GetAdminCreatePlayByType(ctx, "game_team_result")
+					for _, v := range adminCreatePlay {
+						adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+					}
+					adminCreatePlayGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameIdAndPlayIds(ctx, nextGame.ID, adminCreatePlayIds...)
+					if nil == adminCreatePlayGameRel || nil != err {
+						return false
+					}
+					if nil != nextGame {
+						var nextTermPool *LastTermPool
+						nextTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, adminCreatePlayGameRel.PlayId, kPlay.Type)
+						if nil == nextTermPool {
+							_, err = p.playRepo.CreateLastTermPool(ctx, &LastTermPool{
+								GameId:         adminCreatePlayGameRel.GameId,
+								OriginGameId:   game.ID,
+								PlayId:         adminCreatePlayGameRel.PlayId,
+								OriginPlayId:   playId,
+								Total:          poolAmount,
+								PlayType:       "game_team_result",
+								OriginPlayType: "game_team_result",
+							})
+							if nil != err {
+								return false
+							}
+						}
+					}
+				}
+			}
+
+			continue
+		}
+
 		sizeofWin := int64(len(winNoRewardedPlayGameTeamResultUserRel))
 		if 0 == sizeofWin {
 			continue
+		}
+
+		// 上一期的奖池
+		var lastTermPool *LastTermPool
+		lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, kPlay.Type)
+		if nil != lastTermPool {
+			poolAmount += lastTermPool.Total
 		}
 
 		poolAmount = poolAmount * rate / 100
@@ -886,39 +1314,81 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 
 	return true
 }
-
 func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []*Play) bool {
+
 	var (
 		playIds                 []int64
 		playGameTeamGoalUserRel map[int64][]*PlayGameTeamGoalUserRel
 		err                     error
-		rate                    int64 = 80 // 猜中分比率可后台设置
-		systemConfig            map[string]*SystemConfig
-		ok                      bool
-		rateZero                int64
-		rateFirst               int64
-		rateSecond              int64
-		rateThird               int64
-		recommendRecordId       int64
-		goalBalanceRecordId     int64
+		res                     bool
 	)
 
 	for _, v := range play {
 		playIds = append(playIds, v.ID)
 	}
 
-	playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIds(ctx, playIds...)
-	if err != nil {
-		return false
+	// 上半场
+	if game.UpEndTime.Before(time.Now().UTC()) {
+		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIdsAndType(ctx, "game_team_goal_up", playIds...)
+		if err != nil {
+			return res
+		}
+		res = p.grantTypeGameGoalHandle(ctx, playGameTeamGoalUserRel, game)
+		if !res {
+			return res
+		}
 	}
 
-	for _, playUserRel := range playGameTeamGoalUserRel {
+	// 下半场
+	if game.EndTime.Before(time.Now().UTC()) {
+		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIdsAndType(ctx, "game_team_goal_down", playIds...)
+		if err != nil {
+			return res
+		}
+		res = p.grantTypeGameGoalHandle(ctx, playGameTeamGoalUserRel, game)
+		if !res {
+			return res
+		}
+
+		// 全场
+		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIdsAndType(ctx, "game_team_goal_all", playIds...)
+		if err != nil {
+			return res
+		}
+		res = p.grantTypeGameGoalHandle(ctx, playGameTeamGoalUserRel, game)
+		if !res {
+			return res
+		}
+	}
+	return true
+}
+
+func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamGoalUserRel map[int64][]*PlayGameTeamGoalUserRel, game *Game) bool {
+	var (
+		err                 error
+		rate                int64 = 80 // 猜中分比率可后台设置
+		systemConfig        map[string]*SystemConfig
+		ok                  bool
+		rateZero            int64
+		rateFirst           int64
+		rateSecond          int64
+		rateThird           int64
+		recommendRecordId   int64
+		goalBalanceRecordId int64
+	)
+
+	for playId, playUserRel := range playGameTeamGoalUserRel {
 		// 每一场玩法
 		var (
 			winNoRewardedPlayGameTeamGoalUserRel []*PlayGameTeamGoalUserRel // 猜中未发放奖励的用户
 			poolAmount                           int64                      // 每个玩法的奖池
 			winTotalAmount                       int64                      // 中奖人的钱总额
+			play                                 *Play
 		)
+		play, err = p.playRepo.GetPlayById(ctx, playId)
+		if nil == play {
+			continue
+		}
 
 		systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third", "sort_play_rate")
 		if _, ok = systemConfig["recommend_rate_zero"]; !ok {
@@ -945,6 +1415,39 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 			return false
 		}
 		rate = systemConfig["sort_play_rate"].Value
+
+		// 不足两人退钱
+		tmpTotalUserIdMap := make(map[int64]int64, 0)
+		var tmpBackedUser []*PlayGameTeamGoalUserRel
+		for _, v := range playUserRel {
+			if 999999999 != v.UserId {
+				tmpTotalUserIdMap[v.UserId] = v.UserId
+			}
+			if strings.EqualFold("no_rewarded", v.Status) {
+				tmpBackedUser = append(tmpBackedUser, v)
+			}
+		}
+		if 2 > len(tmpTotalUserIdMap) {
+			for _, v := range tmpBackedUser {
+				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+						return err
+					}
+					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, v.Type, v.ID); nil != err {
+						return err
+					}
+
+					if res := p.playGameTeamGoalUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+						return res
+					}
+					return nil
+				}); nil != err {
+					continue
+				}
+			}
+
+			continue
+		}
 
 		for _, v := range playUserRel { // 当前玩法，全为上半场或下半场或全场
 			if strings.EqualFold("game_team_goal_all", v.Type) { // 判断是否猜中
@@ -1003,10 +1506,162 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 			poolAmount += v.Pay
 		}
 
+		// 加入下一期奖池，注意后续再次结算再有中奖的，不能撤回加入下一期池子
+		if 0 == winTotalAmount {
+			var playRoomRel *PlayRoomRel
+
+			// 开房间的退回
+			var tmpRoomBackedUser []*PlayGameTeamGoalUserRel
+			playRoomRel, err = p.roomRepo.GetPlayRoomByPlayId(ctx, play.ID)
+			if nil != playRoomRel && strings.EqualFold("admin", play.CreateUserType) {
+				for _, v := range playUserRel {
+					if 999999999 != v.UserId {
+						if strings.EqualFold("no_rewarded", v.Status) {
+							tmpRoomBackedUser = append(tmpRoomBackedUser, v)
+						}
+					}
+				}
+				for _, v := range tmpRoomBackedUser {
+					if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+						if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+							return err
+						}
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, v.Type, v.ID); nil != err {
+							return err
+						}
+
+						if res := p.playGameTeamGoalUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+							return res
+						}
+						return nil
+					}); nil != err {
+						continue
+					}
+				}
+			} else {
+				var (
+					lastTermPool           *LastTermPool
+					nextGame               *Game
+					adminCreatePlay        []*Play
+					adminCreatePlayGameRel *PlayGameRel
+					adminCreatePlayIds     []int64
+				)
+				if strings.EqualFold("game_team_goal_all", play.Type) {
+					lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, "game_team_goal_all")
+					if nil != lastTermPool {
+						poolAmount += lastTermPool.Total
+					}
+					nextGame, err = p.gameRepo.GetNextGame(ctx, game.EndTime)
+					if nil == nextGame || nil != err {
+						return false
+					}
+					adminCreatePlay, err = p.playRepo.GetAdminCreatePlayByType(ctx, "game_team_goal_up")
+					for _, v := range adminCreatePlay {
+						adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+					}
+					adminCreatePlayGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameIdAndPlayIds(ctx, nextGame.ID, adminCreatePlayIds...)
+					if nil == adminCreatePlayGameRel || nil != err {
+						return false
+					}
+					if nil != nextGame {
+						var nextTermPool *LastTermPool
+						nextTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, adminCreatePlayGameRel.PlayId, "game_team_goal_up")
+						if nil == nextTermPool {
+							_, err = p.playRepo.CreateLastTermPool(ctx, &LastTermPool{
+								GameId:         adminCreatePlayGameRel.GameId,
+								OriginGameId:   game.ID,
+								PlayId:         adminCreatePlayGameRel.PlayId,
+								OriginPlayId:   playId,
+								Total:          poolAmount,
+								PlayType:       "game_team_goal_up",
+								OriginPlayType: "game_team_goal_all",
+							})
+							if nil != err {
+								return false
+							}
+						}
+					}
+
+				} else if strings.EqualFold("game_team_goal_up", play.Type) {
+					lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, "game_team_goal_up")
+					if nil != lastTermPool {
+						poolAmount += lastTermPool.Total
+					}
+
+					adminCreatePlay, err = p.playRepo.GetAdminCreatePlayByType(ctx, "game_team_goal_down")
+					for _, v := range adminCreatePlay {
+						adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+					}
+					adminCreatePlayGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameIdAndPlayIds(ctx, game.ID, adminCreatePlayIds...)
+					if nil == adminCreatePlayGameRel || nil != err {
+						return false
+					}
+
+					var nextTermPool *LastTermPool
+					nextTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, adminCreatePlayGameRel.PlayId, "game_team_goal_down")
+					if nil == nextTermPool {
+						_, err = p.playRepo.CreateLastTermPool(ctx, &LastTermPool{
+							GameId:         adminCreatePlayGameRel.GameId,
+							OriginGameId:   game.ID,
+							PlayId:         adminCreatePlayGameRel.PlayId,
+							OriginPlayId:   playId,
+							Total:          poolAmount,
+							PlayType:       "game_team_goal_down",
+							OriginPlayType: "game_team_goal_up",
+						})
+						if nil != err {
+							return false
+						}
+					}
+
+				} else if strings.EqualFold("game_team_goal_down", play.Type) {
+					lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, "game_team_goal_down")
+					if nil != lastTermPool {
+						poolAmount += lastTermPool.Total
+					}
+
+					adminCreatePlay, err = p.playRepo.GetAdminCreatePlayByType(ctx, "game_team_goal_all")
+					for _, v := range adminCreatePlay {
+						adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+					}
+					adminCreatePlayGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameIdAndPlayIds(ctx, game.ID, adminCreatePlayIds...)
+					if nil == adminCreatePlayGameRel || nil != err {
+						return false
+					}
+
+					var nextTermPool *LastTermPool
+					nextTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, adminCreatePlayGameRel.PlayId, "game_team_goal_all")
+					if nil == nextTermPool {
+						_, err = p.playRepo.CreateLastTermPool(ctx, &LastTermPool{
+							GameId:         adminCreatePlayGameRel.GameId,
+							OriginGameId:   game.ID,
+							PlayId:         adminCreatePlayGameRel.PlayId,
+							OriginPlayId:   playId,
+							Total:          poolAmount,
+							PlayType:       "game_team_goal_all",
+							OriginPlayType: "game_team_goal_down",
+						})
+						if nil != err {
+							return false
+						}
+					}
+
+				}
+			}
+
+			continue
+		}
+
 		sizeofWin := int64(len(winNoRewardedPlayGameTeamGoalUserRel))
 		if 0 == sizeofWin {
-			// todo 未中奖处理
 			continue
+		}
+
+		// 上一期的奖池
+		var lastTermPool *LastTermPool
+		lastTermPool, err = p.playRepo.GetLastTermPoolByPlayIdAndType(ctx, playId, play.Type)
+		if nil != lastTermPool {
+			poolAmount += lastTermPool.Total
 		}
 
 		poolAmount = poolAmount * rate / 100
@@ -1167,7 +1822,7 @@ func (p *PlayUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 		return nil, err
 	}
 
-	tmpPlaySort, tmpErr := p.playRepo.GetAdminCreatePlayByType(ctx, sort.Type)
+	tmpPlaySort, tmpErr := p.playRepo.GetAdminCreatePlayBySortType(ctx, play.Type)
 	if nil == tmpErr || nil != tmpPlaySort {
 		return nil, errors.New(500, "TIME_ERROR", "已存在玩法")
 	}
@@ -1284,6 +1939,7 @@ func (p *PlayUseCase) GetPlayUserRelList(ctx context.Context, req *v1.GetPlayRel
 	var (
 		play        *Play
 		userId      []int64
+		base        int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		playUserRel []*struct {
 			UserId int64
 			Status string
@@ -1344,7 +2000,7 @@ func (p *PlayUseCase) GetPlayUserRelList(ctx context.Context, req *v1.GetPlayRel
 		}
 		res.Items = append(res.Items, &v1.GetPlayRelListReply_Item{
 			Address: tempAddress,
-			Pay:     item.Pay,
+			Pay:     item.Pay / base,
 			Status:  item.Status,
 		})
 	}

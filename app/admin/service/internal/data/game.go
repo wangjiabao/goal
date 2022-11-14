@@ -84,6 +84,35 @@ func (g *GameRepo) GetGameById(ctx context.Context, gameId int64) (*biz.Game, er
 	}, nil
 }
 
+func (g *GameRepo) GetNextGame(ctx context.Context, endTime time.Time) (*biz.Game, error) {
+	var game Game
+	if err := g.data.db.Where("end_time>?", endTime).Table("soccer_game").Order("end_time asc").First(&game).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("GAME_NOT_FOUND", "game not found")
+		}
+
+		return nil, errors.New(500, "GAME_NOT_FOUND", err.Error())
+	}
+
+	return &biz.Game{
+		ID:               game.ID,
+		RedTeamId:        game.RedTeamId,
+		BlueTeamId:       game.BlueTeamId,
+		Name:             game.Name,
+		StartTime:        game.StartTime,
+		EndTime:          game.EndTime,
+		UpEndTime:        game.UpEndTime,
+		DownStartTime:    game.DownStartTime,
+		RedTeamDownGoal:  game.RedTeamDownGoal,
+		RedTeamUpGoal:    game.RedTeamUpGoal,
+		BlueTeamDownGoal: game.BlueTeamDownGoal,
+		BlueTeamUpGoal:   game.BlueTeamUpGoal,
+		WinTeamId:        game.WinTeamId,
+		Status:           game.Status,
+		Result:           game.Result,
+	}, nil
+}
+
 // CreateGame .
 func (g *GameRepo) CreateGame(ctx context.Context, gc *biz.Game) (*biz.Game, error) {
 	var game Game

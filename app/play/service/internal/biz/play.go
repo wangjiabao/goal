@@ -45,6 +45,7 @@ type PlayGameScoreUserRel struct {
 	PlayId    int64
 	Content   string
 	Pay       int64
+	OriginPay int64
 	Status    string
 	CreatedAt time.Time
 }
@@ -57,6 +58,7 @@ type PlayGameTeamSortUserRel struct {
 	Status    string
 	Content   string
 	Pay       int64
+	OriginPay int64
 	CreatedAt time.Time
 }
 
@@ -67,6 +69,7 @@ type PlayGameTeamGoalUserRel struct {
 	TeamId    int64
 	Type      string
 	Pay       int64
+	OriginPay int64
 	Goal      int64
 	Status    string
 	CreatedAt time.Time
@@ -94,6 +97,7 @@ type PlayGameTeamResultUserRel struct {
 	PlayId    int64
 	Content   string
 	Pay       int64
+	OriginPay int64
 	Status    string
 	CreatedAt time.Time
 }
@@ -483,7 +487,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 		playAllTypeUserRel = append(playAllTypeUserRel, &PlayAllTypeUserRel{
 			ID:        v.ID,
 			PlayId:    v.PlayId,
-			Pay:       v.Pay,
+			Pay:       v.OriginPay,
 			Status:    v.Status,
 			CreatedAt: v.CreatedAt,
 		})
@@ -494,7 +498,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 		playAllTypeUserRel = append(playAllTypeUserRel, &PlayAllTypeUserRel{
 			ID:        v.ID,
 			PlayId:    v.PlayId,
-			Pay:       v.Pay,
+			Pay:       v.OriginPay,
 			Status:    v.Status,
 			CreatedAt: v.CreatedAt,
 		})
@@ -505,7 +509,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 		playAllTypeUserRel = append(playAllTypeUserRel, &PlayAllTypeUserRel{
 			ID:        v.ID,
 			PlayId:    v.PlayId,
-			Pay:       v.Pay,
+			Pay:       v.OriginPay,
 			Status:    v.Status,
 			CreatedAt: v.CreatedAt,
 		})
@@ -516,7 +520,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 		playAllTypeUserRel = append(playAllTypeUserRel, &PlayAllTypeUserRel{
 			ID:        v.ID,
 			PlayId:    v.PlayId,
-			Pay:       v.Pay,
+			Pay:       v.OriginPay,
 			Status:    v.Status,
 			CreatedAt: v.CreatedAt,
 		})
@@ -719,6 +723,7 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		systemConfig         *SystemConfig
 		err                  error
 		recordId             int64
+		originPay            int64
 		feeRate              int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                 int64 = 100000 // 基础精度0.00001
 		payLimit             int64 = 100    // 限额
@@ -759,7 +764,7 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 	if pay > userBalance.Balance {
 		return nil, errors.New(500, "USER_BALANCE_ERROR", "余额不足")
 	}
-
+	originPay = pay
 	// 查找代理
 	upUserProxy, downUserProxy, err = p.userProxyRepo.GetUserProxyAndDown(ctx)
 	if nil != err {
@@ -780,12 +785,13 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		fee := pay / feeRate // 扣除手续费
 		pay -= fee
 		playGameScoreUserRel, err = p.playGameScoreUserRelRepo.CreatePlayGameScoreUserRel(ctx, &PlayGameScoreUserRel{
-			ID:      0,
-			UserId:  userId,
-			PlayId:  play.ID,
-			Content: strconv.FormatInt(req.SendBody.RedScore, 10) + ":" + strconv.FormatInt(req.SendBody.BlueScore, 10),
-			Pay:     pay,
-			Status:  "no_rewarded",
+			ID:        0,
+			UserId:    userId,
+			PlayId:    play.ID,
+			Content:   strconv.FormatInt(req.SendBody.RedScore, 10) + ":" + strconv.FormatInt(req.SendBody.BlueScore, 10),
+			Pay:       pay,
+			OriginPay: originPay,
+			Status:    "no_rewarded",
 		})
 		if err != nil {
 			return err
@@ -858,6 +864,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		upUserProxy                   []*UserProxy
 		downUserProxy                 map[int64][]*UserProxy
 		recordId                      int64
+		originPay                     int64
 		err                           error
 		feeRate                       int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                          int64 = 100000 // 基础精度0.00001 todo 加配置文件
@@ -918,6 +925,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 	if pay > userBalance.Balance {
 		return nil, errors.New(500, "USER_BALANCE_ERROR", "余额不足")
 	}
+	originPay = pay
 
 	// 查找代理
 	upUserProxy, downUserProxy, err = p.userProxyRepo.GetUserProxyAndDown(ctx)
@@ -939,12 +947,13 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		fee := pay / feeRate // 扣除手续费
 		pay -= fee
 		playGameTeamResultUserRel, err = p.playGameTeamResultUserRelRepo.CreatePlayGameTeamResultUserRel(ctx, &PlayGameTeamResultUserRel{
-			ID:      0,
-			UserId:  userId,
-			PlayId:  play.ID,
-			Content: gameResult,
-			Pay:     pay,
-			Status:  "no_rewarded",
+			ID:        0,
+			UserId:    userId,
+			PlayId:    play.ID,
+			Content:   gameResult,
+			OriginPay: originPay,
+			Pay:       pay,
+			Status:    "no_rewarded",
 		})
 		if err != nil {
 			return err
@@ -1016,6 +1025,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		downUserProxy           map[int64][]*UserProxy
 		err                     error
 		recordId                int64
+		originPay               int64
 		systemConfig            *SystemConfig
 		feeRate                 int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                    int64 = 100000 // 基础精度0.00001 todo 加配置文件
@@ -1070,6 +1080,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 	if pay > userBalance.Balance {
 		return nil, errors.New(500, "USER_BALANCE_ERROR", "余额不足")
 	}
+	originPay = pay
 
 	// 查找代理
 	upUserProxy, downUserProxy, err = p.userProxyRepo.GetUserProxyAndDown(ctx)
@@ -1091,13 +1102,14 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		fee := pay / feeRate // 扣除手续费
 		pay -= fee
 		playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.CreatePlayGameTeamSortUserRel(ctx, &PlayGameTeamSortUserRel{
-			ID:      0,
-			UserId:  userId,
-			PlayId:  play.ID,
-			SortId:  req.SendBody.SortId,
-			Content: req.SendBody.Content,
-			Pay:     pay,
-			Status:  "no_rewarded",
+			ID:        0,
+			UserId:    userId,
+			PlayId:    play.ID,
+			SortId:    req.SendBody.SortId,
+			Content:   req.SendBody.Content,
+			Pay:       pay,
+			OriginPay: originPay,
+			Status:    "no_rewarded",
 		})
 		if err != nil {
 			return err
@@ -1170,6 +1182,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		systemConfig            *SystemConfig
 		err                     error
 		recordId                int64
+		originPay               int64
 		feeRate                 int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                    int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		payLimit                int64 = 100    // 限额 todo 后台可以设置
@@ -1205,6 +1218,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 	if pay > userBalance.Balance {
 		return nil, errors.New(500, "USER_BALANCE_ERROR", "余额不足")
 	}
+	originPay = pay
 
 	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
 	if nil != err {
@@ -1232,14 +1246,15 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		fee := pay / feeRate // 扣除手续费
 		pay -= fee
 		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.CreatePlayGameTeamGoalUserRel(ctx, &PlayGameTeamGoalUserRel{
-			ID:     0,
-			UserId: userId,
-			PlayId: play.ID,
-			TeamId: req.SendBody.TeamId,
-			Type:   req.SendBody.PlayType,
-			Goal:   req.SendBody.Goal,
-			Pay:    pay,
-			Status: "no_rewarded",
+			ID:        0,
+			UserId:    userId,
+			PlayId:    play.ID,
+			TeamId:    req.SendBody.TeamId,
+			Type:      req.SendBody.PlayType,
+			Goal:      req.SendBody.Goal,
+			Pay:       pay,
+			OriginPay: originPay,
+			Status:    "no_rewarded",
 		})
 		if err != nil {
 			return err

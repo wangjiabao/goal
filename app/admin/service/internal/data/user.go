@@ -12,7 +12,7 @@ import (
 type UserBalance struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	UserId    int64     `gorm:"type:int;not null"`
-	Balance   int64     `gorm:"type:int;not null"`
+	Balance   int64     `gorm:"type:bigint;not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -46,7 +46,7 @@ type BalanceRecordIdRel struct {
 type UserBalanceRecord struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	UserId    int64     `gorm:"type:int;not null"`
-	Balance   int64     `gorm:"type:int;not null"`
+	Balance   int64     `gorm:"type:bigint;not null"`
 	Type      string    `gorm:"type:varchar(45);not null"`
 	Reason    string    `gorm:"type:varchar(45);not null"`
 	Amount    int64     `gorm:"type:int;not null"`
@@ -77,7 +77,7 @@ type UserInfo struct {
 
 type UserWithdraw struct {
 	ID        int64     `gorm:"primarykey;type:int"`
-	Amount    int64     `gorm:"type:int;not null"`
+	Amount    int64     `gorm:"type:bigint;not null"`
 	UserId    int64     `gorm:"type:int;not null"`
 	Tx        string    `gorm:"type:varchar(100);not null"`
 	Status    string    `gorm:"type:varchar(45);not null"`
@@ -269,6 +269,7 @@ func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *b
 	for _, item := range userWithdraw {
 		res = append(res, &biz.UserWithdraw{
 			ID:        item.ID,
+			UserId:    item.UserId,
 			Status:    item.Status,
 			Amount:    item.Amount,
 			Tx:        item.Tx,
@@ -291,6 +292,36 @@ func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, addres
 	}
 
 	return true, nil
+}
+
+// TransferIntoUserBack 在事务中使用，退款
+func (ub *UserBalanceRepo) TransferIntoUserBack(ctx context.Context, userId int64, amount int64) (int64, error) {
+	var err error
+	if err = ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		// UpdateColumn("balance", gorm.Expr("balance + ?", pay))
+		Updates(map[string]interface{}{"balance": gorm.Expr("balance + ?", amount)}).Error; nil != err {
+		return 0, errors.NotFound("user balance err", "user balance not found")
+	}
+
+	var userBalance UserBalance
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	if err != nil {
+		return 0, err
+	}
+
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = userBalance.Balance
+	userBalanceRecode.UserId = userBalance.UserId
+	userBalanceRecode.Type = "transfer_into"
+	userBalanceRecode.Reason = "user_goal_back"
+	userBalanceRecode.Amount = amount
+	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return userBalanceRecode.ID, nil
 }
 
 // TransferIntoUserGoalReward 在事务中使用，中奖

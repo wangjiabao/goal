@@ -20,9 +20,9 @@ type UserBalance struct {
 type UserBalanceRecord struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	UserId    int64     `gorm:"type:int;not null"`
-	Balance   int64     `gorm:"type:int;not null"`
+	Balance   int64     `gorm:"type:bigint;not null"`
 	Type      string    `gorm:"type:varchar(45);not null"`
-	Amount    int64     `gorm:"type:int;not null"`
+	Amount    int64     `gorm:"type:bigint;not null"`
 	Reason    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
@@ -38,7 +38,7 @@ type AddressEthBalance struct {
 
 type UserWithdraw struct {
 	ID        int64     `gorm:"primarykey;type:int"`
-	Amount    int64     `gorm:"type:int;not null"`
+	Amount    int64     `gorm:"type:bigint;not null"`
 	UserId    int64     `gorm:"type:int;not null"`
 	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`

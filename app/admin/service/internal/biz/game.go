@@ -33,6 +33,7 @@ type DisplayGame struct {
 
 type GameRepo interface {
 	GetGameById(ctx context.Context, gameId int64) (*Game, error)
+	GetNextGame(ctx context.Context, endTime time.Time) (*Game, error)
 	CreateGame(ctx context.Context, gc *Game) (*Game, error)
 	UpdateGame(ctx context.Context, gc *Game) (*Game, error)
 	GetGameList(ctx context.Context) ([]*Game, error)

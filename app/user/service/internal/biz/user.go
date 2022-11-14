@@ -438,13 +438,13 @@ func (uc *UserUseCase) CreateProxy(ctx context.Context, u *User, req *v1.CreateP
 			return err
 		}
 
-		userBalance, err = uc.ubRepo.TransferIntoProxy(ctx, u.ID, amount*base)
+		userBalance, err = uc.ubRepo.TransferIntoProxy(ctx, u.ID, amount)
 		if err != nil {
 			return err
 		}
 
 		if nil != recommendUserProxy && 0 != recommendUserProxy.UserId {
-			userBalance, err = uc.ubRepo.TransferIntoProxyRecommendReward(ctx, recommendUserProxy.UserId, amount*base*recommendProxyReward/100)
+			userBalance, err = uc.ubRepo.TransferIntoProxyRecommendReward(ctx, recommendUserProxy.UserId, amount*recommendProxyReward/100)
 		}
 
 		return nil

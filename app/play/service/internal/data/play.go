@@ -48,7 +48,8 @@ type PlayGameScoreUserRel struct {
 	PlayId    int64     `gorm:"type:int;not null"`
 	UserId    int64     `gorm:"type:int;not null"`
 	Content   string    `gorm:"type:varchar(45);not null"`
-	Pay       int64     `gorm:"type:int;not null"`
+	Pay       int64     `gorm:"type:bigint;not null"`
+	OriginPay int64     `gorm:"type:bigint;not null"`
 	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
@@ -59,8 +60,9 @@ type PlayGameTeamSortUserRel struct {
 	PlayId    int64     `gorm:"type:int;not null"`
 	UserId    int64     `gorm:"type:int;not null"`
 	SortId    int64     `gorm:"type:int;not null"`
+	OriginPay int64     `gorm:"type:bigint;not null"`
 	Content   string    `gorm:"type:varchar(45);not null"`
-	Pay       int64     `gorm:"type:int;not null"`
+	Pay       int64     `gorm:"type:bigint;not null"`
 	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
@@ -73,7 +75,8 @@ type PlayGameTeamGoalUserRel struct {
 	TeamId    int64     `gorm:"type:int;not null"`
 	Goal      int64     `gorm:"type:int;not null"`
 	Type      string    `gorm:"type:varchar(45);not null"`
-	Pay       int64     `gorm:"type:int;not null"`
+	Pay       int64     `gorm:"type:bigint;not null"`
+	OriginPay int64     `gorm:"type:bigint;not null"`
 	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
@@ -100,7 +103,8 @@ type PlayGameTeamResultUserRel struct {
 	PlayId    int64     `gorm:"type:int;not null"`
 	UserId    int64     `gorm:"type:int;not null"`
 	Content   string    `gorm:"type:varchar(45);not null"`
-	Pay       int64     `gorm:"type:int;not null"`
+	Pay       int64     `gorm:"type:bigint;not null"`
+	OriginPay int64     `gorm:"type:bigint;not null"`
 	Status    string    `gorm:"type:varchar(45);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
@@ -454,6 +458,7 @@ func (p *PlayGameScoreUserRelRepo) CreatePlayGameScoreUserRel(ctx context.Contex
 	playGameScoreUserRel.UserId = pr.UserId
 	playGameScoreUserRel.PlayId = pr.PlayId
 	playGameScoreUserRel.Pay = pr.Pay
+	playGameScoreUserRel.OriginPay = pr.OriginPay
 	playGameScoreUserRel.Content = pr.Content
 	playGameScoreUserRel.Status = pr.Status
 	res := p.data.DB(ctx).Table("play_game_score_user_rel").Create(&playGameScoreUserRel)
@@ -484,6 +489,7 @@ func (p *PlayGameScoreUserRelRepo) GetPlayGameScoreUserRelByUserId(ctx context.C
 			UserId:    playGameScoreUserRel.UserId,
 			PlayId:    playGameScoreUserRel.PlayId,
 			Pay:       playGameScoreUserRel.Pay,
+			OriginPay: playGameScoreUserRel.OriginPay,
 			Content:   playGameScoreUserRel.Content,
 			Status:    playGameScoreUserRel.Status,
 			CreatedAt: playGameScoreUserRel.CreatedAt,
@@ -609,6 +615,7 @@ func (p *PlayGameTeamResultUserRelRepo) CreatePlayGameTeamResultUserRel(ctx cont
 	playGameTeamResultUserRel.UserId = pr.UserId
 	playGameTeamResultUserRel.PlayId = pr.PlayId
 	playGameTeamResultUserRel.Pay = pr.Pay
+	playGameTeamResultUserRel.OriginPay = pr.OriginPay
 	playGameTeamResultUserRel.Content = pr.Content
 	playGameTeamResultUserRel.Status = pr.Status
 	res := p.data.DB(ctx).Table("play_game_team_result_user_rel").Create(&playGameTeamResultUserRel)
@@ -638,6 +645,7 @@ func (p *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByUserId(ctx
 			UserId:    playGameTeamResultUserRel.UserId,
 			PlayId:    playGameTeamResultUserRel.PlayId,
 			Pay:       playGameTeamResultUserRel.Pay,
+			OriginPay: playGameTeamResultUserRel.OriginPay,
 			Content:   playGameTeamResultUserRel.Content,
 			CreatedAt: playGameTeamResultUserRel.CreatedAt,
 			Status:    playGameTeamResultUserRel.Status,
@@ -656,6 +664,7 @@ func (p *PlayGameTeamGoalUserRelRepo) CreatePlayGameTeamGoalUserRel(ctx context.
 	playGameTeamGoalUserRel.Status = pr.Status
 	playGameTeamGoalUserRel.Goal = pr.Goal
 	playGameTeamGoalUserRel.Type = pr.Type
+	playGameTeamGoalUserRel.OriginPay = pr.OriginPay
 	res := p.data.DB(ctx).Table("play_game_team_goal_user_rel").Create(&playGameTeamGoalUserRel)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_PLAY_GAME_GOAL_REL_ERROR", "玩法比赛进球数竞猜创建失败")
@@ -686,6 +695,7 @@ func (p *PlayGameTeamGoalUserRelRepo) GetPlayGameTeamGoalUserRelByUserId(ctx con
 			UserId:    playGameTeamGoalUserRel.UserId,
 			PlayId:    playGameTeamGoalUserRel.PlayId,
 			Pay:       playGameTeamGoalUserRel.Pay,
+			OriginPay: playGameTeamGoalUserRel.OriginPay,
 			Status:    playGameTeamGoalUserRel.Status,
 			Goal:      playGameTeamGoalUserRel.Goal,
 			TeamId:    playGameTeamGoalUserRel.TeamId,
@@ -702,6 +712,7 @@ func (p *PlayGameTeamSortUserRelRepo) CreatePlayGameTeamSortUserRel(ctx context.
 	playGameTeamSortUserRel.UserId = pr.UserId
 	playGameTeamSortUserRel.PlayId = pr.PlayId
 	playGameTeamSortUserRel.Pay = pr.Pay
+	playGameTeamSortUserRel.OriginPay = pr.OriginPay
 	playGameTeamSortUserRel.Status = pr.Status
 	playGameTeamSortUserRel.Content = pr.Content
 	playGameTeamSortUserRel.SortId = pr.SortId
@@ -735,6 +746,7 @@ func (p *PlayGameTeamSortUserRelRepo) GetPlayGameTeamSortUserRelByUserId(ctx con
 			UserId:    playGameTeamSortUserRel.UserId,
 			PlayId:    playGameTeamSortUserRel.PlayId,
 			Pay:       playGameTeamSortUserRel.Pay,
+			OriginPay: playGameTeamSortUserRel.OriginPay,
 			Status:    playGameTeamSortUserRel.Status,
 			Content:   playGameTeamSortUserRel.Content,
 			SortId:    playGameTeamSortUserRel.SortId,

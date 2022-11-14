@@ -18,6 +18,7 @@ type Sort struct {
 
 type SortRepo interface {
 	GetGameSortById(ctx context.Context, gameId int64) (*Sort, error)
+	GetNexGameSort(ctx context.Context, endTime time.Time) (*Sort, error)
 	GetGameSortList(ctx context.Context) ([]*Sort, error)
 	CreateSort(ctx context.Context, sc *Sort) (*Sort, error)
 	UpdateSort(ctx context.Context, sc *Sort) (*Sort, error)

@@ -52,6 +52,26 @@ func (s *SortRepo) GetGameSortById(ctx context.Context, gameId int64) (*biz.Sort
 	}, nil
 }
 
+func (s *SortRepo) GetNexGameSort(ctx context.Context, endTime time.Time) (*biz.Sort, error) {
+	var sort Sort
+	if err := s.data.DB(ctx).Where("end_time>?", endTime).Table("soccer_game_team_sort").Order("end_time asc").First(&sort).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("GAME_SORT_NOT_FOUND", "game sort not found")
+		}
+
+		return nil, errors.New(500, "GAME_SORT_NOT_FOUND", err.Error())
+	}
+
+	return &biz.Sort{
+		ID:       sort.ID,
+		EndTime:  sort.EndTime,
+		SortName: sort.SortName,
+		Type:     sort.Type,
+		Status:   sort.Status,
+		Content:  sort.Content,
+	}, nil
+}
+
 func (s *SortRepo) GetGameSortList(ctx context.Context) ([]*biz.Sort, error) {
 	var gameSort []*Sort
 	if err := s.data.DB(ctx).Table("soccer_game_team_sort").Find(&gameSort).Error; err != nil {

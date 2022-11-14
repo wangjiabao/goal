@@ -44,3 +44,15 @@ func (r *RoomRepo) GetRoomList(ctx context.Context) ([]*biz.Room, error) {
 
 	return res, nil
 }
+
+func (r *RoomRepo) GetPlayRoomByPlayId(ctx context.Context, playId int64) (*biz.PlayRoomRel, error) {
+	var playRoomRel PlayRoomRel
+	if result := r.data.DB(ctx).Table("goal_play_room_rel").Where(&PlayRoomRel{PlayId: playId}).First(&playRoomRel); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询房间内比赛玩法关系失败")
+	}
+
+	return &biz.PlayRoomRel{
+		PlayId: playRoomRel.PlayId,
+		RoomId: playRoomRel.RoomId,
+	}, nil
+}
