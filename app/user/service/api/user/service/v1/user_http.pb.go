@@ -60,7 +60,7 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r.POST("/api/user/proxy/down/create", _User_CreateDownProxy0_HTTP_Handler(srv))
 	r.GET("/api/user_proxy/list", _User_GetUserProxyList0_HTTP_Handler(srv))
 	r.GET("/api/user_proxy/config_list", _User_GetUserProxyConfigList0_HTTP_Handler(srv))
-	r.POST("/api/user_deposit", _User_UserDeposit0_HTTP_Handler(srv))
+	r.GET("/api/user_deposit", _User_UserDeposit0_HTTP_Handler(srv))
 }
 
 func _User_EthAuthorize0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -290,9 +290,6 @@ func _User_GetUserProxyConfigList0_HTTP_Handler(srv UserHTTPServer) func(ctx htt
 func _User_UserDeposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in UserDepositRequest
-		if err := ctx.Bind(&in.SendBody); err != nil {
-			return err
-		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -465,10 +462,10 @@ func (c *UserHTTPClientImpl) GetUserWithdrawList(ctx context.Context, in *GetUse
 func (c *UserHTTPClientImpl) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...http.CallOption) (*UserDepositReply, error) {
 	var out UserDepositReply
 	pattern := "/api/user_deposit"
-	path := binding.EncodeURL(pattern, in, false)
+	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserUserDeposit))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

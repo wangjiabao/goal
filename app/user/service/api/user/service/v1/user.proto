@@ -83,8 +83,7 @@ service User {
 
 	rpc UserDeposit (UserDepositRequest) returns (UserDepositReply){
 		option (google.api.http) = {
-			post: "/api/user_deposit"
-			body: "send_body"
+			get: "/api/user_deposit"
 		};
 	};
 
@@ -123,10 +122,6 @@ message DepositRequest {
 }
 
 message UserDepositRequest {
-	message SendBody{
-	}
-
-	SendBody send_body = 1;
 }
 
 message UserDepositReply {

@@ -163,16 +163,10 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Status'
     /api/user_deposit:
-        post:
+        get:
             tags:
                 - User
             operationId: User_UserDeposit
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/UserDepositRequest_SendBody'
-                required: true
             responses:
                 "200":
                     description: OK
@@ -453,9 +447,6 @@ components:
             properties:
                 result:
                     type: string
-        UserDepositRequest_SendBody:
-            type: object
-            properties: {}
         WithdrawReply:
             type: object
             properties:
