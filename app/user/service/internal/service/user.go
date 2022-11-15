@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -254,7 +255,7 @@ func (u *UserService) DepositHandle(ctx context.Context) (bool, error) {
 		if err != nil {
 			continue
 		}
-
+		fmt.Println(22222222, bal.String(), v.ToAddress)
 		_, err = u.uc.DepositHandle(ctx, bal.String(), v.ToAddress, v.ID)
 		if err != nil {
 			continue
