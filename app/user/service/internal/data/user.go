@@ -181,8 +181,9 @@ func (u *UserRepo) GetUserById(ctx context.Context, Id int64) (*biz.User, error)
 	}
 
 	return &biz.User{
-		ID:      user.ID,
-		Address: user.Address,
+		ID:        user.ID,
+		Address:   user.Address,
+		ToAddress: user.ToAddress,
 	}, nil
 }
 
