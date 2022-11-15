@@ -259,6 +259,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/goal_admin/play/game_delete:
+        post:
+            tags:
+                - Admin
+            operationId: Admin_DeletePlayGame
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DeletePlayGameRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeletePlayGameReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/goal_admin/play/sort:
         post:
             tags:
@@ -301,6 +325,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/SortPlayGrantReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/play/sort_delete:
+        post:
+            tags:
+                - Admin
+            operationId: Admin_DeletePlaySort
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DeletePlaySortRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeletePlaySortReply'
                 default:
                     description: Default error response
                     content:
@@ -513,6 +561,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/UpdateSortReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /api/goal_admin/sort_list:
+        get:
+            tags:
+                - Admin
+            operationId: Admin_GetPlaySortList
+            parameters:
+                - name: sortId
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetPlaySortListReply'
                 default:
                     description: Default error response
                     content:
@@ -1044,6 +1116,28 @@ components:
                 gameId:
                     type: integer
                     format: int64
+        DeletePlayGameReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        DeletePlayGameRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+        DeletePlaySortReply:
+            type: object
+            properties:
+                result:
+                    type: string
+        DeletePlaySortRequest_SendBody:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
         DisplayGameIndexReply:
             type: object
             properties:
@@ -1364,6 +1458,25 @@ components:
                 Pay:
                     type: integer
                     format: int64
+        GetPlaySortListReply:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GetPlaySortListReply_Item'
+        GetPlaySortListReply_Item:
+            type: object
+            properties:
+                playId:
+                    type: integer
+                    format: int64
+                type:
+                    type: string
+                startTime:
+                    type: string
+                endTime:
+                    type: string
         GetRoomListReply:
             type: object
             properties:

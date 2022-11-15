@@ -25,10 +25,13 @@ const OperationAdminCreatePlayGameResult = "/api.admin.service.v1.Admin/CreatePl
 const OperationAdminCreatePlayGameScore = "/api.admin.service.v1.Admin/CreatePlayGameScore"
 const OperationAdminCreatePlayGameSort = "/api.admin.service.v1.Admin/CreatePlayGameSort"
 const OperationAdminCreatePlaySort = "/api.admin.service.v1.Admin/CreatePlaySort"
+const OperationAdminDeletePlayGame = "/api.admin.service.v1.Admin/DeletePlayGame"
+const OperationAdminDeletePlaySort = "/api.admin.service.v1.Admin/DeletePlaySort"
 const OperationAdminGamePlayGrant = "/api.admin.service.v1.Admin/GamePlayGrant"
 const OperationAdminGetConfigList = "/api.admin.service.v1.Admin/GetConfigList"
 const OperationAdminGetPlayList = "/api.admin.service.v1.Admin/GetPlayList"
 const OperationAdminGetPlayRelList = "/api.admin.service.v1.Admin/GetPlayRelList"
+const OperationAdminGetPlaySortList = "/api.admin.service.v1.Admin/GetPlaySortList"
 const OperationAdminGetRoomList = "/api.admin.service.v1.Admin/GetRoomList"
 const OperationAdminGetRoomPlayList = "/api.admin.service.v1.Admin/GetRoomPlayList"
 const OperationAdminSortPlayGrant = "/api.admin.service.v1.Admin/SortPlayGrant"
@@ -41,10 +44,13 @@ type AdminHTTPServer interface {
 	CreatePlayGameScore(context.Context, *CreatePlayGameScoreRequest) (*CreatePlayGameScoreReply, error)
 	CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error)
 	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
+	DeletePlayGame(context.Context, *DeletePlayGameRequest) (*DeletePlayGameReply, error)
+	DeletePlaySort(context.Context, *DeletePlaySortRequest) (*DeletePlaySortReply, error)
 	GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error)
 	GetConfigList(context.Context, *GetConfigListRequest) (*GetConfigListReply, error)
 	GetPlayList(context.Context, *GetPlayListRequest) (*GetPlayListReply, error)
 	GetPlayRelList(context.Context, *GetPlayRelListRequest) (*GetPlayRelListReply, error)
+	GetPlaySortList(context.Context, *GetPlaySortListRequest) (*GetPlaySortListReply, error)
 	GetRoomList(context.Context, *GetRoomListRequest) (*GetRoomListReply, error)
 	GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error)
 	SortPlayGrant(context.Context, *SortPlayGrantRequest) (*SortPlayGrantReply, error)
@@ -58,6 +64,7 @@ func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
 	r.POST("/api/goal_admin/play/game", _Admin_CreatePlayGame0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play/sort", _Admin_CreatePlaySort0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/game/{game_id}/play", _Admin_GetPlayList0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/sort_list", _Admin_GetPlaySortList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/play/{play_id}/play_rel", _Admin_GetPlayRelList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/room_list", _Admin_GetRoomList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/room/{room_id}/play_list", _Admin_GetRoomPlayList0_HTTP_Handler(srv))
@@ -67,6 +74,8 @@ func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
 	r.POST("/api/goal_admin/play_game_sort", _Admin_CreatePlayGameSort0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/system_config_list", _Admin_GetConfigList0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/update_system_config", _Admin_UpdateConfig0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/play/game_delete", _Admin_DeletePlayGame0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/play/sort_delete", _Admin_DeletePlaySort0_HTTP_Handler(srv))
 }
 
 func _Admin_GamePlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
@@ -175,6 +184,25 @@ func _Admin_GetPlayList0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context
 			return err
 		}
 		reply := out.(*GetPlayListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Admin_GetPlaySortList0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetPlaySortListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminGetPlaySortList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetPlaySortList(ctx, req.(*GetPlaySortListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetPlaySortListReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -371,6 +399,50 @@ func _Admin_UpdateConfig0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Contex
 	}
 }
 
+func _Admin_DeletePlayGame0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeletePlayGameRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminDeletePlayGame)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeletePlayGame(ctx, req.(*DeletePlayGameRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeletePlayGameReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Admin_DeletePlaySort0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DeletePlaySortRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminDeletePlaySort)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeletePlaySort(ctx, req.(*DeletePlaySortRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DeletePlaySortReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AdminHTTPClient interface {
 	CreatePlayGame(ctx context.Context, req *CreatePlayGameRequest, opts ...http.CallOption) (rsp *CreatePlayGameReply, err error)
 	CreatePlayGameGoal(ctx context.Context, req *CreatePlayGameGoalRequest, opts ...http.CallOption) (rsp *CreatePlayGameGoalReply, err error)
@@ -378,10 +450,13 @@ type AdminHTTPClient interface {
 	CreatePlayGameScore(ctx context.Context, req *CreatePlayGameScoreRequest, opts ...http.CallOption) (rsp *CreatePlayGameScoreReply, err error)
 	CreatePlayGameSort(ctx context.Context, req *CreatePlayGameSortRequest, opts ...http.CallOption) (rsp *CreatePlayGameSortReply, err error)
 	CreatePlaySort(ctx context.Context, req *CreatePlaySortRequest, opts ...http.CallOption) (rsp *CreatePlaySortReply, err error)
+	DeletePlayGame(ctx context.Context, req *DeletePlayGameRequest, opts ...http.CallOption) (rsp *DeletePlayGameReply, err error)
+	DeletePlaySort(ctx context.Context, req *DeletePlaySortRequest, opts ...http.CallOption) (rsp *DeletePlaySortReply, err error)
 	GamePlayGrant(ctx context.Context, req *GamePlayGrantRequest, opts ...http.CallOption) (rsp *GamePlayGrantReply, err error)
 	GetConfigList(ctx context.Context, req *GetConfigListRequest, opts ...http.CallOption) (rsp *GetConfigListReply, err error)
 	GetPlayList(ctx context.Context, req *GetPlayListRequest, opts ...http.CallOption) (rsp *GetPlayListReply, err error)
 	GetPlayRelList(ctx context.Context, req *GetPlayRelListRequest, opts ...http.CallOption) (rsp *GetPlayRelListReply, err error)
+	GetPlaySortList(ctx context.Context, req *GetPlaySortListRequest, opts ...http.CallOption) (rsp *GetPlaySortListReply, err error)
 	GetRoomList(ctx context.Context, req *GetRoomListRequest, opts ...http.CallOption) (rsp *GetRoomListReply, err error)
 	GetRoomPlayList(ctx context.Context, req *GetRoomPlayListRequest, opts ...http.CallOption) (rsp *GetRoomPlayListReply, err error)
 	SortPlayGrant(ctx context.Context, req *SortPlayGrantRequest, opts ...http.CallOption) (rsp *SortPlayGrantReply, err error)
@@ -474,6 +549,32 @@ func (c *AdminHTTPClientImpl) CreatePlaySort(ctx context.Context, in *CreatePlay
 	return &out, err
 }
 
+func (c *AdminHTTPClientImpl) DeletePlayGame(ctx context.Context, in *DeletePlayGameRequest, opts ...http.CallOption) (*DeletePlayGameReply, error) {
+	var out DeletePlayGameReply
+	pattern := "/api/goal_admin/play/game_delete"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminDeletePlayGame))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) DeletePlaySort(ctx context.Context, in *DeletePlaySortRequest, opts ...http.CallOption) (*DeletePlaySortReply, error) {
+	var out DeletePlaySortReply
+	pattern := "/api/goal_admin/play/sort_delete"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminDeletePlaySort))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
 func (c *AdminHTTPClientImpl) GamePlayGrant(ctx context.Context, in *GamePlayGrantRequest, opts ...http.CallOption) (*GamePlayGrantReply, error) {
 	var out GamePlayGrantReply
 	pattern := "/api/goal_admin/play/game/grant"
@@ -518,6 +619,19 @@ func (c *AdminHTTPClientImpl) GetPlayRelList(ctx context.Context, in *GetPlayRel
 	pattern := "/api/goal_admin/play/{play_id}/play_rel"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAdminGetPlayRelList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) GetPlaySortList(ctx context.Context, in *GetPlaySortListRequest, opts ...http.CallOption) (*GetPlaySortListReply, error) {
+	var out GetPlaySortListReply
+	pattern := "/api/goal_admin/sort_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAdminGetPlaySortList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

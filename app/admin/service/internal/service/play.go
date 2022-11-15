@@ -32,14 +32,29 @@ func (p *PlayService) CreatePlayGame(ctx context.Context, req *v1.CreatePlayGame
 	return p.uc.CreatePlayGame(ctx, req)
 }
 
-// CreatePlaySort 创建房间和比赛排名玩法
+// CreatePlaySort 创建比赛排名玩法
 func (p *PlayService) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySortRequest) (*v1.CreatePlaySortReply, error) {
 	return p.uc.CreatePlaySort(ctx, req)
+}
+
+// DeletePlayGame 删除比赛玩法
+func (p *PlayService) DeletePlayGame(ctx context.Context, req *v1.DeletePlayGameRequest) (*v1.DeletePlayGameReply, error) {
+	return p.uc.DeletePlayGame(ctx, req)
+}
+
+// DeletePlaySort 删除比赛排名
+func (p *PlayService) DeletePlaySort(ctx context.Context, req *v1.DeletePlaySortRequest) (*v1.DeletePlaySortReply, error) {
+	return p.uc.DeletePlaySort(ctx, req)
 }
 
 // GetPlayList .
 func (p *PlayService) GetPlayList(ctx context.Context, req *v1.GetPlayListRequest) (*v1.GetPlayListReply, error) {
 	return p.uc.GetPlayList(ctx, req)
+}
+
+// GetPlaySortList .
+func (p *PlayService) GetPlaySortList(ctx context.Context, req *v1.GetPlaySortListRequest) (*v1.GetPlaySortListReply, error) {
+	return p.uc.GetPlaySortList(ctx, req)
 }
 
 // GetPlayRelList .

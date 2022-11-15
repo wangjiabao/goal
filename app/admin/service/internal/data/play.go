@@ -240,6 +240,23 @@ func (pgr *PlayGameRelRepo) GetPlayGameRelByGameId(ctx context.Context, gameId i
 	return pl, nil
 }
 
+func (pgr *PlayGameRelRepo) GetPlayGameRelListByGameIdAndPlayIds(ctx context.Context, gameId int64, playId ...int64) ([]*biz.PlayGameRel, error) {
+	var l []*PlayGameRel
+	if result := pgr.data.DB(ctx).Table("goal_play_game_rel").Where("game_id=? and play_id IN (?)", gameId, playId).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_REL_ERROR", "查询比赛玩法关系失败")
+	}
+
+	pl := make([]*biz.PlayGameRel, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.PlayGameRel{
+			ID:     v.ID,
+			PlayId: v.PlayId,
+			GameId: v.GameId,
+		})
+	}
+	return pl, nil
+}
+
 func (pgr *PlayGameRelRepo) GetPlayGameRelByGameIdAndPlayIds(ctx context.Context, gameId int64, playId ...int64) (*biz.PlayGameRel, error) {
 	var playGameRel *PlayGameRel
 	if result := pgr.data.DB(ctx).Table("goal_play_game_rel").Where("game_id=? and play_id IN (?)", gameId, playId).First(&playGameRel); result.Error != nil {
@@ -303,6 +320,23 @@ func (prr *PlayRoomRelRepo) GetPlayRoomRelByRoomId(ctx context.Context, roomId i
 func (psr *PlaySortRelRepo) GetPlaySortRelBySortId(ctx context.Context, sortId int64) ([]*biz.PlaySortRel, error) {
 	var l []*PlaySortRel
 	if result := psr.data.DB(ctx).Table("goal_play_game_sort_rel").Where("sort_id=?", sortId).Find(&l); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_GAME_SORT_REL_ERROR", "查询比赛排名玩法关系失败")
+	}
+
+	pl := make([]*biz.PlaySortRel, 0)
+	for _, v := range l {
+		pl = append(pl, &biz.PlaySortRel{
+			ID:     v.ID,
+			PlayId: v.PlayId,
+			SortId: v.SortId,
+		})
+	}
+	return pl, nil
+}
+
+func (psr *PlaySortRelRepo) GetPlaySortRelListBySortIdAndPlayIds(ctx context.Context, sortId int64, playIds ...int64) ([]*biz.PlaySortRel, error) {
+	var l []*PlaySortRel
+	if result := psr.data.DB(ctx).Table("goal_play_game_sort_rel").Where("sort_id=? and play_id IN (?)", sortId, playIds).Find(&l); result.Error != nil {
 		return nil, errors.InternalServer("SELECT_PLAY_GAME_SORT_REL_ERROR", "查询比赛排名玩法关系失败")
 	}
 
@@ -779,6 +813,39 @@ func (pgr *PlayGameRelRepo) CreatePlayGameRel(ctx context.Context, rel *biz.Play
 	}, nil
 }
 
+// DeletePlayGameRelByPlayId .
+func (pgr *PlayGameRelRepo) DeletePlayGameRelByPlayId(ctx context.Context, playId int64) (bool, error) {
+	var playGameRel PlayGameRel
+	res := pgr.data.DB(ctx).Table("goal_play_game_rel").Where("play_id=?", playId).Delete(&playGameRel)
+	if res.Error != nil {
+		return false, errors.New(500, "CREATE_PLAY_GAME_REL_ERROR", "玩法和比赛关系删除失败")
+	}
+
+	return true, nil
+}
+
+// DeletePlaySortRelByPlayId .
+func (psr *PlaySortRelRepo) DeletePlaySortRelByPlayId(ctx context.Context, playId int64) (bool, error) {
+	var playSortRel PlaySortRel
+	res := psr.data.DB(ctx).Table("goal_play_game_sort_rel").Where("play_id=?", playId).Delete(&playSortRel)
+	if res.Error != nil {
+		return false, errors.New(500, "DELETE_PLAY_SORT_REL_ERROR", "玩法和排名关系删除失败")
+	}
+
+	return true, nil
+}
+
+// DeletePlayById .
+func (p *PlayRepo) DeletePlayById(ctx context.Context, id int64) (bool, error) {
+	var play Play
+	res := p.data.DB(ctx).Table("goal_play").Where("id=?", id).Delete(&play)
+	if res.Error != nil {
+		return false, errors.New(500, "DELETE_PLAY_ERROR", "玩法删除失败")
+	}
+
+	return true, nil
+}
+
 // CreatePlaySortRel .
 func (psr *PlaySortRelRepo) CreatePlaySortRel(ctx context.Context, rel *biz.PlaySortRel) (*biz.PlaySortRel, error) {
 	var playSortRel PlaySortRel
@@ -809,6 +876,24 @@ func (s *SystemConfigRepo) UpdateConfig(ctx context.Context, id int64, value int
 func (p *PlayRepo) GetAdminCreatePlayByType(ctx context.Context, playType string) ([]*biz.Play, error) {
 	var play []*Play
 	if result := p.data.DB(ctx).Table("goal_play").Where(&Play{CreateUserId: 1, CreateUserType: "admin", Type: playType}).Find(&play); result.Error != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询玩法失败")
+	}
+
+	var res []*biz.Play
+	for _, v := range play {
+		res = append(res, &biz.Play{
+			ID:        v.ID,
+			StartTime: v.StartTime,
+			EndTime:   v.EndTime,
+		})
+	}
+
+	return res, nil
+}
+
+func (p *PlayRepo) GetAdminCreatePlay(ctx context.Context) ([]*biz.Play, error) {
+	var play []*Play
+	if result := p.data.DB(ctx).Table("goal_play").Where(&Play{CreateUserId: 1, CreateUserType: "admin"}).Find(&play); result.Error != nil {
 		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询玩法失败")
 	}
 

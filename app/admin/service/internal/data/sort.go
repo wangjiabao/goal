@@ -32,9 +32,9 @@ func NewSortRepo(data *Data, logger log.Logger) biz.SortRepo {
 	}
 }
 
-func (s *SortRepo) GetGameSortById(ctx context.Context, gameId int64) (*biz.Sort, error) {
+func (s *SortRepo) GetGameSortById(ctx context.Context, sortId int64) (*biz.Sort, error) {
 	var sort Sort
-	if err := s.data.DB(ctx).Where(&Game{ID: gameId}).Table("soccer_game_team_sort").First(&sort).Error; err != nil {
+	if err := s.data.DB(ctx).Where("id=?", sortId).Table("soccer_game_team_sort").First(&sort).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.NotFound("GAME_SORT_NOT_FOUND", "game sort not found")
 		}

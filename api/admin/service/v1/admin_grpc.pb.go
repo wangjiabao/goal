@@ -27,6 +27,7 @@ type AdminClient interface {
 	CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...grpc.CallOption) (*CreatePlayGameReply, error)
 	CreatePlaySort(ctx context.Context, in *CreatePlaySortRequest, opts ...grpc.CallOption) (*CreatePlaySortReply, error)
 	GetPlayList(ctx context.Context, in *GetPlayListRequest, opts ...grpc.CallOption) (*GetPlayListReply, error)
+	GetPlaySortList(ctx context.Context, in *GetPlaySortListRequest, opts ...grpc.CallOption) (*GetPlaySortListReply, error)
 	GetPlayRelList(ctx context.Context, in *GetPlayRelListRequest, opts ...grpc.CallOption) (*GetPlayRelListReply, error)
 	GetRoomList(ctx context.Context, in *GetRoomListRequest, opts ...grpc.CallOption) (*GetRoomListReply, error)
 	GetRoomPlayList(ctx context.Context, in *GetRoomPlayListRequest, opts ...grpc.CallOption) (*GetRoomPlayListReply, error)
@@ -36,6 +37,8 @@ type AdminClient interface {
 	CreatePlayGameSort(ctx context.Context, in *CreatePlayGameSortRequest, opts ...grpc.CallOption) (*CreatePlayGameSortReply, error)
 	GetConfigList(ctx context.Context, in *GetConfigListRequest, opts ...grpc.CallOption) (*GetConfigListReply, error)
 	UpdateConfig(ctx context.Context, in *UpdateConfigRequest, opts ...grpc.CallOption) (*UpdateConfigReply, error)
+	DeletePlayGame(ctx context.Context, in *DeletePlayGameRequest, opts ...grpc.CallOption) (*DeletePlayGameReply, error)
+	DeletePlaySort(ctx context.Context, in *DeletePlaySortRequest, opts ...grpc.CallOption) (*DeletePlaySortReply, error)
 }
 
 type adminClient struct {
@@ -85,6 +88,15 @@ func (c *adminClient) CreatePlaySort(ctx context.Context, in *CreatePlaySortRequ
 func (c *adminClient) GetPlayList(ctx context.Context, in *GetPlayListRequest, opts ...grpc.CallOption) (*GetPlayListReply, error) {
 	out := new(GetPlayListReply)
 	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/GetPlayList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) GetPlaySortList(ctx context.Context, in *GetPlaySortListRequest, opts ...grpc.CallOption) (*GetPlaySortListReply, error) {
+	out := new(GetPlaySortListReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/GetPlaySortList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -172,6 +184,24 @@ func (c *adminClient) UpdateConfig(ctx context.Context, in *UpdateConfigRequest,
 	return out, nil
 }
 
+func (c *adminClient) DeletePlayGame(ctx context.Context, in *DeletePlayGameRequest, opts ...grpc.CallOption) (*DeletePlayGameReply, error) {
+	out := new(DeletePlayGameReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/DeletePlayGame", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminClient) DeletePlaySort(ctx context.Context, in *DeletePlaySortRequest, opts ...grpc.CallOption) (*DeletePlaySortReply, error) {
+	out := new(DeletePlaySortReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/DeletePlaySort", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServer is the server API for Admin service.
 // All implementations must embed UnimplementedAdminServer
 // for forward compatibility
@@ -181,6 +211,7 @@ type AdminServer interface {
 	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
 	CreatePlaySort(context.Context, *CreatePlaySortRequest) (*CreatePlaySortReply, error)
 	GetPlayList(context.Context, *GetPlayListRequest) (*GetPlayListReply, error)
+	GetPlaySortList(context.Context, *GetPlaySortListRequest) (*GetPlaySortListReply, error)
 	GetPlayRelList(context.Context, *GetPlayRelListRequest) (*GetPlayRelListReply, error)
 	GetRoomList(context.Context, *GetRoomListRequest) (*GetRoomListReply, error)
 	GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error)
@@ -190,6 +221,8 @@ type AdminServer interface {
 	CreatePlayGameSort(context.Context, *CreatePlayGameSortRequest) (*CreatePlayGameSortReply, error)
 	GetConfigList(context.Context, *GetConfigListRequest) (*GetConfigListReply, error)
 	UpdateConfig(context.Context, *UpdateConfigRequest) (*UpdateConfigReply, error)
+	DeletePlayGame(context.Context, *DeletePlayGameRequest) (*DeletePlayGameReply, error)
+	DeletePlaySort(context.Context, *DeletePlaySortRequest) (*DeletePlaySortReply, error)
 	mustEmbedUnimplementedAdminServer()
 }
 
@@ -211,6 +244,9 @@ func (UnimplementedAdminServer) CreatePlaySort(context.Context, *CreatePlaySortR
 }
 func (UnimplementedAdminServer) GetPlayList(context.Context, *GetPlayListRequest) (*GetPlayListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPlayList not implemented")
+}
+func (UnimplementedAdminServer) GetPlaySortList(context.Context, *GetPlaySortListRequest) (*GetPlaySortListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPlaySortList not implemented")
 }
 func (UnimplementedAdminServer) GetPlayRelList(context.Context, *GetPlayRelListRequest) (*GetPlayRelListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPlayRelList not implemented")
@@ -238,6 +274,12 @@ func (UnimplementedAdminServer) GetConfigList(context.Context, *GetConfigListReq
 }
 func (UnimplementedAdminServer) UpdateConfig(context.Context, *UpdateConfigRequest) (*UpdateConfigReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateConfig not implemented")
+}
+func (UnimplementedAdminServer) DeletePlayGame(context.Context, *DeletePlayGameRequest) (*DeletePlayGameReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePlayGame not implemented")
+}
+func (UnimplementedAdminServer) DeletePlaySort(context.Context, *DeletePlaySortRequest) (*DeletePlaySortReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePlaySort not implemented")
 }
 func (UnimplementedAdminServer) mustEmbedUnimplementedAdminServer() {}
 
@@ -338,6 +380,24 @@ func _Admin_GetPlayList_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AdminServer).GetPlayList(ctx, req.(*GetPlayListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_GetPlaySortList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPlaySortListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetPlaySortList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/GetPlaySortList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetPlaySortList(ctx, req.(*GetPlaySortListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -504,6 +564,42 @@ func _Admin_UpdateConfig_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Admin_DeletePlayGame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePlayGameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).DeletePlayGame(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/DeletePlayGame",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).DeletePlayGame(ctx, req.(*DeletePlayGameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Admin_DeletePlaySort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePlaySortRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).DeletePlaySort(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/DeletePlaySort",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).DeletePlaySort(ctx, req.(*DeletePlaySortRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Admin_ServiceDesc is the grpc.ServiceDesc for Admin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -530,6 +626,10 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPlayList",
 			Handler:    _Admin_GetPlayList_Handler,
+		},
+		{
+			MethodName: "GetPlaySortList",
+			Handler:    _Admin_GetPlaySortList_Handler,
 		},
 		{
 			MethodName: "GetPlayRelList",
@@ -566,6 +666,14 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateConfig",
 			Handler:    _Admin_UpdateConfig_Handler,
+		},
+		{
+			MethodName: "DeletePlayGame",
+			Handler:    _Admin_DeletePlayGame_Handler,
+		},
+		{
+			MethodName: "DeletePlaySort",
+			Handler:    _Admin_DeletePlaySort_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

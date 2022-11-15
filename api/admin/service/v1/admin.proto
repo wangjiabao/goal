@@ -44,6 +44,12 @@ service Admin {
 		};
 	};
 
+	rpc GetPlaySortList (GetPlaySortListRequest) returns (GetPlaySortListReply) {
+		option (google.api.http) = {
+			get: "/api/goal_admin/sort_list"
+		};
+	};
+
 	rpc GetPlayRelList (GetPlayRelListRequest) returns (GetPlayRelListReply) {
 		option (google.api.http) = {
 			get: "/api/goal_admin/play/{play_id}/play_rel"
@@ -99,6 +105,20 @@ service Admin {
 	rpc UpdateConfig (UpdateConfigRequest) returns (UpdateConfigReply) {
 		option (google.api.http) = {
 			post: "/api/goal_admin/update_system_config"
+			body: "send_body"
+		};
+	};
+
+	rpc DeletePlayGame (DeletePlayGameRequest) returns (DeletePlayGameReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play/game_delete"
+			body: "send_body"
+		};
+	};
+
+	rpc DeletePlaySort (DeletePlaySortRequest) returns (DeletePlaySortReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/play/sort_delete"
 			body: "send_body"
 		};
 	};
@@ -293,6 +313,30 @@ message UpdateConfigReply {
 	int64 id = 1;
 }
 
+message DeletePlayGameRequest {
+	message SendBody{
+		int64 play_id = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message DeletePlayGameReply {
+	string result = 1;
+}
+
+message DeletePlaySortRequest {
+	message SendBody{
+		int64 play_id = 1;
+	}
+
+	SendBody send_body = 1;
+}
+
+message DeletePlaySortReply {
+	string result = 1;
+}
+
 message CreateGameRequest {
 	message SendBody{
 		int64 red_team_id = 1;
@@ -425,6 +469,20 @@ message GetPlayListRequest {
 }
 
 message GetPlayListReply {
+	repeated Item items = 1;
+	message Item {
+		int64 play_id = 1;
+		string type = 2;
+		string start_time = 3;
+		string end_time = 4;
+	}
+}
+
+message GetPlaySortListRequest {
+	int64 sort_id = 1;
+}
+
+message GetPlaySortListReply {
 	repeated Item items = 1;
 	message Item {
 		int64 play_id = 1;

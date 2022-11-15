@@ -274,6 +274,8 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 		playGameTeamGoalDownUserRel       []*PlayGameTeamGoalUserRel
 		playGameTeamGoalAllUserRel        []*PlayGameTeamGoalUserRel
 		playGameTeamResultUserRelPlayId   int64
+		adminCreatePlay                   []*Play
+		adminCreatePlayIds                []int64
 		playGameTeamResultUserRel         []*PlayGameTeamResultUserRel
 		base                              int64 = 100000 // 基础精度0.00001 todo 加配置文件
 	)
@@ -286,7 +288,12 @@ func (g *GameUseCase) GameIndexStatistics(ctx context.Context, req *v1.GameIndex
 		return nil, err
 	}
 
-	playGameRel, _ = g.playGameRelRepo.GetPlayGameRelByGameId(ctx, req.GameId)
+	adminCreatePlay, err = g.playRepo.GetAdminCreatePlay(ctx)
+	for _, v := range adminCreatePlay {
+		adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+	}
+
+	playGameRel, _ = g.playGameRelRepo.GetPlayGameRelListByGameIdAndPlayIds(ctx, req.GameId, adminCreatePlayIds...)
 	for _, v := range playGameRel {
 		playIds = append(playIds, v.PlayId)
 	}

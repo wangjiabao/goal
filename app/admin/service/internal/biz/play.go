@@ -153,7 +153,9 @@ type PlayRepo interface {
 	GetPlayListByIds(ctx context.Context, ids ...int64) ([]*Play, error)
 	GetPlayById(ctx context.Context, id int64) (*Play, error)
 	CreatePlay(ctx context.Context, pc *Play) (*Play, error)
+	DeletePlayById(ctx context.Context, id int64) (bool, error)
 	GetAdminCreatePlayByType(ctx context.Context, playType string) ([]*Play, error)
+	GetAdminCreatePlay(ctx context.Context) ([]*Play, error)
 	GetAdminCreatePlayBySortType(ctx context.Context, playType string) (*Play, error)
 	GetLastTermPoolByPlayIdAndType(ctx context.Context, playId int64, playType string) (*LastTermPool, error)
 	CreateLastTermPool(ctx context.Context, lastTermPool *LastTermPool) (*LastTermPool, error)
@@ -161,8 +163,10 @@ type PlayRepo interface {
 
 type PlayGameRelRepo interface {
 	GetPlayGameRelByGameId(ctx context.Context, gameId int64) ([]*PlayGameRel, error)
+	GetPlayGameRelListByGameIdAndPlayIds(ctx context.Context, gameId int64, playId ...int64) ([]*PlayGameRel, error)
 	GetPlayGameRelByGameIdAndPlayIds(ctx context.Context, gameId int64, playIds ...int64) (*PlayGameRel, error)
 	CreatePlayGameRel(ctx context.Context, rel *PlayGameRel) (*PlayGameRel, error)
+	DeletePlayGameRelByPlayId(ctx context.Context, playId int64) (bool, error)
 }
 
 type PlayRoomRelRepo interface {
@@ -171,8 +175,10 @@ type PlayRoomRelRepo interface {
 
 type PlaySortRelRepo interface {
 	GetPlaySortRelBySortIdAndPlayIds(ctx context.Context, sortId int64, playId ...int64) (*PlaySortRel, error)
+	GetPlaySortRelListBySortIdAndPlayIds(ctx context.Context, sortId int64, playIds ...int64) ([]*PlaySortRel, error)
 	GetPlaySortRelBySortId(ctx context.Context, sortId int64) ([]*PlaySortRel, error)
 	CreatePlaySortRel(ctx context.Context, rel *PlaySortRel) (*PlaySortRel, error)
+	DeletePlaySortRelByPlayId(ctx context.Context, playId int64) (bool, error)
 }
 
 type PlayGameScoreUserRelRepo interface {
@@ -326,7 +332,8 @@ func (p *PlayUseCase) GamePlayGrant(ctx context.Context, req *v1.GamePlayGrantRe
 			playGameGoal = append(playGameGoal, v)
 		}
 	}
-	if strings.EqualFold("end", game.Status) && game.EndTime.Before(time.Now().UTC()) {
+
+	if strings.EqualFold("end", game.Status) && game.EndTime.Before(time.Now().UTC().Add(8*time.Hour)) {
 		p.grantTypeGameScore(ctx, game, playGameScore)
 		p.grantTypeGameResult(ctx, game, playGameResult)
 	}
@@ -493,15 +500,18 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 				for k, sv := range tmpTeams { //解析除队伍id
 					tmp, _ := strconv.ParseInt(sv, 10, 64)
 					if 0 >= tmp {
-						break // 不符合规范，非正式输入的
+						continue // 不符合规范，非正式输入的
 					}
 					if _, ok := contentTeamId[tmp]; ok && k == contentTeamId[tmp] { // 不存在
 						if 0 == k {
 							amountBaseTmp += 50
+							break
 						} else if 1 == k {
 							amountBaseTmp += 30
+							break
 						} else if 2 == k {
 							amountBaseTmp += 20
+							break
 						}
 					}
 				}
@@ -1328,7 +1338,7 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 	}
 
 	// 上半场
-	if game.UpEndTime.Before(time.Now().UTC()) {
+	if game.UpEndTime.Before(time.Now().UTC().Add(8 * time.Hour)) {
 		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIdsAndType(ctx, "game_team_goal_up", playIds...)
 		if err != nil {
 			return res
@@ -1340,7 +1350,7 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 	}
 
 	// 下半场
-	if game.EndTime.Before(time.Now().UTC()) {
+	if game.EndTime.Before(time.Now().UTC().Add(8 * time.Hour)) {
 		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByPlayIdsAndType(ctx, "game_team_goal_down", playIds...)
 		if err != nil {
 			return res
@@ -1745,12 +1755,15 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 // CreatePlayGame 创建一个比赛玩法等记录
 func (p *PlayUseCase) CreatePlayGame(ctx context.Context, req *v1.CreatePlayGameRequest) (*v1.CreatePlayGameReply, error) {
 	var (
-		playGameRel *PlayGameRel
-		play        *Play
-		game        *Game
-		err         error
-		startTime   time.Time
-		endTime     time.Time
+		playGameRel            *PlayGameRel
+		play                   *Play
+		adminCreatePlay        []*Play
+		adminCreatePlayIds     []int64
+		adminCreatePlayGameRel *PlayGameRel
+		game                   *Game
+		err                    error
+		startTime              time.Time
+		endTime                time.Time
 	)
 
 	game, err = p.gameRepo.GetGameById(ctx, req.SendBody.GameId) // 获取比赛信息以校验创建的玩法
@@ -1778,7 +1791,16 @@ func (p *PlayUseCase) CreatePlayGame(ctx context.Context, req *v1.CreatePlayGame
 		return nil, errors.New(500, "TIME_ERROR", "玩法类型输入错误")
 	}
 
-	err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+	adminCreatePlay, err = p.playRepo.GetAdminCreatePlayByType(ctx, req.SendBody.PlayType)
+	for _, v := range adminCreatePlay {
+		adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+	}
+	adminCreatePlayGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameIdAndPlayIds(ctx, game.ID, adminCreatePlayIds...)
+	if nil != adminCreatePlayGameRel {
+		return nil, errors.New(500, "PLAY_ERROR", "已创建比赛下该玩法")
+	}
+
+	if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 		play, err = p.playRepo.CreatePlay(ctx, &Play{ // 新增玩法
 			CreateUserId:   1,
 			CreateUserType: "admin",
@@ -1799,11 +1821,37 @@ func (p *PlayUseCase) CreatePlayGame(ctx context.Context, req *v1.CreatePlayGame
 		}
 
 		return nil
-	})
+	}); nil != err {
+		return nil, err
+	}
 
 	return &v1.CreatePlayGameReply{
 		PlayId: play.ID,
 	}, err
+}
+
+func (p *PlayUseCase) DeletePlayGame(ctx context.Context, req *v1.DeletePlayGameRequest) (*v1.DeletePlayGameReply, error) {
+
+	var err error
+	if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		_, err = p.playRepo.DeletePlayById(ctx, req.SendBody.PlayId)
+		if nil != err {
+			return err
+		}
+
+		_, err = p.playGameRelRepo.DeletePlayGameRelByPlayId(ctx, req.SendBody.PlayId)
+		if nil != err {
+			return err
+		}
+
+		return nil
+	}); nil != err {
+		return nil, err
+	}
+
+	return &v1.DeletePlayGameReply{
+		Result: "成功",
+	}, nil
 }
 
 // CreatePlaySort  创建一个排名玩法等记录
@@ -1822,7 +1870,7 @@ func (p *PlayUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 		return nil, err
 	}
 
-	tmpPlaySort, tmpErr := p.playRepo.GetAdminCreatePlayBySortType(ctx, play.Type)
+	tmpPlaySort, tmpErr := p.playRepo.GetAdminCreatePlayBySortType(ctx, sort.Type)
 	if nil == tmpErr || nil != tmpPlaySort {
 		return nil, errors.New(500, "TIME_ERROR", "已存在玩法")
 	}
@@ -1869,15 +1917,44 @@ func (p *PlayUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 	}, err
 }
 
+func (p *PlayUseCase) DeletePlaySort(ctx context.Context, req *v1.DeletePlaySortRequest) (*v1.DeletePlaySortReply, error) {
+	var err error
+	if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		_, err = p.playRepo.DeletePlayById(ctx, req.SendBody.PlayId)
+		if nil != err {
+			return err
+		}
+
+		_, err = p.playSortRelRepo.DeletePlaySortRelByPlayId(ctx, req.SendBody.PlayId)
+		if nil != err {
+			return err
+		}
+
+		return nil
+	}); nil != err {
+		return nil, err
+	}
+
+	return &v1.DeletePlaySortReply{
+		Result: "成功",
+	}, nil
+}
+
 func (p *PlayUseCase) GetPlayList(ctx context.Context, req *v1.GetPlayListRequest) (*v1.GetPlayListReply, error) {
 	var (
-		play        []*Play
-		playIds     []int64
-		playGameRel []*PlayGameRel
-		err         error
+		play               []*Play
+		playIds            []int64
+		playGameRel        []*PlayGameRel
+		adminCreatePlay    []*Play
+		adminCreatePlayIds []int64
+		err                error
 	)
+	adminCreatePlay, err = p.playRepo.GetAdminCreatePlay(ctx)
+	for _, v := range adminCreatePlay {
+		adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+	}
 
-	playGameRel, err = p.playGameRelRepo.GetPlayGameRelByGameId(ctx, req.GameId)
+	playGameRel, err = p.playGameRelRepo.GetPlayGameRelListByGameIdAndPlayIds(ctx, req.GameId, adminCreatePlayIds...)
 	if err != nil {
 		return nil, err
 	}
@@ -1892,6 +1969,46 @@ func (p *PlayUseCase) GetPlayList(ctx context.Context, req *v1.GetPlayListReques
 	}
 	for _, item := range play {
 		res.Items = append(res.Items, &v1.GetPlayListReply_Item{
+			PlayId:    item.ID,
+			Type:      item.Type,
+			StartTime: item.StartTime.Format("2006-01-02 15:04:05"),
+			EndTime:   item.EndTime.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return res, nil
+}
+
+func (p *PlayUseCase) GetPlaySortList(ctx context.Context, req *v1.GetPlaySortListRequest) (*v1.GetPlaySortListReply, error) {
+	var (
+		play               []*Play
+		playIds            []int64
+		playSortRel        []*PlaySortRel
+		adminCreatePlay    []*Play
+		adminCreatePlayIds []int64
+		err                error
+	)
+
+	adminCreatePlay, err = p.playRepo.GetAdminCreatePlay(ctx)
+	for _, v := range adminCreatePlay {
+		adminCreatePlayIds = append(adminCreatePlayIds, v.ID)
+	}
+
+	playSortRel, err = p.playSortRelRepo.GetPlaySortRelListBySortIdAndPlayIds(ctx, req.SortId, adminCreatePlayIds...)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range playSortRel {
+		playIds = append(playIds, v.PlayId)
+	}
+
+	play, err = p.playRepo.GetPlayListByIds(ctx, playIds...)
+
+	res := &v1.GetPlaySortListReply{
+		Items: make([]*v1.GetPlaySortListReply_Item, 0),
+	}
+	for _, item := range play {
+		res.Items = append(res.Items, &v1.GetPlaySortListReply_Item{
 			PlayId:    item.ID,
 			Type:      item.Type,
 			StartTime: item.StartTime.Format("2006-01-02 15:04:05"),

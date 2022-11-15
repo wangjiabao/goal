@@ -31,6 +31,11 @@ const OperationPlayGameUserList = "/api.play.service.v1.Play/GameUserList"
 const OperationPlayGetRoomUserList = "/api.play.service.v1.Play/GetRoomUserList"
 const OperationPlayGetUserPlayList = "/api.play.service.v1.Play/GetUserPlayList"
 const OperationPlayPlayAmountTotal = "/api.play.service.v1.Play/PlayAmountTotal"
+const OperationPlayPlayAmountTotalGoal = "/api.play.service.v1.Play/PlayAmountTotalGoal"
+const OperationPlayPlayAmountTotalResult = "/api.play.service.v1.Play/PlayAmountTotalResult"
+const OperationPlayPlayAmountTotalScore = "/api.play.service.v1.Play/PlayAmountTotalScore"
+const OperationPlayPlayAmountTotalSort = "/api.play.service.v1.Play/PlayAmountTotalSort"
+const OperationPlayPlayAmountTotalSortOther = "/api.play.service.v1.Play/PlayAmountTotalSortOther"
 const OperationPlayRoomAccount = "/api.play.service.v1.Play/RoomAccount"
 const OperationPlayRoomInfo = "/api.play.service.v1.Play/RoomInfo"
 const OperationPlayRoomPlayList = "/api.play.service.v1.Play/RoomPlayList"
@@ -48,6 +53,11 @@ type PlayHTTPServer interface {
 	GetRoomUserList(context.Context, *GetRoomUserListRequest) (*GetRoomUserListReply, error)
 	GetUserPlayList(context.Context, *GetUserPlayListRequest) (*GetUserPlayListReply, error)
 	PlayAmountTotal(context.Context, *PlayAmountTotalRequest) (*PlayAmountTotalReply, error)
+	PlayAmountTotalGoal(context.Context, *PlayAmountTotalGoalRequest) (*PlayAmountTotalGoalReply, error)
+	PlayAmountTotalResult(context.Context, *PlayAmountTotalResultRequest) (*PlayAmountTotalResultReply, error)
+	PlayAmountTotalScore(context.Context, *PlayAmountTotalScoreRequest) (*PlayAmountTotalScoreReply, error)
+	PlayAmountTotalSort(context.Context, *PlayAmountTotalSortRequest) (*PlayAmountTotalSortReply, error)
+	PlayAmountTotalSortOther(context.Context, *PlayAmountTotalSortOtherRequest) (*PlayAmountTotalSortOtherReply, error)
 	RoomAccount(context.Context, *RoomAccountRequest) (*RoomAccountReply, error)
 	RoomInfo(context.Context, *RoomInfoRequest) (*RoomInfoReply, error)
 	RoomPlayList(context.Context, *RoomPlayListRequest) (*RoomPlayListReply, error)
@@ -62,6 +72,11 @@ func RegisterPlayHTTPServer(s *http.Server, srv PlayHTTPServer) {
 	r.POST("/api/play/game", _Play_CreatePlayGame0_HTTP_Handler(srv))
 	r.POST("/api/room/account", _Play_RoomAccount0_HTTP_Handler(srv))
 	r.GET("/api/play_amount_total", _Play_PlayAmountTotal0_HTTP_Handler(srv))
+	r.GET("/api/play_amount_result_total", _Play_PlayAmountTotalResult0_HTTP_Handler(srv))
+	r.GET("/api/play_amount_goal_total", _Play_PlayAmountTotalGoal0_HTTP_Handler(srv))
+	r.GET("/api/play_amount_total_score", _Play_PlayAmountTotalScore0_HTTP_Handler(srv))
+	r.GET("/api/play_amount_total_sort", _Play_PlayAmountTotalSort0_HTTP_Handler(srv))
+	r.GET("/api/play_amount_total_sort_other", _Play_PlayAmountTotalSortOther0_HTTP_Handler(srv))
 	r.POST("/api/room", _Play_CreateRoom0_HTTP_Handler(srv))
 	r.POST("/api/play/game_score", _Play_CreatePlayGameScore0_HTTP_Handler(srv))
 	r.POST("/api/play/game_result", _Play_CreatePlayGameResult0_HTTP_Handler(srv))
@@ -219,6 +234,101 @@ func _Play_PlayAmountTotal0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Conte
 			return err
 		}
 		reply := out.(*PlayAmountTotalReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Play_PlayAmountTotalResult0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PlayAmountTotalResultRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlayPlayAmountTotalResult)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PlayAmountTotalResult(ctx, req.(*PlayAmountTotalResultRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PlayAmountTotalResultReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Play_PlayAmountTotalGoal0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PlayAmountTotalGoalRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlayPlayAmountTotalGoal)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PlayAmountTotalGoal(ctx, req.(*PlayAmountTotalGoalRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PlayAmountTotalGoalReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Play_PlayAmountTotalScore0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PlayAmountTotalScoreRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlayPlayAmountTotalScore)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PlayAmountTotalScore(ctx, req.(*PlayAmountTotalScoreRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PlayAmountTotalScoreReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Play_PlayAmountTotalSort0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PlayAmountTotalSortRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlayPlayAmountTotalSort)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PlayAmountTotalSort(ctx, req.(*PlayAmountTotalSortRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PlayAmountTotalSortReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Play_PlayAmountTotalSortOther0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PlayAmountTotalSortOtherRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationPlayPlayAmountTotalSortOther)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PlayAmountTotalSortOther(ctx, req.(*PlayAmountTotalSortOtherRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PlayAmountTotalSortOtherReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -406,6 +516,11 @@ type PlayHTTPClient interface {
 	GetRoomUserList(ctx context.Context, req *GetRoomUserListRequest, opts ...http.CallOption) (rsp *GetRoomUserListReply, err error)
 	GetUserPlayList(ctx context.Context, req *GetUserPlayListRequest, opts ...http.CallOption) (rsp *GetUserPlayListReply, err error)
 	PlayAmountTotal(ctx context.Context, req *PlayAmountTotalRequest, opts ...http.CallOption) (rsp *PlayAmountTotalReply, err error)
+	PlayAmountTotalGoal(ctx context.Context, req *PlayAmountTotalGoalRequest, opts ...http.CallOption) (rsp *PlayAmountTotalGoalReply, err error)
+	PlayAmountTotalResult(ctx context.Context, req *PlayAmountTotalResultRequest, opts ...http.CallOption) (rsp *PlayAmountTotalResultReply, err error)
+	PlayAmountTotalScore(ctx context.Context, req *PlayAmountTotalScoreRequest, opts ...http.CallOption) (rsp *PlayAmountTotalScoreReply, err error)
+	PlayAmountTotalSort(ctx context.Context, req *PlayAmountTotalSortRequest, opts ...http.CallOption) (rsp *PlayAmountTotalSortReply, err error)
+	PlayAmountTotalSortOther(ctx context.Context, req *PlayAmountTotalSortOtherRequest, opts ...http.CallOption) (rsp *PlayAmountTotalSortOtherReply, err error)
 	RoomAccount(ctx context.Context, req *RoomAccountRequest, opts ...http.CallOption) (rsp *RoomAccountReply, err error)
 	RoomInfo(ctx context.Context, req *RoomInfoRequest, opts ...http.CallOption) (rsp *RoomInfoReply, err error)
 	RoomPlayList(ctx context.Context, req *RoomPlayListRequest, opts ...http.CallOption) (rsp *RoomPlayListReply, err error)
@@ -567,6 +682,71 @@ func (c *PlayHTTPClientImpl) PlayAmountTotal(ctx context.Context, in *PlayAmount
 	pattern := "/api/play_amount_total"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayPlayAmountTotal))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *PlayHTTPClientImpl) PlayAmountTotalGoal(ctx context.Context, in *PlayAmountTotalGoalRequest, opts ...http.CallOption) (*PlayAmountTotalGoalReply, error) {
+	var out PlayAmountTotalGoalReply
+	pattern := "/api/play_amount_goal_total"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalGoal))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *PlayHTTPClientImpl) PlayAmountTotalResult(ctx context.Context, in *PlayAmountTotalResultRequest, opts ...http.CallOption) (*PlayAmountTotalResultReply, error) {
+	var out PlayAmountTotalResultReply
+	pattern := "/api/play_amount_result_total"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalResult))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *PlayHTTPClientImpl) PlayAmountTotalScore(ctx context.Context, in *PlayAmountTotalScoreRequest, opts ...http.CallOption) (*PlayAmountTotalScoreReply, error) {
+	var out PlayAmountTotalScoreReply
+	pattern := "/api/play_amount_total_score"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalScore))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *PlayHTTPClientImpl) PlayAmountTotalSort(ctx context.Context, in *PlayAmountTotalSortRequest, opts ...http.CallOption) (*PlayAmountTotalSortReply, error) {
+	var out PlayAmountTotalSortReply
+	pattern := "/api/play_amount_total_sort"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalSort))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *PlayHTTPClientImpl) PlayAmountTotalSortOther(ctx context.Context, in *PlayAmountTotalSortOtherRequest, opts ...http.CallOption) (*PlayAmountTotalSortOtherReply, error) {
+	var out PlayAmountTotalSortOtherReply
+	pattern := "/api/play_amount_total_sort_other"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalSortOther))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

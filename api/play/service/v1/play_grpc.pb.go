@@ -29,6 +29,11 @@ type PlayClient interface {
 	CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...grpc.CallOption) (*CreatePlayGameReply, error)
 	RoomAccount(ctx context.Context, in *RoomAccountRequest, opts ...grpc.CallOption) (*RoomAccountReply, error)
 	PlayAmountTotal(ctx context.Context, in *PlayAmountTotalRequest, opts ...grpc.CallOption) (*PlayAmountTotalReply, error)
+	PlayAmountTotalResult(ctx context.Context, in *PlayAmountTotalResultRequest, opts ...grpc.CallOption) (*PlayAmountTotalResultReply, error)
+	PlayAmountTotalGoal(ctx context.Context, in *PlayAmountTotalGoalRequest, opts ...grpc.CallOption) (*PlayAmountTotalGoalReply, error)
+	PlayAmountTotalScore(ctx context.Context, in *PlayAmountTotalScoreRequest, opts ...grpc.CallOption) (*PlayAmountTotalScoreReply, error)
+	PlayAmountTotalSort(ctx context.Context, in *PlayAmountTotalSortRequest, opts ...grpc.CallOption) (*PlayAmountTotalSortReply, error)
+	PlayAmountTotalSortOther(ctx context.Context, in *PlayAmountTotalSortOtherRequest, opts ...grpc.CallOption) (*PlayAmountTotalSortOtherReply, error)
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomReply, error)
 	CreatePlayGameScore(ctx context.Context, in *CreatePlayGameScoreRequest, opts ...grpc.CallOption) (*CreatePlayGameScoreReply, error)
 	CreatePlayGameResult(ctx context.Context, in *CreatePlayGameResultRequest, opts ...grpc.CallOption) (*CreatePlayGameResultReply, error)
@@ -104,6 +109,51 @@ func (c *playClient) RoomAccount(ctx context.Context, in *RoomAccountRequest, op
 func (c *playClient) PlayAmountTotal(ctx context.Context, in *PlayAmountTotalRequest, opts ...grpc.CallOption) (*PlayAmountTotalReply, error) {
 	out := new(PlayAmountTotalReply)
 	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/PlayAmountTotal", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playClient) PlayAmountTotalResult(ctx context.Context, in *PlayAmountTotalResultRequest, opts ...grpc.CallOption) (*PlayAmountTotalResultReply, error) {
+	out := new(PlayAmountTotalResultReply)
+	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/PlayAmountTotalResult", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playClient) PlayAmountTotalGoal(ctx context.Context, in *PlayAmountTotalGoalRequest, opts ...grpc.CallOption) (*PlayAmountTotalGoalReply, error) {
+	out := new(PlayAmountTotalGoalReply)
+	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/PlayAmountTotalGoal", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playClient) PlayAmountTotalScore(ctx context.Context, in *PlayAmountTotalScoreRequest, opts ...grpc.CallOption) (*PlayAmountTotalScoreReply, error) {
+	out := new(PlayAmountTotalScoreReply)
+	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/PlayAmountTotalScore", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playClient) PlayAmountTotalSort(ctx context.Context, in *PlayAmountTotalSortRequest, opts ...grpc.CallOption) (*PlayAmountTotalSortReply, error) {
+	out := new(PlayAmountTotalSortReply)
+	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/PlayAmountTotalSort", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *playClient) PlayAmountTotalSortOther(ctx context.Context, in *PlayAmountTotalSortOtherRequest, opts ...grpc.CallOption) (*PlayAmountTotalSortOtherReply, error) {
+	out := new(PlayAmountTotalSortOtherReply)
+	err := c.cc.Invoke(ctx, "/api.play.service.v1.Play/PlayAmountTotalSortOther", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -193,6 +243,11 @@ type PlayServer interface {
 	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
 	RoomAccount(context.Context, *RoomAccountRequest) (*RoomAccountReply, error)
 	PlayAmountTotal(context.Context, *PlayAmountTotalRequest) (*PlayAmountTotalReply, error)
+	PlayAmountTotalResult(context.Context, *PlayAmountTotalResultRequest) (*PlayAmountTotalResultReply, error)
+	PlayAmountTotalGoal(context.Context, *PlayAmountTotalGoalRequest) (*PlayAmountTotalGoalReply, error)
+	PlayAmountTotalScore(context.Context, *PlayAmountTotalScoreRequest) (*PlayAmountTotalScoreReply, error)
+	PlayAmountTotalSort(context.Context, *PlayAmountTotalSortRequest) (*PlayAmountTotalSortReply, error)
+	PlayAmountTotalSortOther(context.Context, *PlayAmountTotalSortOtherRequest) (*PlayAmountTotalSortOtherReply, error)
 	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomReply, error)
 	CreatePlayGameScore(context.Context, *CreatePlayGameScoreRequest) (*CreatePlayGameScoreReply, error)
 	CreatePlayGameResult(context.Context, *CreatePlayGameResultRequest) (*CreatePlayGameResultReply, error)
@@ -228,6 +283,21 @@ func (UnimplementedPlayServer) RoomAccount(context.Context, *RoomAccountRequest)
 }
 func (UnimplementedPlayServer) PlayAmountTotal(context.Context, *PlayAmountTotalRequest) (*PlayAmountTotalReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PlayAmountTotal not implemented")
+}
+func (UnimplementedPlayServer) PlayAmountTotalResult(context.Context, *PlayAmountTotalResultRequest) (*PlayAmountTotalResultReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlayAmountTotalResult not implemented")
+}
+func (UnimplementedPlayServer) PlayAmountTotalGoal(context.Context, *PlayAmountTotalGoalRequest) (*PlayAmountTotalGoalReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlayAmountTotalGoal not implemented")
+}
+func (UnimplementedPlayServer) PlayAmountTotalScore(context.Context, *PlayAmountTotalScoreRequest) (*PlayAmountTotalScoreReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlayAmountTotalScore not implemented")
+}
+func (UnimplementedPlayServer) PlayAmountTotalSort(context.Context, *PlayAmountTotalSortRequest) (*PlayAmountTotalSortReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlayAmountTotalSort not implemented")
+}
+func (UnimplementedPlayServer) PlayAmountTotalSortOther(context.Context, *PlayAmountTotalSortOtherRequest) (*PlayAmountTotalSortOtherReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlayAmountTotalSortOther not implemented")
 }
 func (UnimplementedPlayServer) CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRoom not implemented")
@@ -388,6 +458,96 @@ func _Play_PlayAmountTotal_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PlayServer).PlayAmountTotal(ctx, req.(*PlayAmountTotalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Play_PlayAmountTotalResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayAmountTotalResultRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayServer).PlayAmountTotalResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.play.service.v1.Play/PlayAmountTotalResult",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayServer).PlayAmountTotalResult(ctx, req.(*PlayAmountTotalResultRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Play_PlayAmountTotalGoal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayAmountTotalGoalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayServer).PlayAmountTotalGoal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.play.service.v1.Play/PlayAmountTotalGoal",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayServer).PlayAmountTotalGoal(ctx, req.(*PlayAmountTotalGoalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Play_PlayAmountTotalScore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayAmountTotalScoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayServer).PlayAmountTotalScore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.play.service.v1.Play/PlayAmountTotalScore",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayServer).PlayAmountTotalScore(ctx, req.(*PlayAmountTotalScoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Play_PlayAmountTotalSort_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayAmountTotalSortRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayServer).PlayAmountTotalSort(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.play.service.v1.Play/PlayAmountTotalSort",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayServer).PlayAmountTotalSort(ctx, req.(*PlayAmountTotalSortRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Play_PlayAmountTotalSortOther_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlayAmountTotalSortOtherRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlayServer).PlayAmountTotalSortOther(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.play.service.v1.Play/PlayAmountTotalSortOther",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlayServer).PlayAmountTotalSortOther(ctx, req.(*PlayAmountTotalSortOtherRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -570,6 +730,26 @@ var Play_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PlayAmountTotal",
 			Handler:    _Play_PlayAmountTotal_Handler,
+		},
+		{
+			MethodName: "PlayAmountTotalResult",
+			Handler:    _Play_PlayAmountTotalResult_Handler,
+		},
+		{
+			MethodName: "PlayAmountTotalGoal",
+			Handler:    _Play_PlayAmountTotalGoal_Handler,
+		},
+		{
+			MethodName: "PlayAmountTotalScore",
+			Handler:    _Play_PlayAmountTotalScore_Handler,
+		},
+		{
+			MethodName: "PlayAmountTotalSort",
+			Handler:    _Play_PlayAmountTotalSort_Handler,
+		},
+		{
+			MethodName: "PlayAmountTotalSortOther",
+			Handler:    _Play_PlayAmountTotalSortOther_Handler,
 		},
 		{
 			MethodName: "CreateRoom",

@@ -98,6 +98,31 @@ func (p *PlayService) PlayAmountTotal(ctx context.Context, req *v1.PlayAmountTot
 	return p.uc.PlayAmountTotal(ctx, req)
 }
 
+// PlayAmountTotalResult .
+func (p *PlayService) PlayAmountTotalResult(ctx context.Context, req *v1.PlayAmountTotalResultRequest) (*v1.PlayAmountTotalResultReply, error) {
+	return p.uc.PlayAmountTotalResult(ctx, req)
+}
+
+// PlayAmountTotalScore .
+func (p *PlayService) PlayAmountTotalScore(ctx context.Context, req *v1.PlayAmountTotalScoreRequest) (*v1.PlayAmountTotalScoreReply, error) {
+	return p.uc.PlayAmountTotalScore(ctx, req)
+}
+
+// PlayAmountTotalSort .
+func (p *PlayService) PlayAmountTotalSort(ctx context.Context, req *v1.PlayAmountTotalSortRequest) (*v1.PlayAmountTotalSortReply, error) {
+	return p.uc.PlayAmountTotalSort(ctx, req)
+}
+
+// PlayAmountTotalSortOther .
+func (p *PlayService) PlayAmountTotalSortOther(ctx context.Context, req *v1.PlayAmountTotalSortOtherRequest) (*v1.PlayAmountTotalSortOtherReply, error) {
+	return p.uc.PlayAmountTotalSortOther(ctx, req)
+}
+
+// PlayAmountTotalGoal .
+func (p *PlayService) PlayAmountTotalGoal(ctx context.Context, req *v1.PlayAmountTotalGoalRequest) (*v1.PlayAmountTotalGoalReply, error) {
+	return p.uc.PlayAmountTotalGoal(ctx, req)
+}
+
 func (p *PlayService) GetRoomUserList(ctx context.Context, req *v1.GetRoomUserListRequest) (*v1.GetRoomUserListReply, error) {
 	return p.uc.GetRoomUserList(ctx)
 }

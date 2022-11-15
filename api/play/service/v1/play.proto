@@ -55,6 +55,36 @@ service Play {
 		};
 	};
 
+	rpc PlayAmountTotalResult (PlayAmountTotalResultRequest) returns (PlayAmountTotalResultReply){
+		option (google.api.http) = {
+			get: "/api/play_amount_result_total"
+		};
+	};
+
+	rpc PlayAmountTotalGoal (PlayAmountTotalGoalRequest) returns (PlayAmountTotalGoalReply){
+		option (google.api.http) = {
+			get: "/api/play_amount_goal_total"
+		};
+	};
+
+	rpc PlayAmountTotalScore (PlayAmountTotalScoreRequest) returns (PlayAmountTotalScoreReply){
+		option (google.api.http) = {
+			get: "/api/play_amount_total_score"
+		};
+	};
+
+	rpc PlayAmountTotalSort (PlayAmountTotalSortRequest) returns (PlayAmountTotalSortReply){
+		option (google.api.http) = {
+			get: "/api/play_amount_total_sort"
+		};
+	};
+
+	rpc PlayAmountTotalSortOther (PlayAmountTotalSortOtherRequest) returns (PlayAmountTotalSortOtherReply){
+		option (google.api.http) = {
+			get: "/api/play_amount_total_sort_other"
+		};
+	};
+
 	rpc CreateRoom (CreateRoomRequest) returns (CreateRoomReply){
 		option (google.api.http) = {
 			post: "/api/room"
@@ -213,6 +243,85 @@ message PlayAmountTotalReply {
 	int64 totalAmount = 3;
 }
 
+message PlayAmountTotalResultRequest {
+	int64 play_id = 1;
+}
+
+message PlayAmountTotalResultReply {
+	int64 totalAmount = 3;
+	int64 RedTotal = 1;
+	int64 DrawTotal = 2;
+	int64 BlueTotal = 4;
+}
+
+message PlayAmountTotalScoreRequest {
+	int64 play_id = 1;
+}
+
+message PlayAmountTotalScoreReply {
+	int64 total = 2;
+	repeated Item items = 1;
+	message Item {
+		string content  = 1;
+		int64 total = 2;
+	}
+}
+
+message PlayAmountTotalGoalRequest {
+	int64 play_id = 1;
+}
+
+message PlayAmountTotalGoalReply {
+	int64 total = 2;
+	repeated RedItem redItems = 1;
+	message RedItem {
+		int64 content = 1;
+		int64 total = 2;
+	}
+	repeated BlueItem blueItems = 3;
+	message BlueItem {
+		int64 content = 1;
+		int64 total = 2;
+	}
+}
+
+message PlayAmountTotalSortRequest {
+	int64 play_id = 1;
+}
+
+message PlayAmountTotalSortReply {
+	int64 total = 4;
+	repeated First firstItems = 1;
+	message First {
+		string content = 1;
+		int64 total = 2;
+	}
+
+	repeated Second secondItems = 2;
+	message Second {
+		string content = 1;
+		int64 total = 2;
+	}
+
+	repeated Third thirdItems = 3;
+	message Third {
+		string content = 1;
+		int64 total = 2;
+	}
+}
+
+message PlayAmountTotalSortOtherRequest {
+	int64 play_id = 1;
+}
+
+message PlayAmountTotalSortOtherReply {
+	int64 total = 4;
+	repeated Item Items = 1;
+	message Item {
+		string content = 1;
+		int64 total = 2;
+	}
+}
 
 message CreateRoomRequest {
 	message SendBody{
@@ -298,11 +407,19 @@ message GetUserPlayListRequest {
 message GetUserPlayListReply {
 	repeated Item items = 1;
 	message Item {
-		int64 ID = 1;
-		int64 PlayId = 2;
-		int64 Pay = 3;
-		string Status = 4;
-		string CreatedAt = 5;
+		int64 id = 1;
+		int64 playId = 2;
+		int64 pay = 3;
+		string status = 4;
+		string createdAt = 5;
+		string gameName =6;
+		int64 redTeamId =7;
+		int64 blueTeamId =8;
+		string content = 9;
+		string type = 10;
+		int64 goal = 11;
+		int64 teamId= 12;
+		int64 sort_id = 13;
 	}
 }
 
