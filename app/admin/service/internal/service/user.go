@@ -148,7 +148,7 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 
 	amount := new(big.Int)
 	withDrawAmount := toAmount
-	amount.SetString(strconv.FormatInt(withDrawAmount, 10)+"00000000000000000", 10) // 提现的金额恢复
+	amount.SetString(strconv.FormatInt(withDrawAmount, 10)+"000000000000000000", 10) // 提现的金额恢复
 	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
 
 	var data []byte
