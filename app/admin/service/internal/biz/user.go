@@ -2,8 +2,10 @@ package biz
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
+	"strconv"
 	"time"
 )
 
@@ -305,8 +307,22 @@ func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 
 func (u *UserUseCase) UserWithdraw(ctx context.Context, withdraw *UserWithdraw, user *User) (bool, error) {
 	var (
-		err error
+		err               error
+		base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		addressEthBalance *AddressEthBalance
+		lastBalance       int64
+		nowAmount         int64
 	)
+	addressEthBalance, err = u.ubRepo.GetAddressEthBalanceByAddress(ctx, user.ToAddress)
+	if err != nil {
+		return false, err
+	}
+	nowAmount = withdraw.Amount / base
+	lastBalance, _ = strconv.ParseInt(addressEthBalance.Balance, 10, 64)
+	if lastBalance < nowAmount {
+		return false, errors.New(500, "BALANCE_ETH_ERROR", "余额不足eth")
+	}
+	lastBalance -= nowAmount
 
 	if err = u.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 		err = u.ubRepo.Withdraw(ctx, user.ID, withdraw.Amount)
@@ -314,6 +330,11 @@ func (u *UserUseCase) UserWithdraw(ctx context.Context, withdraw *UserWithdraw, 
 			return err
 		}
 		err = u.ubRepo.UpdateWithdraw(ctx, withdraw.ID, "pass", "")
+		if nil != err {
+			return err
+		}
+
+		_, err = u.ubRepo.UpdateEthBalanceByAddress(ctx, user.ToAddress, strconv.FormatInt(lastBalance, 10))
 		if nil != err {
 			return err
 		}
