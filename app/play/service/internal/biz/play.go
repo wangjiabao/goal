@@ -875,7 +875,8 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		return nil, errors.New(500, "TIME_ERROR", "玩法已结束")
 	}
 
-	pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
+	//pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
+	pay = req.SendBody.Pay
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
@@ -1040,7 +1041,8 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		return nil, errors.New(500, "TIME_ERROR", "玩法已结束")
 	}
 
-	pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
+	//pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
+	pay = req.SendBody.Pay
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
@@ -1191,7 +1193,8 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		return nil, errors.New(500, "TIME_ERROR", "玩法已结束")
 	}
 
-	pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
+	//pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
+	pay = req.SendBody.Pay
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
@@ -1335,7 +1338,8 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		return nil, errors.New(500, "PLAY_ERROR", "玩法类型不匹配")
 	}
 
-	pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
+	//pay = req.SendBody.Pay * 100       // 基础的数是注，每注100在玩法这里*100
+	pay = req.SendBody.Pay
 	if 0 != pay%payLimit || pay <= 0 { // 限制的整数倍
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
