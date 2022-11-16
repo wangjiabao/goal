@@ -11,7 +11,7 @@ option java_package = "api.user.service.v1";
 service User {
 	rpc EthAuthorize (EthAuthorizeRequest) returns (EthAuthorizeReply) {
 		option (google.api.http) = {
-			post: "/api/user/eth_authorize"
+			post: "/api/user_server/user/eth_authorize"
 			body: "send_body"
 		};
 	};
@@ -19,71 +19,71 @@ service User {
 
 	rpc GetUser (GetUserRequest) returns (GetUserReply) {
 		option (google.api.http) = {
-			get: "/api/user"
+			get: "/api/user_server/user"
 		};
 	};
 
 	rpc Deposit (DepositRequest) returns (DepositReply) {
 		option (google.api.http) = {
-			post: "/api/user/balance/deposit"
+			post: "/api/user_server/user/balance/deposit"
 			body: "send_body"
 		};
 	};
 
 	rpc Withdraw (WithdrawRequest) returns (WithdrawReply) {
 		option (google.api.http) = {
-			post: "/api/user/balance/withdraw"
+			post: "/api/user_server/user/balance/withdraw"
 			body: "send_body"
 		};
 	};
 
 	rpc GetUserRecommendList (GetUserRecommendListRequest) returns (GetUserRecommendListReply) {
 		option (google.api.http) = {
-			get: "/api/user_recommend/list"
+			get: "/api/user_server/user_recommend/list"
 		};
 	};
 
 	rpc GetUserDepositList (GetUserDepositListRequest) returns (GetUserDepositListReply) {
 		option (google.api.http) = {
-			get: "/api/deposit/list"
+			get: "/api/user_server/deposit/list"
 		};
 	};
 
 	rpc GetUserWithdrawList (GetUserWithdrawListRequest) returns (GetUserWithdrawListReply) {
 		option (google.api.http) = {
-			get: "/api/withdraw/list"
+			get: "/api/user_server/withdraw/list"
 		};
 	};
 
 	rpc CreateProxy (CreateProxyRequest) returns (CreateProxyReply) {
 		option (google.api.http) = {
-			post: "/api/user/proxy/create"
+			post: "/api/user_server/user/proxy/create"
 			body: "send_body"
 		};
 	};
 
 	rpc CreateDownProxy (CreateDownProxyRequest) returns (CreateDownProxyReply) {
 		option (google.api.http) = {
-			post: "/api/user/proxy/down/create"
+			post: "/api/user_server/user/proxy/down/create"
 			body: "send_body"
 		};
 	};
 
 	rpc GetUserProxyList (GetUserProxyListRequest) returns (GetUserProxyListReply) {
 		option (google.api.http) = {
-			get: "/api/user_proxy/list"
+			get: "/api/user_server/user_proxy/list"
 		};
 	};
 
 	rpc GetUserProxyConfigList (GetUserProxyConfigListRequest) returns (GetUserProxyConfigListReply) {
 		option (google.api.http) = {
-			get: "/api/user_proxy/config_list"
+			get: "/api/user_server/user_proxy/config_list"
 		};
 	};
 
 	rpc UserDeposit (UserDepositRequest) returns (UserDepositReply){
 		option (google.api.http) = {
-			get: "/api/user_deposit"
+			get: "/api/user_server/user_deposit"
 		};
 	};
 

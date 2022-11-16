@@ -6,7 +6,7 @@ info:
     title: User API
     version: 0.0.1
 paths:
-    /api/deposit/list:
+    /api/user_server/deposit/list:
         get:
             tags:
                 - User
@@ -24,7 +24,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user:
+    /api/user_server/user:
         get:
             tags:
                 - User
@@ -42,7 +42,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/balance/deposit:
+    /api/user_server/user/balance/deposit:
         post:
             tags:
                 - User
@@ -66,7 +66,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/balance/withdraw:
+    /api/user_server/user/balance/withdraw:
         post:
             tags:
                 - User
@@ -90,7 +90,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/eth_authorize:
+    /api/user_server/user/eth_authorize:
         post:
             tags:
                 - User
@@ -114,7 +114,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/proxy/create:
+    /api/user_server/user/proxy/create:
         post:
             tags:
                 - User
@@ -138,7 +138,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user/proxy/down/create:
+    /api/user_server/user/proxy/down/create:
         post:
             tags:
                 - User
@@ -162,7 +162,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user_deposit:
+    /api/user_server/user_deposit:
         get:
             tags:
                 - User
@@ -180,7 +180,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user_proxy/config_list:
+    /api/user_server/user_proxy/config_list:
         get:
             tags:
                 - User
@@ -198,7 +198,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user_proxy/list:
+    /api/user_server/user_proxy/list:
         get:
             tags:
                 - User
@@ -216,7 +216,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/user_recommend/list:
+    /api/user_server/user_recommend/list:
         get:
             tags:
                 - User
@@ -234,7 +234,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
-    /api/withdraw/list:
+    /api/user_server/withdraw/list:
         get:
             tags:
                 - User

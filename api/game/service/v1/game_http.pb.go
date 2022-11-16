@@ -33,10 +33,10 @@ type GameHTTPServer interface {
 
 func RegisterGameHTTPServer(s *http.Server, srv GameHTTPServer) {
 	r := s.Route("/")
-	r.GET("/api/display_game/{type}", _Game_DisplayGame0_HTTP_Handler(srv))
-	r.GET("/api/games", _Game_GetGameList0_HTTP_Handler(srv))
-	r.GET("/api/team/list", _Game_GetTeamList0_HTTP_Handler(srv))
-	r.GET("/api/game/sorts", _Game_GetGameSortList0_HTTP_Handler(srv))
+	r.GET("/api/game_server/display_game/{type}", _Game_DisplayGame0_HTTP_Handler(srv))
+	r.GET("/api/game_server/games", _Game_GetGameList0_HTTP_Handler(srv))
+	r.GET("/api/game_server/team/list", _Game_GetTeamList0_HTTP_Handler(srv))
+	r.GET("/api/game_server/game/sorts", _Game_GetGameSortList0_HTTP_Handler(srv))
 }
 
 func _Game_DisplayGame0_HTTP_Handler(srv GameHTTPServer) func(ctx http.Context) error {
@@ -135,7 +135,7 @@ func NewGameHTTPClient(client *http.Client) GameHTTPClient {
 
 func (c *GameHTTPClientImpl) DisplayGame(ctx context.Context, in *DisplayGameRequest, opts ...http.CallOption) (*DisplayGameReply, error) {
 	var out DisplayGameReply
-	pattern := "/api/display_game/{type}"
+	pattern := "/api/game_server/display_game/{type}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGameDisplayGame))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -148,7 +148,7 @@ func (c *GameHTTPClientImpl) DisplayGame(ctx context.Context, in *DisplayGameReq
 
 func (c *GameHTTPClientImpl) GetGameList(ctx context.Context, in *GetGameListRequest, opts ...http.CallOption) (*GetGameListReply, error) {
 	var out GetGameListReply
-	pattern := "/api/games"
+	pattern := "/api/game_server/games"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGameGetGameList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -161,7 +161,7 @@ func (c *GameHTTPClientImpl) GetGameList(ctx context.Context, in *GetGameListReq
 
 func (c *GameHTTPClientImpl) GetGameSortList(ctx context.Context, in *GetGameSortListRequest, opts ...http.CallOption) (*GetGameSortListReply, error) {
 	var out GetGameSortListReply
-	pattern := "/api/game/sorts"
+	pattern := "/api/game_server/game/sorts"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGameGetGameSortList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -174,7 +174,7 @@ func (c *GameHTTPClientImpl) GetGameSortList(ctx context.Context, in *GetGameSor
 
 func (c *GameHTTPClientImpl) GetTeamList(ctx context.Context, in *GetTeamListRequest, opts ...http.CallOption) (*GetTeamListReply, error) {
 	var out GetTeamListReply
-	pattern := "/api/team/list"
+	pattern := "/api/game_server/team/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationGameGetTeamList))
 	opts = append(opts, http.PathTemplate(pattern))

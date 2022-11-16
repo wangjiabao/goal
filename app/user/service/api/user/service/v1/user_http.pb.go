@@ -49,18 +49,18 @@ type UserHTTPServer interface {
 
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
-	r.POST("/api/user/eth_authorize", _User_EthAuthorize0_HTTP_Handler(srv))
-	r.GET("/api/user", _User_GetUser0_HTTP_Handler(srv))
-	r.POST("/api/user/balance/deposit", _User_Deposit0_HTTP_Handler(srv))
-	r.POST("/api/user/balance/withdraw", _User_Withdraw0_HTTP_Handler(srv))
-	r.GET("/api/user_recommend/list", _User_GetUserRecommendList0_HTTP_Handler(srv))
-	r.GET("/api/deposit/list", _User_GetUserDepositList0_HTTP_Handler(srv))
-	r.GET("/api/withdraw/list", _User_GetUserWithdrawList0_HTTP_Handler(srv))
-	r.POST("/api/user/proxy/create", _User_CreateProxy0_HTTP_Handler(srv))
-	r.POST("/api/user/proxy/down/create", _User_CreateDownProxy0_HTTP_Handler(srv))
-	r.GET("/api/user_proxy/list", _User_GetUserProxyList0_HTTP_Handler(srv))
-	r.GET("/api/user_proxy/config_list", _User_GetUserProxyConfigList0_HTTP_Handler(srv))
-	r.GET("/api/user_deposit", _User_UserDeposit0_HTTP_Handler(srv))
+	r.POST("/api/user_server/user/eth_authorize", _User_EthAuthorize0_HTTP_Handler(srv))
+	r.GET("/api/user_server/user", _User_GetUser0_HTTP_Handler(srv))
+	r.POST("/api/user_server/user/balance/deposit", _User_Deposit0_HTTP_Handler(srv))
+	r.POST("/api/user_server/user/balance/withdraw", _User_Withdraw0_HTTP_Handler(srv))
+	r.GET("/api/user_server/user_recommend/list", _User_GetUserRecommendList0_HTTP_Handler(srv))
+	r.GET("/api/user_server/deposit/list", _User_GetUserDepositList0_HTTP_Handler(srv))
+	r.GET("/api/user_server/withdraw/list", _User_GetUserWithdrawList0_HTTP_Handler(srv))
+	r.POST("/api/user_server/user/proxy/create", _User_CreateProxy0_HTTP_Handler(srv))
+	r.POST("/api/user_server/user/proxy/down/create", _User_CreateDownProxy0_HTTP_Handler(srv))
+	r.GET("/api/user_server/user_proxy/list", _User_GetUserProxyList0_HTTP_Handler(srv))
+	r.GET("/api/user_server/user_proxy/config_list", _User_GetUserProxyConfigList0_HTTP_Handler(srv))
+	r.GET("/api/user_server/user_deposit", _User_UserDeposit0_HTTP_Handler(srv))
 }
 
 func _User_EthAuthorize0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
@@ -331,7 +331,7 @@ func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 
 func (c *UserHTTPClientImpl) CreateDownProxy(ctx context.Context, in *CreateDownProxyRequest, opts ...http.CallOption) (*CreateDownProxyReply, error) {
 	var out CreateDownProxyReply
-	pattern := "/api/user/proxy/down/create"
+	pattern := "/api/user_server/user/proxy/down/create"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserCreateDownProxy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -344,7 +344,7 @@ func (c *UserHTTPClientImpl) CreateDownProxy(ctx context.Context, in *CreateDown
 
 func (c *UserHTTPClientImpl) CreateProxy(ctx context.Context, in *CreateProxyRequest, opts ...http.CallOption) (*CreateProxyReply, error) {
 	var out CreateProxyReply
-	pattern := "/api/user/proxy/create"
+	pattern := "/api/user_server/user/proxy/create"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserCreateProxy))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -357,7 +357,7 @@ func (c *UserHTTPClientImpl) CreateProxy(ctx context.Context, in *CreateProxyReq
 
 func (c *UserHTTPClientImpl) Deposit(ctx context.Context, in *DepositRequest, opts ...http.CallOption) (*DepositReply, error) {
 	var out DepositReply
-	pattern := "/api/user/balance/deposit"
+	pattern := "/api/user_server/user/balance/deposit"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserDeposit))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -370,7 +370,7 @@ func (c *UserHTTPClientImpl) Deposit(ctx context.Context, in *DepositRequest, op
 
 func (c *UserHTTPClientImpl) EthAuthorize(ctx context.Context, in *EthAuthorizeRequest, opts ...http.CallOption) (*EthAuthorizeReply, error) {
 	var out EthAuthorizeReply
-	pattern := "/api/user/eth_authorize"
+	pattern := "/api/user_server/user/eth_authorize"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserEthAuthorize))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -383,7 +383,7 @@ func (c *UserHTTPClientImpl) EthAuthorize(ctx context.Context, in *EthAuthorizeR
 
 func (c *UserHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequest, opts ...http.CallOption) (*GetUserReply, error) {
 	var out GetUserReply
-	pattern := "/api/user"
+	pattern := "/api/user_server/user"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUser))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -396,7 +396,7 @@ func (c *UserHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequest, op
 
 func (c *UserHTTPClientImpl) GetUserDepositList(ctx context.Context, in *GetUserDepositListRequest, opts ...http.CallOption) (*GetUserDepositListReply, error) {
 	var out GetUserDepositListReply
-	pattern := "/api/deposit/list"
+	pattern := "/api/user_server/deposit/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUserDepositList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -409,7 +409,7 @@ func (c *UserHTTPClientImpl) GetUserDepositList(ctx context.Context, in *GetUser
 
 func (c *UserHTTPClientImpl) GetUserProxyConfigList(ctx context.Context, in *GetUserProxyConfigListRequest, opts ...http.CallOption) (*GetUserProxyConfigListReply, error) {
 	var out GetUserProxyConfigListReply
-	pattern := "/api/user_proxy/config_list"
+	pattern := "/api/user_server/user_proxy/config_list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUserProxyConfigList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -422,7 +422,7 @@ func (c *UserHTTPClientImpl) GetUserProxyConfigList(ctx context.Context, in *Get
 
 func (c *UserHTTPClientImpl) GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...http.CallOption) (*GetUserProxyListReply, error) {
 	var out GetUserProxyListReply
-	pattern := "/api/user_proxy/list"
+	pattern := "/api/user_server/user_proxy/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUserProxyList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -435,7 +435,7 @@ func (c *UserHTTPClientImpl) GetUserProxyList(ctx context.Context, in *GetUserPr
 
 func (c *UserHTTPClientImpl) GetUserRecommendList(ctx context.Context, in *GetUserRecommendListRequest, opts ...http.CallOption) (*GetUserRecommendListReply, error) {
 	var out GetUserRecommendListReply
-	pattern := "/api/user_recommend/list"
+	pattern := "/api/user_server/user_recommend/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUserRecommendList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -448,7 +448,7 @@ func (c *UserHTTPClientImpl) GetUserRecommendList(ctx context.Context, in *GetUs
 
 func (c *UserHTTPClientImpl) GetUserWithdrawList(ctx context.Context, in *GetUserWithdrawListRequest, opts ...http.CallOption) (*GetUserWithdrawListReply, error) {
 	var out GetUserWithdrawListReply
-	pattern := "/api/withdraw/list"
+	pattern := "/api/user_server/withdraw/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserGetUserWithdrawList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -461,7 +461,7 @@ func (c *UserHTTPClientImpl) GetUserWithdrawList(ctx context.Context, in *GetUse
 
 func (c *UserHTTPClientImpl) UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...http.CallOption) (*UserDepositReply, error) {
 	var out UserDepositReply
-	pattern := "/api/user_deposit"
+	pattern := "/api/user_server/user_deposit"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationUserUserDeposit))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -474,7 +474,7 @@ func (c *UserHTTPClientImpl) UserDeposit(ctx context.Context, in *UserDepositReq
 
 func (c *UserHTTPClientImpl) Withdraw(ctx context.Context, in *WithdrawRequest, opts ...http.CallOption) (*WithdrawReply, error) {
 	var out WithdrawReply
-	pattern := "/api/user/balance/withdraw"
+	pattern := "/api/user_server/user/balance/withdraw"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserWithdraw))
 	opts = append(opts, http.PathTemplate(pattern))

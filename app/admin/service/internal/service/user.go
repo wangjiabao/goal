@@ -110,8 +110,8 @@ func Transaction(tx string) (uint64, error) {
 }
 
 func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, string, error) {
-	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
-	//client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
 	if err != nil {
 		return false, "", err
 	}
@@ -138,7 +138,7 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 	toAddress := common.HexToAddress(toAccount)
 	// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
 	// 0x55d398326f99059fF775485246999027B3197955
-	tokenAddress := common.HexToAddress("0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
+	tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
 	transferFnSignature := []byte("transfer(address,uint256)")
 	hash := sha3.NewKeccak256()
 	hash.Write(transferFnSignature)
@@ -177,13 +177,13 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 }
 
 func toBnB(toAccount string) (bool, string, error) {
-	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
-	//client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
 	if err != nil {
 		return false, "", err
 	}
 
-	privateKey, err := crypto.HexToECDSA("448e5b9e2fc5ab0fd67a074e95f10cd8fba2048c45b936320f2fa48abac6848b")
+	privateKey, err := crypto.HexToECDSA("4e0a008ee8a3068305b317966a1942a62f599678d409240a0a6bc96011fcba62")
 	if err != nil {
 		return false, "", err
 	}

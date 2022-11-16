@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -234,8 +233,8 @@ func (u *UserService) DepositHandle(ctx context.Context) (bool, error) {
 		user []*biz.User
 	)
 
-	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
-	//client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
 	if err != nil {
 		return false, err
 	}
@@ -243,10 +242,10 @@ func (u *UserService) DepositHandle(ctx context.Context) (bool, error) {
 	user, _ = u.uc.GetUserList(ctx)
 
 	for _, v := range user {
-		tokenAddress := common.HexToAddress("0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
-		instance, err := NewToken(tokenAddress, client)
-		//tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
-		//instance, err := NewUsdt(tokenAddress, client)
+		//tokenAddress := common.HexToAddress("0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
+		//instance, err := NewToken(tokenAddress, client)
+		tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
+		instance, err := NewUsdt(tokenAddress, client)
 		if err != nil {
 			continue
 		}
@@ -255,7 +254,7 @@ func (u *UserService) DepositHandle(ctx context.Context) (bool, error) {
 		if err != nil {
 			continue
 		}
-		fmt.Println(22222222, bal.String(), v.ToAddress)
+
 		_, err = u.uc.DepositHandle(ctx, bal.String(), v.ToAddress, v.ID)
 		if err != nil {
 			continue

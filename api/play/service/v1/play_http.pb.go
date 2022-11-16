@@ -65,26 +65,26 @@ type PlayHTTPServer interface {
 
 func RegisterPlayHTTPServer(s *http.Server, srv PlayHTTPServer) {
 	r := s.Route("/")
-	r.GET("/api/allowed_play_list/{game_id}", _Play_AllowedPlayList0_HTTP_Handler(srv))
-	r.GET("/api/room_play_list/{room_id}", _Play_RoomPlayList0_HTTP_Handler(srv))
-	r.GET("/api/room_info/{room_id}", _Play_RoomInfo0_HTTP_Handler(srv))
-	r.POST("/api/play/sort", _Play_CreatePlaySort0_HTTP_Handler(srv))
-	r.POST("/api/play/game", _Play_CreatePlayGame0_HTTP_Handler(srv))
-	r.POST("/api/room/account", _Play_RoomAccount0_HTTP_Handler(srv))
-	r.GET("/api/play_amount_total", _Play_PlayAmountTotal0_HTTP_Handler(srv))
-	r.GET("/api/play_amount_result_total", _Play_PlayAmountTotalResult0_HTTP_Handler(srv))
-	r.GET("/api/play_amount_goal_total", _Play_PlayAmountTotalGoal0_HTTP_Handler(srv))
-	r.GET("/api/play_amount_total_score", _Play_PlayAmountTotalScore0_HTTP_Handler(srv))
-	r.GET("/api/play_amount_total_sort", _Play_PlayAmountTotalSort0_HTTP_Handler(srv))
-	r.GET("/api/play_amount_total_sort_other", _Play_PlayAmountTotalSortOther0_HTTP_Handler(srv))
-	r.POST("/api/room", _Play_CreateRoom0_HTTP_Handler(srv))
-	r.POST("/api/play/game_score", _Play_CreatePlayGameScore0_HTTP_Handler(srv))
-	r.POST("/api/play/game_result", _Play_CreatePlayGameResult0_HTTP_Handler(srv))
-	r.POST("/api/play/game_goal", _Play_CreatePlayGameGoal0_HTTP_Handler(srv))
-	r.POST("/api/play/game_sort", _Play_CreatePlayGameSort0_HTTP_Handler(srv))
-	r.GET("/api/play/user/list", _Play_GetUserPlayList0_HTTP_Handler(srv))
-	r.GET("/api/game/{game_id}/user_list", _Play_GameUserList0_HTTP_Handler(srv))
-	r.GET("/api/room_user_list", _Play_GetRoomUserList0_HTTP_Handler(srv))
+	r.GET("/api/play_server/allowed_play_list/{game_id}", _Play_AllowedPlayList0_HTTP_Handler(srv))
+	r.GET("/api/play_server/room_play_list/{room_id}", _Play_RoomPlayList0_HTTP_Handler(srv))
+	r.GET("/api/play_server/room_info/{room_id}", _Play_RoomInfo0_HTTP_Handler(srv))
+	r.POST("/api/play_server/play/sort", _Play_CreatePlaySort0_HTTP_Handler(srv))
+	r.POST("/api/play_server/play/game", _Play_CreatePlayGame0_HTTP_Handler(srv))
+	r.POST("/api/play_server/room/account", _Play_RoomAccount0_HTTP_Handler(srv))
+	r.GET("/api/play_server/play_amount_total", _Play_PlayAmountTotal0_HTTP_Handler(srv))
+	r.GET("/api/play_server/play_amount_result_total", _Play_PlayAmountTotalResult0_HTTP_Handler(srv))
+	r.GET("/api/play_server/play_amount_goal_total", _Play_PlayAmountTotalGoal0_HTTP_Handler(srv))
+	r.GET("/api/play_server/play_amount_total_score", _Play_PlayAmountTotalScore0_HTTP_Handler(srv))
+	r.GET("/api/play_server/play_amount_total_sort", _Play_PlayAmountTotalSort0_HTTP_Handler(srv))
+	r.GET("/api/play_server/play_amount_total_sort_other", _Play_PlayAmountTotalSortOther0_HTTP_Handler(srv))
+	r.POST("/api/play_server/room", _Play_CreateRoom0_HTTP_Handler(srv))
+	r.POST("/api/play_server/play/game_score", _Play_CreatePlayGameScore0_HTTP_Handler(srv))
+	r.POST("/api/play_server/play/game_result", _Play_CreatePlayGameResult0_HTTP_Handler(srv))
+	r.POST("/api/play_server/play/game_goal", _Play_CreatePlayGameGoal0_HTTP_Handler(srv))
+	r.POST("/api/play_server/play/game_sort", _Play_CreatePlayGameSort0_HTTP_Handler(srv))
+	r.GET("/api/play_server/play/user/list", _Play_GetUserPlayList0_HTTP_Handler(srv))
+	r.GET("/api/play_server/game/{game_id}/user_list", _Play_GameUserList0_HTTP_Handler(srv))
+	r.GET("/api/play_server/room_user_list", _Play_GetRoomUserList0_HTTP_Handler(srv))
 }
 
 func _Play_AllowedPlayList0_HTTP_Handler(srv PlayHTTPServer) func(ctx http.Context) error {
@@ -536,7 +536,7 @@ func NewPlayHTTPClient(client *http.Client) PlayHTTPClient {
 
 func (c *PlayHTTPClientImpl) AllowedPlayList(ctx context.Context, in *AllowedPlayListRequest, opts ...http.CallOption) (*AllowedPlayListReply, error) {
 	var out AllowedPlayListReply
-	pattern := "/api/allowed_play_list/{game_id}"
+	pattern := "/api/play_server/allowed_play_list/{game_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayAllowedPlayList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -549,7 +549,7 @@ func (c *PlayHTTPClientImpl) AllowedPlayList(ctx context.Context, in *AllowedPla
 
 func (c *PlayHTTPClientImpl) CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...http.CallOption) (*CreatePlayGameReply, error) {
 	var out CreatePlayGameReply
-	pattern := "/api/play/game"
+	pattern := "/api/play_server/play/game"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlayCreatePlayGame))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -562,7 +562,7 @@ func (c *PlayHTTPClientImpl) CreatePlayGame(ctx context.Context, in *CreatePlayG
 
 func (c *PlayHTTPClientImpl) CreatePlayGameGoal(ctx context.Context, in *CreatePlayGameGoalRequest, opts ...http.CallOption) (*CreatePlayGameGoalReply, error) {
 	var out CreatePlayGameGoalReply
-	pattern := "/api/play/game_goal"
+	pattern := "/api/play_server/play/game_goal"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlayCreatePlayGameGoal))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -575,7 +575,7 @@ func (c *PlayHTTPClientImpl) CreatePlayGameGoal(ctx context.Context, in *CreateP
 
 func (c *PlayHTTPClientImpl) CreatePlayGameResult(ctx context.Context, in *CreatePlayGameResultRequest, opts ...http.CallOption) (*CreatePlayGameResultReply, error) {
 	var out CreatePlayGameResultReply
-	pattern := "/api/play/game_result"
+	pattern := "/api/play_server/play/game_result"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlayCreatePlayGameResult))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -588,7 +588,7 @@ func (c *PlayHTTPClientImpl) CreatePlayGameResult(ctx context.Context, in *Creat
 
 func (c *PlayHTTPClientImpl) CreatePlayGameScore(ctx context.Context, in *CreatePlayGameScoreRequest, opts ...http.CallOption) (*CreatePlayGameScoreReply, error) {
 	var out CreatePlayGameScoreReply
-	pattern := "/api/play/game_score"
+	pattern := "/api/play_server/play/game_score"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlayCreatePlayGameScore))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -601,7 +601,7 @@ func (c *PlayHTTPClientImpl) CreatePlayGameScore(ctx context.Context, in *Create
 
 func (c *PlayHTTPClientImpl) CreatePlayGameSort(ctx context.Context, in *CreatePlayGameSortRequest, opts ...http.CallOption) (*CreatePlayGameSortReply, error) {
 	var out CreatePlayGameSortReply
-	pattern := "/api/play/game_sort"
+	pattern := "/api/play_server/play/game_sort"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlayCreatePlayGameSort))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -614,7 +614,7 @@ func (c *PlayHTTPClientImpl) CreatePlayGameSort(ctx context.Context, in *CreateP
 
 func (c *PlayHTTPClientImpl) CreatePlaySort(ctx context.Context, in *CreatePlaySortRequest, opts ...http.CallOption) (*CreatePlaySortReply, error) {
 	var out CreatePlaySortReply
-	pattern := "/api/play/sort"
+	pattern := "/api/play_server/play/sort"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlayCreatePlaySort))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -627,7 +627,7 @@ func (c *PlayHTTPClientImpl) CreatePlaySort(ctx context.Context, in *CreatePlayS
 
 func (c *PlayHTTPClientImpl) CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...http.CallOption) (*CreateRoomReply, error) {
 	var out CreateRoomReply
-	pattern := "/api/room"
+	pattern := "/api/play_server/room"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlayCreateRoom))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -640,7 +640,7 @@ func (c *PlayHTTPClientImpl) CreateRoom(ctx context.Context, in *CreateRoomReque
 
 func (c *PlayHTTPClientImpl) GameUserList(ctx context.Context, in *GameUserListRequest, opts ...http.CallOption) (*GameUserListReply, error) {
 	var out GameUserListReply
-	pattern := "/api/game/{game_id}/user_list"
+	pattern := "/api/play_server/game/{game_id}/user_list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayGameUserList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -653,7 +653,7 @@ func (c *PlayHTTPClientImpl) GameUserList(ctx context.Context, in *GameUserListR
 
 func (c *PlayHTTPClientImpl) GetRoomUserList(ctx context.Context, in *GetRoomUserListRequest, opts ...http.CallOption) (*GetRoomUserListReply, error) {
 	var out GetRoomUserListReply
-	pattern := "/api/room_user_list"
+	pattern := "/api/play_server/room_user_list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayGetRoomUserList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -666,7 +666,7 @@ func (c *PlayHTTPClientImpl) GetRoomUserList(ctx context.Context, in *GetRoomUse
 
 func (c *PlayHTTPClientImpl) GetUserPlayList(ctx context.Context, in *GetUserPlayListRequest, opts ...http.CallOption) (*GetUserPlayListReply, error) {
 	var out GetUserPlayListReply
-	pattern := "/api/play/user/list"
+	pattern := "/api/play_server/play/user/list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayGetUserPlayList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -679,7 +679,7 @@ func (c *PlayHTTPClientImpl) GetUserPlayList(ctx context.Context, in *GetUserPla
 
 func (c *PlayHTTPClientImpl) PlayAmountTotal(ctx context.Context, in *PlayAmountTotalRequest, opts ...http.CallOption) (*PlayAmountTotalReply, error) {
 	var out PlayAmountTotalReply
-	pattern := "/api/play_amount_total"
+	pattern := "/api/play_server/play_amount_total"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayPlayAmountTotal))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -692,7 +692,7 @@ func (c *PlayHTTPClientImpl) PlayAmountTotal(ctx context.Context, in *PlayAmount
 
 func (c *PlayHTTPClientImpl) PlayAmountTotalGoal(ctx context.Context, in *PlayAmountTotalGoalRequest, opts ...http.CallOption) (*PlayAmountTotalGoalReply, error) {
 	var out PlayAmountTotalGoalReply
-	pattern := "/api/play_amount_goal_total"
+	pattern := "/api/play_server/play_amount_goal_total"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalGoal))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -705,7 +705,7 @@ func (c *PlayHTTPClientImpl) PlayAmountTotalGoal(ctx context.Context, in *PlayAm
 
 func (c *PlayHTTPClientImpl) PlayAmountTotalResult(ctx context.Context, in *PlayAmountTotalResultRequest, opts ...http.CallOption) (*PlayAmountTotalResultReply, error) {
 	var out PlayAmountTotalResultReply
-	pattern := "/api/play_amount_result_total"
+	pattern := "/api/play_server/play_amount_result_total"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalResult))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -718,7 +718,7 @@ func (c *PlayHTTPClientImpl) PlayAmountTotalResult(ctx context.Context, in *Play
 
 func (c *PlayHTTPClientImpl) PlayAmountTotalScore(ctx context.Context, in *PlayAmountTotalScoreRequest, opts ...http.CallOption) (*PlayAmountTotalScoreReply, error) {
 	var out PlayAmountTotalScoreReply
-	pattern := "/api/play_amount_total_score"
+	pattern := "/api/play_server/play_amount_total_score"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalScore))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -731,7 +731,7 @@ func (c *PlayHTTPClientImpl) PlayAmountTotalScore(ctx context.Context, in *PlayA
 
 func (c *PlayHTTPClientImpl) PlayAmountTotalSort(ctx context.Context, in *PlayAmountTotalSortRequest, opts ...http.CallOption) (*PlayAmountTotalSortReply, error) {
 	var out PlayAmountTotalSortReply
-	pattern := "/api/play_amount_total_sort"
+	pattern := "/api/play_server/play_amount_total_sort"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalSort))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -744,7 +744,7 @@ func (c *PlayHTTPClientImpl) PlayAmountTotalSort(ctx context.Context, in *PlayAm
 
 func (c *PlayHTTPClientImpl) PlayAmountTotalSortOther(ctx context.Context, in *PlayAmountTotalSortOtherRequest, opts ...http.CallOption) (*PlayAmountTotalSortOtherReply, error) {
 	var out PlayAmountTotalSortOtherReply
-	pattern := "/api/play_amount_total_sort_other"
+	pattern := "/api/play_server/play_amount_total_sort_other"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayPlayAmountTotalSortOther))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -757,7 +757,7 @@ func (c *PlayHTTPClientImpl) PlayAmountTotalSortOther(ctx context.Context, in *P
 
 func (c *PlayHTTPClientImpl) RoomAccount(ctx context.Context, in *RoomAccountRequest, opts ...http.CallOption) (*RoomAccountReply, error) {
 	var out RoomAccountReply
-	pattern := "/api/room/account"
+	pattern := "/api/play_server/room/account"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationPlayRoomAccount))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -770,7 +770,7 @@ func (c *PlayHTTPClientImpl) RoomAccount(ctx context.Context, in *RoomAccountReq
 
 func (c *PlayHTTPClientImpl) RoomInfo(ctx context.Context, in *RoomInfoRequest, opts ...http.CallOption) (*RoomInfoReply, error) {
 	var out RoomInfoReply
-	pattern := "/api/room_info/{room_id}"
+	pattern := "/api/play_server/room_info/{room_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayRoomInfo))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -783,7 +783,7 @@ func (c *PlayHTTPClientImpl) RoomInfo(ctx context.Context, in *RoomInfoRequest, 
 
 func (c *PlayHTTPClientImpl) RoomPlayList(ctx context.Context, in *RoomPlayListRequest, opts ...http.CallOption) (*RoomPlayListReply, error) {
 	var out RoomPlayListReply
-	pattern := "/api/room_play_list/{room_id}"
+	pattern := "/api/play_server/room_play_list/{room_id}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationPlayRoomPlayList))
 	opts = append(opts, http.PathTemplate(pattern))

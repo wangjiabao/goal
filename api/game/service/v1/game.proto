@@ -11,25 +11,25 @@ option java_package = "api.game.service.v1";
 service Game {
 	rpc DisplayGame (DisplayGameRequest) returns (DisplayGameReply) {
 		option (google.api.http) = {
-			get: "/api/display_game/{type}"
+			get: "/api/game_server/display_game/{type}"
 		};
 	};
 
 	rpc GetGameList (GetGameListRequest) returns (GetGameListReply) {
 		option (google.api.http) = {
-			get: "/api/games"
+			get: "/api/game_server/games"
 		};
 	};
 
 	rpc GetTeamList (GetTeamListRequest) returns (GetTeamListReply) {
 		option (google.api.http) = {
-			get: "/api/team/list"
+			get: "/api/game_server/team/list"
 		};
 	};
 
 	rpc GetGameSortList (GetGameSortListRequest) returns (GetGameSortListReply) {
 		option (google.api.http) = {
-			get: "/api/game/sorts"
+			get: "/api/game_server/game/sorts"
 		};
 	};
 }

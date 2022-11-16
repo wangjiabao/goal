@@ -12,129 +12,129 @@ option java_package = "api.play.service.v1";
 service Play {
 	rpc AllowedPlayList (AllowedPlayListRequest) returns (AllowedPlayListReply){
 		option (google.api.http) = {
-			get: "/api/allowed_play_list/{game_id}"
+			get: "/api/play_server/allowed_play_list/{game_id}"
 		};
 	};
 
 	rpc RoomPlayList (RoomPlayListRequest) returns (RoomPlayListReply){
 		option (google.api.http) = {
-			get: "/api/room_play_list/{room_id}"
+			get: "/api/play_server/room_play_list/{room_id}"
 		};
 	};
 
 	rpc RoomInfo (RoomInfoRequest) returns (RoomInfoReply){
 		option (google.api.http) = {
-			get: "/api/room_info/{room_id}"
+			get: "/api/play_server/room_info/{room_id}"
 		};
 	};
 
 	rpc CreatePlaySort (CreatePlaySortRequest) returns (CreatePlaySortReply){
 		option (google.api.http) = {
-			post: "/api/play/sort"
+			post: "/api/play_server/play/sort"
 			body: "send_body"
 		};
 	};
 
 	rpc CreatePlayGame (CreatePlayGameRequest) returns (CreatePlayGameReply){
 		option (google.api.http) = {
-			post: "/api/play/game"
+			post: "/api/play_server/play/game"
 			body: "send_body"
 		};
 	};
 
 	rpc RoomAccount (RoomAccountRequest) returns (RoomAccountReply){
 		option (google.api.http) = {
-			post: "/api/room/account"
+			post: "/api/play_server/room/account"
 			body: "send_body"
 		};
 	};
 
 	rpc PlayAmountTotal (PlayAmountTotalRequest) returns (PlayAmountTotalReply){
 		option (google.api.http) = {
-			get: "/api/play_amount_total"
+			get: "/api/play_server/play_amount_total"
 		};
 	};
 
 	rpc PlayAmountTotalResult (PlayAmountTotalResultRequest) returns (PlayAmountTotalResultReply){
 		option (google.api.http) = {
-			get: "/api/play_amount_result_total"
+			get: "/api/play_server/play_amount_result_total"
 		};
 	};
 
 	rpc PlayAmountTotalGoal (PlayAmountTotalGoalRequest) returns (PlayAmountTotalGoalReply){
 		option (google.api.http) = {
-			get: "/api/play_amount_goal_total"
+			get: "/api/play_server/play_amount_goal_total"
 		};
 	};
 
 	rpc PlayAmountTotalScore (PlayAmountTotalScoreRequest) returns (PlayAmountTotalScoreReply){
 		option (google.api.http) = {
-			get: "/api/play_amount_total_score"
+			get: "/api/play_server/play_amount_total_score"
 		};
 	};
 
 	rpc PlayAmountTotalSort (PlayAmountTotalSortRequest) returns (PlayAmountTotalSortReply){
 		option (google.api.http) = {
-			get: "/api/play_amount_total_sort"
+			get: "/api/play_server/play_amount_total_sort"
 		};
 	};
 
 	rpc PlayAmountTotalSortOther (PlayAmountTotalSortOtherRequest) returns (PlayAmountTotalSortOtherReply){
 		option (google.api.http) = {
-			get: "/api/play_amount_total_sort_other"
+			get: "/api/play_server/play_amount_total_sort_other"
 		};
 	};
 
 	rpc CreateRoom (CreateRoomRequest) returns (CreateRoomReply){
 		option (google.api.http) = {
-			post: "/api/room"
+			post: "/api/play_server/room"
 			body: "send_body"
 		};
 	};
 
 	rpc CreatePlayGameScore (CreatePlayGameScoreRequest) returns (CreatePlayGameScoreReply){
 		option (google.api.http) = {
-			post: "/api/play/game_score"
+			post: "/api/play_server/play/game_score"
 			body: "send_body"
 		};
 	};
 
 	rpc CreatePlayGameResult (CreatePlayGameResultRequest) returns (CreatePlayGameResultReply){
 		option (google.api.http) = {
-			post: "/api/play/game_result"
+			post: "/api/play_server/play/game_result"
 			body: "send_body"
 		};
 	};
 
 	rpc CreatePlayGameGoal (CreatePlayGameGoalRequest) returns (CreatePlayGameGoalReply){
 		option (google.api.http) = {
-			post: "/api/play/game_goal"
+			post: "/api/play_server/play/game_goal"
 			body: "send_body"
 		};
 	};
 
 	rpc CreatePlayGameSort (CreatePlayGameSortRequest) returns (CreatePlayGameSortReply){
 		option (google.api.http) = {
-			post: "/api/play/game_sort"
+			post: "/api/play_server/play/game_sort"
 			body: "send_body"
 		};
 	};
 
 	rpc GetUserPlayList (GetUserPlayListRequest) returns (GetUserPlayListReply){
 		option (google.api.http) = {
-			get: "/api/play/user/list"
+			get: "/api/play_server/play/user/list"
 		};
 	};
 
 	rpc GameUserList (GameUserListRequest) returns (GameUserListReply){
 		option (google.api.http) = {
-			get: "/api/game/{game_id}/user_list"
+			get: "/api/play_server/game/{game_id}/user_list"
 		};
 	};
 
 	rpc GetRoomUserList (GetRoomUserListRequest) returns (GetRoomUserListReply){
 		option (google.api.http) = {
-			get: "/api/room_user_list"
+			get: "/api/play_server/room_user_list"
 		};
 	};
 
