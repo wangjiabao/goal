@@ -442,12 +442,13 @@ func (psr *PlayGameScoreUserRelRepo) GetPlayGameScoreUserRelByPlayIds(ctx contex
 	pl := make(map[int64][]*biz.PlayGameScoreUserRel, 0)
 	for _, v := range l {
 		pl[v.PlayId] = append(pl[v.PlayId], &biz.PlayGameScoreUserRel{
-			ID:      v.ID,
-			PlayId:  v.PlayId,
-			UserId:  v.UserId,
-			Content: v.Content,
-			Pay:     v.Pay,
-			Status:  v.Status,
+			ID:        v.ID,
+			PlayId:    v.PlayId,
+			UserId:    v.UserId,
+			Content:   v.Content,
+			Pay:       v.Pay,
+			OriginPay: v.OriginPay,
+			Status:    v.Status,
 		})
 	}
 	return pl, nil
@@ -517,12 +518,13 @@ func (pgtR *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByPlayIds
 	pl := make(map[int64][]*biz.PlayGameTeamResultUserRel, 0)
 	for _, v := range l {
 		pl[v.PlayId] = append(pl[v.PlayId], &biz.PlayGameTeamResultUserRel{
-			ID:      v.ID,
-			PlayId:  v.PlayId,
-			UserId:  v.UserId,
-			Content: v.Content,
-			Pay:     v.Pay,
-			Status:  v.Status,
+			ID:        v.ID,
+			PlayId:    v.PlayId,
+			UserId:    v.UserId,
+			Content:   v.Content,
+			Pay:       v.Pay,
+			OriginPay: v.OriginPay,
+			Status:    v.Status,
 		})
 	}
 	return pl, nil
@@ -594,14 +596,15 @@ func (pgtG *PlayGameTeamGoalUserRelRepo) GetPlayGameTeamGoalUserRelByPlayIdsAndT
 	pl := make(map[int64][]*biz.PlayGameTeamGoalUserRel, 0)
 	for _, v := range l {
 		pl[v.PlayId] = append(pl[v.PlayId], &biz.PlayGameTeamGoalUserRel{
-			ID:     v.ID,
-			PlayId: v.PlayId,
-			UserId: v.UserId,
-			TeamId: v.TeamId,
-			Goal:   v.Goal,
-			Type:   v.Type,
-			Pay:    v.Pay,
-			Status: v.Status,
+			ID:        v.ID,
+			PlayId:    v.PlayId,
+			UserId:    v.UserId,
+			TeamId:    v.TeamId,
+			Goal:      v.Goal,
+			Type:      v.Type,
+			Pay:       v.Pay,
+			OriginPay: v.OriginPay,
+			Status:    v.Status,
 		})
 	}
 	return pl, nil
@@ -676,13 +679,14 @@ func (pgtS *PlayGameTeamSortUserRelRepo) GetPlayGameTeamSortUserRelByPlayIds(ctx
 	pl := make(map[int64][]*biz.PlayGameTeamSortUserRel, 0)
 	for _, v := range l {
 		pl[v.PlayId] = append(pl[v.PlayId], &biz.PlayGameTeamSortUserRel{
-			ID:      v.ID,
-			PlayId:  v.PlayId,
-			UserId:  v.UserId,
-			SortId:  v.SortId,
-			Content: v.Content,
-			Pay:     v.Pay,
-			Status:  v.Status,
+			ID:        v.ID,
+			PlayId:    v.PlayId,
+			UserId:    v.UserId,
+			SortId:    v.SortId,
+			Content:   v.Content,
+			Pay:       v.Pay,
+			OriginPay: v.OriginPay,
+			Status:    v.Status,
 		})
 	}
 	return pl, nil

@@ -51,42 +51,46 @@ type PlaySortRel struct {
 }
 
 type PlayGameScoreUserRel struct {
-	ID      int64
-	PlayId  int64
-	UserId  int64
-	Content string
-	Pay     int64
-	Status  string
+	ID        int64
+	PlayId    int64
+	UserId    int64
+	Content   string
+	Pay       int64
+	OriginPay int64
+	Status    string
 }
 
 type PlayGameTeamResultUserRel struct {
-	ID      int64
-	UserId  int64
-	PlayId  int64
-	Content string
-	Pay     int64
-	Status  string
+	ID        int64
+	UserId    int64
+	PlayId    int64
+	Content   string
+	Pay       int64
+	OriginPay int64
+	Status    string
 }
 
 type PlayGameTeamGoalUserRel struct {
-	ID     int64
-	UserId int64
-	PlayId int64
-	TeamId int64
-	Type   string
-	Goal   int64
-	Pay    int64
-	Status string
+	ID        int64
+	UserId    int64
+	PlayId    int64
+	TeamId    int64
+	Type      string
+	Goal      int64
+	Pay       int64
+	OriginPay int64
+	Status    string
 }
 
 type PlayGameTeamSortUserRel struct {
-	ID      int64
-	UserId  int64
-	PlayId  int64
-	Content string
-	SortId  int64
-	Pay     int64
-	Status  string
+	ID        int64
+	UserId    int64
+	PlayId    int64
+	Content   string
+	SortId    int64
+	OriginPay int64
+	Pay       int64
+	Status    string
 }
 
 type UserBalance struct {
@@ -474,7 +478,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 		if 2 > len(tmpTotalUserIdMap) {
 			for _, v := range tmpBackedUser {
 				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
 						return err
 					}
 					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, playSort.Type, v.ID); nil != err {
@@ -837,7 +841,7 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 		if 2 > len(tmpTotalUserIdMap) {
 			for _, v := range tmpBackedUser {
 				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
 						return err
 					}
 					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_score", v.ID); nil != err {
@@ -1121,7 +1125,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 		if 2 > len(tmpTotalUserIdMap) {
 			for _, v := range tmpBackedUser {
 				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
 						return err
 					}
 					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_team_result", v.ID); nil != err {
@@ -1440,7 +1444,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 		if 2 > len(tmpTotalUserIdMap) {
 			for _, v := range tmpBackedUser {
 				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.Pay); nil != err {
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
 						return err
 					}
 					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, v.Type, v.ID); nil != err {
