@@ -38,6 +38,12 @@ type PlayGameRel struct {
 	GameId int64
 }
 
+type Admin struct {
+	ID       int64
+	Account  string
+	Password string
+}
+
 type PlayRoomRel struct {
 	ID     int64
 	PlayId int64
@@ -154,6 +160,7 @@ type SystemConfigRepo interface {
 }
 
 type PlayRepo interface {
+	GetAdmin(ctx context.Context, account string, password string) (*Admin, error)
 	GetPlayListByIds(ctx context.Context, ids ...int64) ([]*Play, error)
 	GetPlayById(ctx context.Context, id int64) (*Play, error)
 	CreatePlay(ctx context.Context, pc *Play) (*Play, error)
@@ -1756,6 +1763,10 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 	}
 
 	return true
+}
+
+func (p *PlayUseCase) Login(ctx context.Context, req *v1.LoginRequest) (*Admin, error) {
+	return p.playRepo.GetAdmin(ctx, req.SendBody.Account, req.SendBody.Password)
 }
 
 // CreatePlayGame 创建一个比赛玩法等记录

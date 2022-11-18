@@ -2,9 +2,13 @@ package service
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	jwt2 "github.com/golang-jwt/jwt/v4"
 	v1 "goal/api/admin/service/v1"
 	"goal/app/admin/service/internal/biz"
+	"goal/app/admin/service/internal/pkg/middleware/auth"
+	"time"
 )
 
 type PlayService struct {
@@ -17,6 +21,31 @@ type PlayService struct {
 // NewPlayService new a game service.
 func NewPlayService(uc *biz.PlayUseCase, logger log.Logger) *PlayService {
 	return &PlayService{uc: uc, log: log.NewHelper(logger)}
+}
+
+func (p *PlayService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.LoginReply, error) {
+
+	admin, err := p.uc.Login(ctx, req)
+	if nil != err {
+		return nil, errors.New(500, "CREATE_TOKEN_ERROR", "账户密码错误")
+	}
+
+	claims := auth.CustomClaims{
+		UserId:   admin.Account,
+		UserType: "admin",
+		StandardClaims: jwt2.StandardClaims{
+			NotBefore: time.Now().Unix(),              // 签名的生效时间
+			ExpiresAt: time.Now().Unix() + 60*60*24*7, // 7天过期
+			Issuer:    "Goal",
+		},
+	}
+	token, err := auth.CreateToken(claims, "d57993e6ea44bce2f340d5d6cc914064")
+	if err != nil {
+		return nil, errors.New(500, "CREATE_TOKEN_ERROR", "生成token失败")
+	}
+	return &v1.LoginReply{
+		Token: token,
+	}, nil
 }
 
 func (p *PlayService) GamePlayGrant(ctx context.Context, req *v1.GamePlayGrantRequest) (*v1.GamePlayGrantReply, error) {

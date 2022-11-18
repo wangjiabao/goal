@@ -34,6 +34,7 @@ const OperationAdminGetPlayRelList = "/api.admin.service.v1.Admin/GetPlayRelList
 const OperationAdminGetPlaySortList = "/api.admin.service.v1.Admin/GetPlaySortList"
 const OperationAdminGetRoomList = "/api.admin.service.v1.Admin/GetRoomList"
 const OperationAdminGetRoomPlayList = "/api.admin.service.v1.Admin/GetRoomPlayList"
+const OperationAdminLogin = "/api.admin.service.v1.Admin/Login"
 const OperationAdminSortPlayGrant = "/api.admin.service.v1.Admin/SortPlayGrant"
 const OperationAdminUpdateConfig = "/api.admin.service.v1.Admin/UpdateConfig"
 
@@ -53,12 +54,14 @@ type AdminHTTPServer interface {
 	GetPlaySortList(context.Context, *GetPlaySortListRequest) (*GetPlaySortListReply, error)
 	GetRoomList(context.Context, *GetRoomListRequest) (*GetRoomListReply, error)
 	GetRoomPlayList(context.Context, *GetRoomPlayListRequest) (*GetRoomPlayListReply, error)
+	Login(context.Context, *LoginRequest) (*LoginReply, error)
 	SortPlayGrant(context.Context, *SortPlayGrantRequest) (*SortPlayGrantReply, error)
 	UpdateConfig(context.Context, *UpdateConfigRequest) (*UpdateConfigReply, error)
 }
 
 func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
 	r := s.Route("/")
+	r.POST("/api/goal_admin/login", _Admin_Login0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play/game/grant", _Admin_GamePlayGrant0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play/sort/grant", _Admin_SortPlayGrant0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play/game", _Admin_CreatePlayGame0_HTTP_Handler(srv))
@@ -76,6 +79,28 @@ func RegisterAdminHTTPServer(s *http.Server, srv AdminHTTPServer) {
 	r.POST("/api/goal_admin/update_system_config", _Admin_UpdateConfig0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play/game_delete", _Admin_DeletePlayGame0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/play/sort_delete", _Admin_DeletePlaySort0_HTTP_Handler(srv))
+}
+
+func _Admin_Login0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in LoginRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAdminLogin)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Login(ctx, req.(*LoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LoginReply)
+		return ctx.Result(200, reply)
+	}
 }
 
 func _Admin_GamePlayGrant0_HTTP_Handler(srv AdminHTTPServer) func(ctx http.Context) error {
@@ -459,6 +484,7 @@ type AdminHTTPClient interface {
 	GetPlaySortList(ctx context.Context, req *GetPlaySortListRequest, opts ...http.CallOption) (rsp *GetPlaySortListReply, err error)
 	GetRoomList(ctx context.Context, req *GetRoomListRequest, opts ...http.CallOption) (rsp *GetRoomListReply, err error)
 	GetRoomPlayList(ctx context.Context, req *GetRoomPlayListRequest, opts ...http.CallOption) (rsp *GetRoomPlayListReply, err error)
+	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginReply, err error)
 	SortPlayGrant(ctx context.Context, req *SortPlayGrantRequest, opts ...http.CallOption) (rsp *SortPlayGrantReply, err error)
 	UpdateConfig(ctx context.Context, req *UpdateConfigRequest, opts ...http.CallOption) (rsp *UpdateConfigReply, err error)
 }
@@ -660,6 +686,19 @@ func (c *AdminHTTPClientImpl) GetRoomPlayList(ctx context.Context, in *GetRoomPl
 	opts = append(opts, http.Operation(OperationAdminGetRoomPlayList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AdminHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opts ...http.CallOption) (*LoginReply, error) {
+	var out LoginReply
+	pattern := "/api/goal_admin/login"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAdminLogin))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

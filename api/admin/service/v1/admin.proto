@@ -10,6 +10,14 @@ option java_multiple_files = true;
 option java_package = "api.admin.service.v1";
 
 service Admin {
+
+	rpc Login (LoginRequest) returns (LoginReply){
+		option (google.api.http) = {
+			post: "/api/goal_admin/login"
+			body: "send_body"
+		};
+	};
+
 	rpc GamePlayGrant (GamePlayGrantRequest) returns (GamePlayGrantReply){
 		option (google.api.http) = {
 			post: "/api/goal_admin/play/game/grant"
@@ -290,8 +298,22 @@ message GamePlayGrantRequest {
 	SendBody send_body = 1;
 }
 
+
 message GamePlayGrantReply {
 	string result = 1;
+}
+
+message LoginRequest {
+	message SendBody{
+		string account = 1;
+		string password = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message LoginReply {
+	string token = 1;
 }
 
 message SortPlayGrantRequest {

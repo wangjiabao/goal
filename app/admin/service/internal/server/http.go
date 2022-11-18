@@ -1,6 +1,10 @@
 package server
 
 import (
+	"context"
+	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
+	"github.com/go-kratos/kratos/v2/middleware/selector"
+	jwt2 "github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/handlers"
 	v1 "goal/api/admin/service/v1"
 	"goal/app/admin/service/internal/conf"
@@ -16,6 +20,11 @@ func NewHTTPServer(c *conf.Server, playService *service.PlayService, userService
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
+			selector.Server( // jwt 验证
+				jwt.Server(func(token *jwt2.Token) (interface{}, error) {
+					return []byte("d57993e6ea44bce2f340d5d6cc914064"), nil
+				}, jwt.WithSigningMethod(jwt2.SigningMethodHS256)),
+			).Match(NewWhiteListMatcher()).Build(),
 		),
 		http.Filter(handlers.CORS(
 			handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
@@ -37,4 +46,16 @@ func NewHTTPServer(c *conf.Server, playService *service.PlayService, userService
 	v1.RegisterGameHTTPServer(srv, gameService)
 	v1.RegisterUserHTTPServer(srv, userService)
 	return srv
+}
+
+// NewWhiteListMatcher 设置白名单，不需要 token 验证的接口
+func NewWhiteListMatcher() selector.MatchFunc {
+	whiteList := make(map[string]struct{})
+	whiteList["/api.admin.service.v1.Admin/Login"] = struct{}{}
+	return func(ctx context.Context, operation string) bool {
+		if _, ok := whiteList[operation]; ok {
+			return false
+		}
+		return true
+	}
 }

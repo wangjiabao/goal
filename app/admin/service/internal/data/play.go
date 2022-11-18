@@ -370,6 +370,17 @@ func (p *PlayRepo) GetPlayListByIds(ctx context.Context, ids ...int64) ([]*biz.P
 	return pl, nil
 }
 
+func (p *PlayRepo) GetAdmin(ctx context.Context, account string, password string) (*biz.Admin, error) {
+	var admin Admin
+	if err := p.data.DB(ctx).Table("admin").Where("account=? and password=?", account, password).First(&admin).Error; err != nil {
+		return nil, errors.NotFound("TEAMS_NOT_FOUND", "不存在用户")
+	}
+	return &biz.Admin{
+		Account:  admin.Account,
+		Password: admin.Password,
+	}, nil
+}
+
 func (s *SystemConfigRepo) GetSystemConfigByName(ctx context.Context, name string) (*biz.SystemConfig, error) {
 	var config *SystemConfig
 	if err := s.data.DB(ctx).Table("system_config").Where("name=?", name).First(&config).Error; err != nil {

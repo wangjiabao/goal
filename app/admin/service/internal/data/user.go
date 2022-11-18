@@ -35,6 +35,14 @@ type User struct {
 	UpdatedAt           time.Time `gorm:"type:datetime;not null"`
 }
 
+type Admin struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	Account   string    `gorm:"type:varchar(100);not null"`
+	Password  string    `gorm:"type:varchar(100);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type BalanceRecordIdRel struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	RecordId  int64     `gorm:"type:int;not null"`

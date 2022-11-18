@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdminClient interface {
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginReply, error)
 	GamePlayGrant(ctx context.Context, in *GamePlayGrantRequest, opts ...grpc.CallOption) (*GamePlayGrantReply, error)
 	SortPlayGrant(ctx context.Context, in *SortPlayGrantRequest, opts ...grpc.CallOption) (*SortPlayGrantReply, error)
 	CreatePlayGame(ctx context.Context, in *CreatePlayGameRequest, opts ...grpc.CallOption) (*CreatePlayGameReply, error)
@@ -47,6 +48,15 @@ type adminClient struct {
 
 func NewAdminClient(cc grpc.ClientConnInterface) AdminClient {
 	return &adminClient{cc}
+}
+
+func (c *adminClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginReply, error) {
+	out := new(LoginReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.Admin/Login", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *adminClient) GamePlayGrant(ctx context.Context, in *GamePlayGrantRequest, opts ...grpc.CallOption) (*GamePlayGrantReply, error) {
@@ -206,6 +216,7 @@ func (c *adminClient) DeletePlaySort(ctx context.Context, in *DeletePlaySortRequ
 // All implementations must embed UnimplementedAdminServer
 // for forward compatibility
 type AdminServer interface {
+	Login(context.Context, *LoginRequest) (*LoginReply, error)
 	GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error)
 	SortPlayGrant(context.Context, *SortPlayGrantRequest) (*SortPlayGrantReply, error)
 	CreatePlayGame(context.Context, *CreatePlayGameRequest) (*CreatePlayGameReply, error)
@@ -230,6 +241,9 @@ type AdminServer interface {
 type UnimplementedAdminServer struct {
 }
 
+func (UnimplementedAdminServer) Login(context.Context, *LoginRequest) (*LoginReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
 func (UnimplementedAdminServer) GamePlayGrant(context.Context, *GamePlayGrantRequest) (*GamePlayGrantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GamePlayGrant not implemented")
 }
@@ -292,6 +306,24 @@ type UnsafeAdminServer interface {
 
 func RegisterAdminServer(s grpc.ServiceRegistrar, srv AdminServer) {
 	s.RegisterService(&Admin_ServiceDesc, srv)
+}
+
+func _Admin_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.Admin/Login",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Admin_GamePlayGrant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -607,6 +639,10 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "api.admin.service.v1.Admin",
 	HandlerType: (*AdminServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Login",
+			Handler:    _Admin_Login_Handler,
+		},
 		{
 			MethodName: "GamePlayGrant",
 			Handler:    _Admin_GamePlayGrant_Handler,
