@@ -547,7 +547,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 						}{AmountBase: amountBaseTmp, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
 					}
 				} else {
-					_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.UserId)
+					_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.ID)
 				}
 
 			} else { // 非冠亚军
@@ -576,7 +576,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 						}{AmountBase: 100, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
 					}
 				} else {
-					_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.UserId)
+					_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.ID)
 				}
 
 			}
@@ -887,7 +887,7 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 					winNoRewardedPlayGameScoreUserRel = append(winNoRewardedPlayGameScoreUserRel, v)
 				}
 			} else {
-				_ = p.playGameScoreUserRelRepo.SetNoRewarded(ctx, v.UserId)
+				_ = p.playGameScoreUserRelRepo.SetNoRewarded(ctx, v.ID)
 			}
 		}
 
@@ -1173,7 +1173,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 				}
 				continue //赢钱的不加入奖池
 			} else {
-				_ = p.playGameTeamResultUserRelRepo.SetNoRewarded(ctx, v.UserId)
+				_ = p.playGameTeamResultUserRelRepo.SetNoRewarded(ctx, v.ID)
 			}
 			poolAmount += v.Pay
 		}
@@ -1502,7 +1502,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else {
-					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.UserId)
+					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.ID)
 				}
 
 			} else if strings.EqualFold("game_team_goal_up", v.Type) {
@@ -1521,7 +1521,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else {
-					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.UserId)
+					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.ID)
 				}
 
 			} else if strings.EqualFold("game_team_goal_down", v.Type) {
@@ -1540,7 +1540,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else {
-					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.UserId)
+					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.ID)
 				}
 
 			}
