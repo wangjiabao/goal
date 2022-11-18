@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/base64"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-kratos/kratos/v2/errors"
@@ -147,7 +148,8 @@ func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAut
 				return err
 			}
 
-			addressEthBalance, err = uc.abRepo.CreateAddressEthBalance(ctx, user.ToAddress)
+			fmt.Println(user.ToAddress, u.ToAddress)
+			addressEthBalance, err = uc.abRepo.CreateAddressEthBalance(ctx, u.ToAddress)
 			if err != nil {
 				return err
 			}
