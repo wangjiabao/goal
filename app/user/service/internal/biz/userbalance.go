@@ -15,6 +15,7 @@ type AddressEthBalance struct {
 	ID      int64
 	Balance string
 	Address string
+	Version int64
 }
 
 type UserBalanceRecord struct {
@@ -35,7 +36,7 @@ type UserWithdraw struct {
 }
 
 type UserBalanceRepo interface {
-	UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error)
+	UpdateEthBalanceByAddress(ctx context.Context, address string, version int64, balance string) (bool, error)
 	GetAddressEthBalanceByAddress(ctx context.Context, address string) (*AddressEthBalance, error)
 	CreateUserBalance(ctx context.Context, u *User) (*UserBalance, error)
 	GetUserBalanceByUserId(ctx context.Context, userId int64) (*UserBalance, error)

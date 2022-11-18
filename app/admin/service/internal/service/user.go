@@ -222,7 +222,7 @@ func toBnB(toAccount string) (bool, string, error) {
 }
 
 func (u *UserService) GetUserList(ctx context.Context, req *v1.GetUserListRequest) (*v1.GetUserListReply, error) {
-	return u.uc.GetUsers(ctx)
+	return u.uc.GetUsers(ctx, req)
 }
 
 func (u *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserReply, error) {
@@ -243,6 +243,10 @@ func (u *UserService) GetUserDepositList(ctx context.Context, req *v1.GetUserDep
 
 func (u *UserService) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserBalanceRecordRequest) (*v1.GetUserBalanceRecordReply, error) {
 	return u.uc.GetUserBalanceRecord(ctx, req)
+}
+
+func (u *UserService) UserBalanceRecordTotal(ctx context.Context, req *v1.UserBalanceRecordTotalRequest) (*v1.UserBalanceRecordTotalReply, error) {
+	return u.uc.UserBalanceRecordTotal(ctx, req)
 }
 
 func (u *UserService) UpdateUserBalanceRecord(ctx context.Context, req *v1.UpdateUserBalanceRecordRequest) (*v1.UpdateUserBalanceRecordReply, error) {

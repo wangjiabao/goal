@@ -102,10 +102,11 @@ func (u *UserRepo) CreateUser(ctx context.Context, uc *biz.User) (*biz.User, err
 	}, nil
 }
 
-func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error) {
+func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, address string, version int64, balance string) (bool, error) {
 	if err := ub.data.DB(ctx).Where("address=?", address).
 		Table("address_eth_balance").
-		Update("balance", balance).Error; err != nil {
+		Where("version=?", version).
+		Updates(map[string]interface{}{"version": gorm.Expr("version + ?", 1), "balance": balance}).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, errors.NotFound("ADDRESS_ETH_BALANCE_NOT_FOUND", "地址余额不存在")
 		}

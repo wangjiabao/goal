@@ -32,6 +32,7 @@ type AddressEthBalance struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	Balance   string    `gorm:"type:varchar(45);not null"`
 	Address   string    `gorm:"type:varchar(45);not null"`
+	Version   int64     `gorm:"type:int;not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }

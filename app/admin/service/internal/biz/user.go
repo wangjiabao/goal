@@ -17,6 +17,14 @@ type User struct {
 	CreatedAt           time.Time
 }
 
+type UserBalanceRecordTotal struct {
+	Total int64
+}
+
+type UserBalanceTotal struct {
+	Total int64
+}
+
 type UserWithdraw struct {
 	ID        int64
 	UserId    int64
@@ -38,7 +46,7 @@ type Pagination struct {
 }
 
 type UserRepo interface {
-	GetUserList(ctx context.Context) ([]*User, error)
+	GetUserList(ctx context.Context, address string, b *Pagination) ([]*User, error, int64)
 	GetUserById(ctx context.Context, userId int64) (*User, error)
 	GetUserListByUserIds(ctx context.Context, userIds ...int64) ([]*User, error)
 	GetUserMap(ctx context.Context, userIds ...int64) (map[int64]*User, error)
@@ -63,26 +71,27 @@ func NewUserUseCase(repo UserRepo, tx Transaction, uiRepo UserInfoRepo, ubRepo U
 	}
 }
 
-func (u *UserUseCase) GetUserList(ctx context.Context) ([]*User, error) {
-	return u.repo.GetUserList(ctx)
-}
-
 func (u *UserUseCase) GetUserById(ctx context.Context, userId int64) (*User, error) {
 	return u.repo.GetUserById(ctx, userId)
 }
 
-func (u *UserUseCase) GetUsers(ctx context.Context) (*v1.GetUserListReply, error) {
+func (u *UserUseCase) GetUsers(ctx context.Context, req *v1.GetUserListRequest) (*v1.GetUserListReply, error) {
 	var (
-		user []*User
-		err  error
+		user  []*User
+		count int64
+		err   error
 	)
 
-	user, err = u.repo.GetUserList(ctx)
+	user, err, count = u.repo.GetUserList(ctx, req.Address, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	res := &v1.GetUserListReply{
+		Count: count,
 		Items: make([]*v1.GetUserListReply_Item, 0),
 	}
 
@@ -112,6 +121,8 @@ func (u *UserUseCase) UpdateUserBalanceRecord(ctx context.Context, req *v1.Updat
 func (u *UserUseCase) GetUserDepositList(ctx context.Context, req *v1.GetUserDepositListRequest) (*v1.GetUserDepositListReply, error) {
 	var (
 		user              map[int64]*User
+		userSearch        []*User
+		searchUserId      []int64
 		userBalanceRecord []*UserBalanceRecord
 		base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		userId            []int64
@@ -119,10 +130,23 @@ func (u *UserUseCase) GetUserDepositList(ctx context.Context, req *v1.GetUserDep
 		count             int64
 	)
 
+	if "" != req.Address {
+		userSearch, err, _ = u.repo.GetUserList(ctx, req.Address, &Pagination{
+			PageNum:  int(req.Page),
+			PageSize: 10,
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range userSearch {
+			searchUserId = append(searchUserId, v.ID)
+		}
+	}
+
 	userBalanceRecord, err, count = u.ubRepo.GetUserBalanceRecord(ctx, "user_deposit", &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
-	})
+	}, searchUserId...)
 	if err != nil {
 		return nil, err
 	}
@@ -209,6 +233,52 @@ func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserB
 	return res, nil
 }
 
+func (u *UserUseCase) UserBalanceRecordTotal(ctx context.Context, req *v1.UserBalanceRecordTotalRequest) (*v1.UserBalanceRecordTotalReply, error) {
+	var (
+		todayDeposit  *UserBalanceRecordTotal
+		totalDeposit  *UserBalanceRecordTotal
+		todayWithdraw *UserBalanceRecordTotal
+		totalWithdraw *UserBalanceRecordTotal
+		totalBalance  *UserBalanceTotal
+		base          int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		err           error
+	)
+	todayDeposit, err = u.ubRepo.GetUserBalanceRecordTotal(ctx, "deposit", true)
+	if nil != err {
+		return nil, err
+	}
+
+	totalDeposit, err = u.ubRepo.GetUserBalanceRecordTotal(ctx, "deposit", false)
+	if nil != err {
+		return nil, err
+	}
+
+	todayWithdraw, err = u.ubRepo.GetUserBalanceRecordTotal(ctx, "withdraw", true)
+	if nil != err {
+		return nil, err
+	}
+
+	totalWithdraw, err = u.ubRepo.GetUserBalanceRecordTotal(ctx, "withdraw", false)
+	if nil != err {
+		return nil, err
+	}
+
+	totalBalance, err = u.ubRepo.GetUserBalanceTotal(ctx)
+	if nil != err {
+		return nil, err
+	}
+
+	res := &v1.UserBalanceRecordTotalReply{
+		TodayDeposit:  todayDeposit.Total / base,
+		TotalDeposit:  totalDeposit.Total / base,
+		TodayWithdraw: todayWithdraw.Total / base,
+		TotalWithdraw: totalWithdraw.Total / base,
+		TotalBalance:  totalBalance.Total / base,
+	}
+
+	return res, nil
+}
+
 func (u *UserUseCase) GetUserProxyList(ctx context.Context, req *v1.GetUserProxyListRequest) (*v1.GetUserProxyListReply, error) {
 	var (
 		user      map[int64]*User
@@ -258,16 +328,30 @@ func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 	var (
 		userMap      map[int64]*User
 		userWithdraw []*UserWithdraw
+		user         []*User
 		userId       []int64
+		searchUserId []int64
 		err          error
 		base         int64 = 100000
 		count        int64
 	)
 
+	if "" != req.Address {
+		user, err, _ = u.repo.GetUserList(ctx, req.Address, &Pagination{
+			PageNum:  int(req.Page),
+			PageSize: 10,
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range user {
+			searchUserId = append(searchUserId, v.ID)
+		}
+	}
 	userWithdraw, err, count = u.ubRepo.WithdrawList(ctx, req.Status, &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
-	})
+	}, searchUserId...)
 
 	if err != nil {
 		return nil, err

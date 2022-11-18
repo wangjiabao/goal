@@ -139,6 +139,12 @@ service User {
 		};
 	};
 
+	rpc UserBalanceRecordTotal (UserBalanceRecordTotalRequest) returns (UserBalanceRecordTotalReply){
+		option (google.api.http) = {
+			get: "/api/goal_admin/user_balance_record_total"
+		};
+	};
+
 	rpc GetUserList (GetUserListRequest) returns (GetUserListReply) {
 		option (google.api.http) = {
 			get: "/api/goal_admin/user_list"
@@ -545,10 +551,12 @@ message GetConfigListReply {
 }
 
 message GetUserListRequest {
-
+	string address = 1;
+	int64 page = 2;
 }
 
 message GetUserListReply {
+	int64 count = 2;
 	repeated Item items = 1;
 	message Item {
 		int64 user_id = 1;
@@ -561,6 +569,7 @@ message GetUserListReply {
 message GetUserWithdrawListRequest {
 	int64 page = 1;
 	string status = 2;
+	string address = 3;
 }
 
 message GetUserWithdrawListReply {
@@ -579,6 +588,7 @@ message GetUserWithdrawListReply {
 message GetUserBalanceRecordRequest {
 	int64 page = 1;
 	string reason = 2;
+	string address = 3;
 }
 
 message GetUserBalanceRecordReply {
@@ -609,6 +619,7 @@ message GetUserProxyListReply {
 
 message GetUserDepositListRequest {
 	int64 page = 1;
+	string address = 4;
 	string reason = 2;
 	string type = 3;
 }
@@ -894,4 +905,15 @@ message UserWithdrawRequest {
 
 message UserWithdrawReply {
 	string result = 1;
+}
+
+message UserBalanceRecordTotalRequest {
+}
+
+message  UserBalanceRecordTotalReply {
+	int64 today_deposit = 1;
+	int64 total_deposit = 2;
+	int64 today_withdraw = 3;
+	int64 total_withdraw = 4;
+	int64 total_balance = 5;
 }

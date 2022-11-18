@@ -700,6 +700,7 @@ const OperationUserGetUserProxyList = "/api.admin.service.v1.User/GetUserProxyLi
 const OperationUserGetUserRecommendList = "/api.admin.service.v1.User/GetUserRecommendList"
 const OperationUserGetUserWithdrawList = "/api.admin.service.v1.User/GetUserWithdrawList"
 const OperationUserUpdateUserBalanceRecord = "/api.admin.service.v1.User/UpdateUserBalanceRecord"
+const OperationUserUserBalanceRecordTotal = "/api.admin.service.v1.User/UserBalanceRecordTotal"
 const OperationUserUserDeposit = "/api.admin.service.v1.User/UserDeposit"
 const OperationUserUserWithdraw = "/api.admin.service.v1.User/UserWithdraw"
 
@@ -712,6 +713,7 @@ type UserHTTPServer interface {
 	GetUserRecommendList(context.Context, *GetUserRecommendListRequest) (*GetUserRecommendListReply, error)
 	GetUserWithdrawList(context.Context, *GetUserWithdrawListRequest) (*GetUserWithdrawListReply, error)
 	UpdateUserBalanceRecord(context.Context, *UpdateUserBalanceRecordRequest) (*UpdateUserBalanceRecordReply, error)
+	UserBalanceRecordTotal(context.Context, *UserBalanceRecordTotalRequest) (*UserBalanceRecordTotalReply, error)
 	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 	UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error)
 }
@@ -720,6 +722,7 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/goal_admin/user/deposit", _User_UserDeposit0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/user/withdraw", _User_UserWithdraw0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/user_balance_record_total", _User_UserBalanceRecordTotal0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_list", _User_GetUserList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_proxy_list", _User_GetUserProxyList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_withdraw_list", _User_GetUserWithdrawList0_HTTP_Handler(srv))
@@ -770,6 +773,25 @@ func _User_UserWithdraw0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context)
 			return err
 		}
 		reply := out.(*UserWithdrawReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _User_UserBalanceRecordTotal0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UserBalanceRecordTotalRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserUserBalanceRecordTotal)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UserBalanceRecordTotal(ctx, req.(*UserBalanceRecordTotalRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UserBalanceRecordTotalReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -944,6 +966,7 @@ type UserHTTPClient interface {
 	GetUserRecommendList(ctx context.Context, req *GetUserRecommendListRequest, opts ...http.CallOption) (rsp *GetUserRecommendListReply, err error)
 	GetUserWithdrawList(ctx context.Context, req *GetUserWithdrawListRequest, opts ...http.CallOption) (rsp *GetUserWithdrawListReply, err error)
 	UpdateUserBalanceRecord(ctx context.Context, req *UpdateUserBalanceRecordRequest, opts ...http.CallOption) (rsp *UpdateUserBalanceRecordReply, err error)
+	UserBalanceRecordTotal(ctx context.Context, req *UserBalanceRecordTotalRequest, opts ...http.CallOption) (rsp *UserBalanceRecordTotalReply, err error)
 	UserDeposit(ctx context.Context, req *UserDepositRequest, opts ...http.CallOption) (rsp *UserDepositReply, err error)
 	UserWithdraw(ctx context.Context, req *UserWithdrawRequest, opts ...http.CallOption) (rsp *UserWithdrawReply, err error)
 }
@@ -1054,6 +1077,19 @@ func (c *UserHTTPClientImpl) UpdateUserBalanceRecord(ctx context.Context, in *Up
 	opts = append(opts, http.Operation(OperationUserUpdateUserBalanceRecord))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) UserBalanceRecordTotal(ctx context.Context, in *UserBalanceRecordTotalRequest, opts ...http.CallOption) (*UserBalanceRecordTotalReply, error) {
+	var out UserBalanceRecordTotalReply
+	pattern := "/api/goal_admin/user_balance_record_total"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserUserBalanceRecordTotal))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

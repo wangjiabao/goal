@@ -262,7 +262,7 @@ func (uc *UserUseCase) DepositHandle(ctx context.Context, balance string, addres
 		if nil != err {
 			return err
 		}
-		_, err = uc.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, strconv.FormatInt(currentBalance, 10))
+		_, err = uc.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, addressEthBalance.Version, strconv.FormatInt(currentBalance, 10))
 		if err != nil {
 			return err
 		}

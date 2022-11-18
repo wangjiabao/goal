@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"goal/app/admin/service/internal/biz"
@@ -41,6 +42,14 @@ type BalanceRecordIdRel struct {
 	RelId     int64     `gorm:"type:int;not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
+type UserBalanceRecordTotal struct {
+	Total int64
+}
+
+type UserBalanceTotal struct {
+	Total int64
 }
 
 type UserBalanceRecord struct {
@@ -179,7 +188,7 @@ func (ub *UserBalanceRepo) GetUserBalance(ctx context.Context, userId int64) (*b
 	}, nil
 }
 
-func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context, reason string, b *biz.Pagination) ([]*biz.UserBalanceRecord, error, int64) {
+func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context, reason string, b *biz.Pagination, userIds ...int64) ([]*biz.UserBalanceRecord, error, int64) {
 	var (
 		userBalanceRecord []*UserBalanceRecord
 		count             int64
@@ -188,6 +197,10 @@ func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context, reason stri
 	instance := ub.data.DB(ctx).Table("user_balance_record")
 	if "" != reason {
 		instance = instance.Where("reason=?", reason)
+	}
+
+	if 0 < len(userIds) {
+		instance = instance.Where("user_id IN(?)", userIds)
 	}
 
 	instance = instance.Count(&count)
@@ -212,6 +225,53 @@ func (ub *UserBalanceRepo) GetUserBalanceRecord(ctx context.Context, reason stri
 	}
 
 	return res, nil, count
+}
+
+func (ub *UserBalanceRepo) GetUserBalanceRecordTotal(ctx context.Context, recordType string, today bool) (*biz.UserBalanceRecordTotal, error) {
+	var userBalanceRecordTotal UserBalanceRecordTotal
+	instance := ub.data.DB(ctx).Table("user_balance_record")
+	if "" != recordType {
+		instance = instance.Where("type=?", recordType)
+	}
+
+	if today {
+		t := time.Now().UTC().Add(8 * time.Hour)
+		createdAt := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+		fmt.Println(t.Day(), createdAt)
+		instance = instance.Where("created_at>=?", createdAt)
+	}
+
+	if err := instance.Select("sum(amount) as total").Take(&userBalanceRecordTotal).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &biz.UserBalanceRecordTotal{
+				Total: 0,
+			}, nil
+		}
+
+		return nil, errors.New(500, "USER_BALANCE_RECORD_NOT_FOUND", err.Error())
+	}
+
+	return &biz.UserBalanceRecordTotal{
+		Total: userBalanceRecordTotal.Total,
+	}, nil
+}
+
+func (ub *UserBalanceRepo) GetUserBalanceTotal(ctx context.Context) (*biz.UserBalanceTotal, error) {
+	var userBalanceTotal UserBalanceTotal
+	instance := ub.data.DB(ctx).Table("user_balance")
+	if err := instance.Select("sum(balance) as total").Take(&userBalanceTotal).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return &biz.UserBalanceTotal{
+				Total: 0,
+			}, nil
+		}
+
+		return nil, errors.New(500, "USER_BALANCE_NOT_FOUND", err.Error())
+	}
+
+	return &biz.UserBalanceTotal{
+		Total: userBalanceTotal.Total,
+	}, nil
 }
 
 func (ub *UserBalanceRepo) GetAddressEthBalanceByAddress(ctx context.Context, address string) (*biz.AddressEthBalance, error) {
@@ -247,7 +307,7 @@ func (ub *UserBalanceRepo) WithdrawById(ctx context.Context, id int64) (*biz.Use
 	}, nil
 }
 
-func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *biz.Pagination) ([]*biz.UserWithdraw, error, int64) {
+func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *biz.Pagination, userIds ...int64) ([]*biz.UserWithdraw, error, int64) {
 	var (
 		count        int64
 		userWithdraw []*UserWithdraw
@@ -256,6 +316,10 @@ func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *b
 
 	if "" != status {
 		instance = instance.Where("status=?", status)
+	}
+
+	if 0 < len(userIds) {
+		instance = instance.Where("user_id IN(?)", userIds)
 	}
 
 	instance = instance.Count(&count)
@@ -525,10 +589,20 @@ func (ui *UserInfoRepo) GetUserInfoListByRecommendCode(ctx context.Context, reco
 	return res, nil
 }
 
-func (u *UserRepo) GetUserList(ctx context.Context) ([]*biz.User, error) {
-	var user []*User
-	if err := u.data.DB(ctx).Table("user").Find(&user).Error; err != nil {
-		return nil, errors.NotFound("USER_NOT_FOUND", "用户不存在")
+func (u *UserRepo) GetUserList(ctx context.Context, address string, b *biz.Pagination) ([]*biz.User, error, int64) {
+	var (
+		user  []*User
+		count int64
+	)
+
+	instance := u.data.DB(ctx).Table("user")
+	if "" != address {
+		instance = instance.Where("address=?", address)
+	}
+
+	instance = instance.Count(&count)
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Find(&user).Error; err != nil {
+		return nil, errors.NotFound("USER_NOT_FOUND", "用户不存在"), 0
 	}
 
 	res := make([]*biz.User, 0)
@@ -541,7 +615,7 @@ func (u *UserRepo) GetUserList(ctx context.Context) ([]*biz.User, error) {
 		})
 	}
 
-	return res, nil
+	return res, nil, count
 }
 
 func (u *UserRepo) GetUserById(ctx context.Context, userId int64) (*biz.User, error) {
