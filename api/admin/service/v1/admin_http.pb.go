@@ -731,6 +731,7 @@ func (c *AdminHTTPClientImpl) UpdateConfig(ctx context.Context, in *UpdateConfig
 	return &out, err
 }
 
+const OperationUserCreateProxy = "/api.admin.service.v1.User/CreateProxy"
 const OperationUserGetUser = "/api.admin.service.v1.User/GetUser"
 const OperationUserGetUserBalanceRecord = "/api.admin.service.v1.User/GetUserBalanceRecord"
 const OperationUserGetUserDepositList = "/api.admin.service.v1.User/GetUserDepositList"
@@ -744,6 +745,7 @@ const OperationUserUserDeposit = "/api.admin.service.v1.User/UserDeposit"
 const OperationUserUserWithdraw = "/api.admin.service.v1.User/UserWithdraw"
 
 type UserHTTPServer interface {
+	CreateProxy(context.Context, *CreateProxyRequest) (*CreateProxyReply, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
 	GetUserBalanceRecord(context.Context, *GetUserBalanceRecordRequest) (*GetUserBalanceRecordReply, error)
 	GetUserDepositList(context.Context, *GetUserDepositListRequest) (*GetUserDepositListReply, error)
@@ -760,6 +762,7 @@ type UserHTTPServer interface {
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/goal_admin/user/deposit", _User_UserDeposit0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/user/proxy/create", _User_CreateProxy0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/user/withdraw", _User_UserWithdraw0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_balance_record_total", _User_UserBalanceRecordTotal0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_list", _User_GetUserList0_HTTP_Handler(srv))
@@ -790,6 +793,28 @@ func _User_UserDeposit0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) 
 			return err
 		}
 		reply := out.(*UserDepositReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _User_CreateProxy0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateProxyRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserCreateProxy)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateProxy(ctx, req.(*CreateProxyRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateProxyReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -997,6 +1022,7 @@ func _User_UpdateUserBalanceRecord0_HTTP_Handler(srv UserHTTPServer) func(ctx ht
 }
 
 type UserHTTPClient interface {
+	CreateProxy(ctx context.Context, req *CreateProxyRequest, opts ...http.CallOption) (rsp *CreateProxyReply, err error)
 	GetUser(ctx context.Context, req *GetUserRequest, opts ...http.CallOption) (rsp *GetUserReply, err error)
 	GetUserBalanceRecord(ctx context.Context, req *GetUserBalanceRecordRequest, opts ...http.CallOption) (rsp *GetUserBalanceRecordReply, err error)
 	GetUserDepositList(ctx context.Context, req *GetUserDepositListRequest, opts ...http.CallOption) (rsp *GetUserDepositListReply, err error)
@@ -1016,6 +1042,19 @@ type UserHTTPClientImpl struct {
 
 func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 	return &UserHTTPClientImpl{client}
+}
+
+func (c *UserHTTPClientImpl) CreateProxy(ctx context.Context, in *CreateProxyRequest, opts ...http.CallOption) (*CreateProxyReply, error) {
+	var out CreateProxyReply
+	pattern := "/api/goal_admin/user/proxy/create"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationUserCreateProxy))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
 }
 
 func (c *UserHTTPClientImpl) GetUser(ctx context.Context, in *GetUserRequest, opts ...http.CallOption) (*GetUserReply, error) {

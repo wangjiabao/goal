@@ -552,6 +552,26 @@ func (ub *UserBalanceRepo) UpdateWithdraw(ctx context.Context, Id int64, status 
 	return nil
 }
 
+// GetUserInfoByMyRecommendCode .
+func (ui *UserInfoRepo) GetUserInfoByMyRecommendCode(ctx context.Context, myRecommendCode string) (*biz.UserInfo, error) {
+	var userInfo UserInfo
+	if err := ui.data.db.Where(&UserInfo{MyRecommendCode: myRecommendCode}).Table("user_info").First(&userInfo).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("USER_NOT_FOUND", "user not found")
+		}
+
+		return nil, errors.New(500, "USER_NOT_FOUND", err.Error())
+	}
+
+	return &biz.UserInfo{
+		ID:              userInfo.ID,
+		Name:            userInfo.Name,
+		Avatar:          userInfo.Avatar,
+		UserId:          userInfo.UserId,
+		MyRecommendCode: userInfo.MyRecommendCode,
+	}, nil
+}
+
 // GetUserInfoByUserId .
 func (ui *UserInfoRepo) GetUserInfoByUserId(ctx context.Context, userId int64) (*biz.UserInfo, error) {
 	var userInfo UserInfo
@@ -624,6 +644,41 @@ func (u *UserRepo) GetUserList(ctx context.Context, address string, b *biz.Pagin
 	}
 
 	return res, nil, count
+}
+
+// CreateUserProxy .
+func (u *UserRepo) CreateUserProxy(ctx context.Context, userId int64, rate int64) (*biz.UserProxy, error) {
+	var userProxy UserProxy
+	userProxy.UserId = userId
+	userProxy.Rate = rate
+	res := u.data.DB(ctx).Table("user_proxy").Create(&userProxy)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_USER_PROXY_ERROR", "用户代理创建失败")
+	}
+
+	return &biz.UserProxy{
+		ID:     userProxy.ID,
+		Rate:   userProxy.Rate,
+		UserId: userProxy.UserId,
+	}, nil
+}
+
+// GetUserProxyByUserId .
+func (u *UserRepo) GetUserProxyByUserId(ctx context.Context, userId int64) (*biz.UserProxy, error) {
+	var userProxy UserProxy
+	if err := u.data.db.Where("user_id=?", userId).
+		Table("user_proxy").First(&userProxy).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("USER_PROXY_NOT_FOUND", "user proxy not found")
+		}
+
+		return nil, errors.New(500, "USER_PROXY_NOT_FOUND", err.Error())
+	}
+
+	return &biz.UserProxy{
+		UserId: userProxy.UserId,
+		Rate:   userProxy.Rate,
+	}, nil
 }
 
 func (u *UserRepo) GetUserById(ctx context.Context, userId int64) (*biz.User, error) {

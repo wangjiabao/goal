@@ -46,6 +46,8 @@ type Pagination struct {
 }
 
 type UserRepo interface {
+	CreateUserProxy(ctx context.Context, userId int64, rate int64) (*UserProxy, error)
+	GetUserProxyByUserId(ctx context.Context, userId int64) (*UserProxy, error)
 	GetUserList(ctx context.Context, address string, b *Pagination) ([]*User, error, int64)
 	GetUserById(ctx context.Context, userId int64) (*User, error)
 	GetUserListByUserIds(ctx context.Context, userIds ...int64) ([]*User, error)
@@ -504,3 +506,26 @@ func (u *UserUseCase) GetUserInfo(ctx context.Context, req *v1.GetUserRequest) (
 //func (u *UserUseCase) GetAddressEthBalance(ctx context.Context, address string) (*AddressEthBalance, error) {
 //	return u.ubRepo.GetAddressEthBalanceByAddress(ctx, address)
 //}
+
+func (u *UserUseCase) CreateProxy(ctx context.Context, user *User, req *v1.CreateProxyRequest) (*v1.CreateProxyReply, error) {
+	var (
+		rate int64 = 5
+		err  error
+	)
+
+	rate = req.SendBody.Rate
+	
+	_, err = u.repo.GetUserProxyByUserId(ctx, user.ID)
+	if err == nil {
+		return nil, errors.New(500, "USER_PROXY_ALREADY", "已经是代理了")
+	}
+
+	_, err = u.repo.CreateUserProxy(ctx, user.ID, rate)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.CreateProxyReply{
+		Result: "提交成功",
+	}, nil
+}

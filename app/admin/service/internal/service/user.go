@@ -256,3 +256,10 @@ func (u *UserService) UpdateUserBalanceRecord(ctx context.Context, req *v1.Updat
 func (u *UserService) GetUserRecommendList(ctx context.Context, req *v1.GetUserRecommendListRequest) (*v1.GetUserRecommendListReply, error) {
 	return u.uc.GetUserRecommendList(ctx, req)
 }
+
+// CreateProxy .
+func (u *UserService) CreateProxy(ctx context.Context, req *v1.CreateProxyRequest) (*v1.CreateProxyReply, error) {
+	return u.uc.CreateProxy(ctx, &biz.User{
+		ID: req.SendBody.UserId,
+	}, req)
+}

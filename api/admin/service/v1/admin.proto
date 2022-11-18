@@ -140,6 +140,13 @@ service User {
 		};
 	};
 
+	rpc CreateProxy (CreateProxyRequest) returns (CreateProxyReply) {
+		option (google.api.http) = {
+			post: "/api/goal_admin/user/proxy/create"
+			body: "send_body"
+		};
+	};
+
 	rpc UserWithdraw (UserWithdrawRequest) returns (UserWithdrawReply){
 		option (google.api.http) = {
 			post: "/api/goal_admin/user/withdraw"
@@ -938,4 +945,17 @@ message  UserBalanceRecordTotalReply {
 	int64 today_withdraw = 3;
 	int64 total_withdraw = 4;
 	int64 total_balance = 5;
+}
+
+message CreateProxyRequest {
+	message SendBody{
+		int64 user_id = 1;
+		int64 rate = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreateProxyReply {
+	string result = 1;
 }

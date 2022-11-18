@@ -10173,6 +10173,239 @@ var _ interface {
 	ErrorName() string
 } = UserBalanceRecordTotalReplyValidationError{}
 
+// Validate checks the field values on CreateProxyRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreateProxyRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateProxyRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreateProxyRequestMultiError, or nil if none found.
+func (m *CreateProxyRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateProxyRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateProxyRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreateProxyRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateProxyRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return CreateProxyRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateProxyRequestMultiError is an error wrapping multiple validation errors
+// returned by CreateProxyRequest.ValidateAll() if the designated constraints
+// aren't met.
+type CreateProxyRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateProxyRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateProxyRequestMultiError) AllErrors() []error { return m }
+
+// CreateProxyRequestValidationError is the validation error returned by
+// CreateProxyRequest.Validate if the designated constraints aren't met.
+type CreateProxyRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateProxyRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateProxyRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateProxyRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateProxyRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateProxyRequestValidationError) ErrorName() string {
+	return "CreateProxyRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateProxyRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateProxyRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateProxyRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateProxyRequestValidationError{}
+
+// Validate checks the field values on CreateProxyReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *CreateProxyReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateProxyReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreateProxyReplyMultiError, or nil if none found.
+func (m *CreateProxyReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateProxyReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Result
+
+	if len(errors) > 0 {
+		return CreateProxyReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateProxyReplyMultiError is an error wrapping multiple validation errors
+// returned by CreateProxyReply.ValidateAll() if the designated constraints
+// aren't met.
+type CreateProxyReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateProxyReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateProxyReplyMultiError) AllErrors() []error { return m }
+
+// CreateProxyReplyValidationError is the validation error returned by
+// CreateProxyReply.Validate if the designated constraints aren't met.
+type CreateProxyReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateProxyReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateProxyReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateProxyReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateProxyReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateProxyReplyValidationError) ErrorName() string { return "CreateProxyReplyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CreateProxyReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateProxyReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateProxyReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateProxyReplyValidationError{}
+
 // Validate checks the field values on GamePlayGrantRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -15097,3 +15330,110 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UserWithdrawRequest_SendBodyValidationError{}
+
+// Validate checks the field values on CreateProxyRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreateProxyRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateProxyRequest_SendBody with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreateProxyRequest_SendBodyMultiError, or nil if none found.
+func (m *CreateProxyRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateProxyRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	// no validation rules for Rate
+
+	if len(errors) > 0 {
+		return CreateProxyRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateProxyRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by CreateProxyRequest_SendBody.ValidateAll() if
+// the designated constraints aren't met.
+type CreateProxyRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateProxyRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateProxyRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// CreateProxyRequest_SendBodyValidationError is the validation error returned
+// by CreateProxyRequest_SendBody.Validate if the designated constraints
+// aren't met.
+type CreateProxyRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateProxyRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateProxyRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateProxyRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateProxyRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateProxyRequest_SendBodyValidationError) ErrorName() string {
+	return "CreateProxyRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateProxyRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateProxyRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateProxyRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateProxyRequest_SendBodyValidationError{}
