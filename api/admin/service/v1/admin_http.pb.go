@@ -762,7 +762,7 @@ type UserHTTPServer interface {
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r := s.Route("/")
 	r.POST("/api/goal_admin/user/deposit", _User_UserDeposit0_HTTP_Handler(srv))
-	r.POST("/api/goal_admin/user/proxy/create", _User_CreateProxy0_HTTP_Handler(srv))
+	r.POST("/api/goal_admin/user_proxy_create", _User_CreateProxy0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/user/withdraw", _User_UserWithdraw0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_balance_record_total", _User_UserBalanceRecordTotal0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_list", _User_GetUserList0_HTTP_Handler(srv))
@@ -1046,7 +1046,7 @@ func NewUserHTTPClient(client *http.Client) UserHTTPClient {
 
 func (c *UserHTTPClientImpl) CreateProxy(ctx context.Context, in *CreateProxyRequest, opts ...http.CallOption) (*CreateProxyReply, error) {
 	var out CreateProxyReply
-	pattern := "/api/goal_admin/user/proxy/create"
+	pattern := "/api/goal_admin/user_proxy_create"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationUserCreateProxy))
 	opts = append(opts, http.PathTemplate(pattern))

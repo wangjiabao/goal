@@ -142,7 +142,7 @@ service User {
 
 	rpc CreateProxy (CreateProxyRequest) returns (CreateProxyReply) {
 		option (google.api.http) = {
-			post: "/api/goal_admin/user/proxy/create"
+			post: "/api/goal_admin/user_proxy_create"
 			body: "send_body"
 		};
 	};
