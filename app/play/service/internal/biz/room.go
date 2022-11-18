@@ -153,7 +153,7 @@ func (r *RoomUseCase) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest)
 		return nil, err
 	}
 
-	systemConfig, err = r.systemConfigRepo.GetSystemConfigByName(ctx, "room_rate")
+	systemConfig, err = r.systemConfigRepo.GetSystemConfigByName(ctx, "room_amount")
 	if nil != err {
 		return nil, err
 	}
