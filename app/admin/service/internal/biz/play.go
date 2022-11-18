@@ -195,6 +195,7 @@ type PlaySortRelRepo interface {
 type PlayGameScoreUserRelRepo interface {
 	GetPlayGameScoreUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameScoreUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
+	SetNoRewarded(ctx context.Context, id int64) error
 	CreatePlayGameScoreUserRel(ctx context.Context, pr *PlayGameScoreUserRel) (*PlayGameScoreUserRel, error)
 	GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameScoreUserRel, error)
 }
@@ -202,6 +203,7 @@ type PlayGameScoreUserRelRepo interface {
 type PlayGameTeamResultUserRelRepo interface {
 	GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamResultUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
+	SetNoRewarded(ctx context.Context, id int64) error
 	CreatePlayGameTeamResultUserRel(ctx context.Context, pr *PlayGameTeamResultUserRel) (*PlayGameTeamResultUserRel, error)
 	GetPlayGameTeamResultUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameTeamResultUserRel, error)
 }
@@ -209,6 +211,7 @@ type PlayGameTeamResultUserRelRepo interface {
 type PlayGameTeamGoalUserRelRepo interface {
 	GetPlayGameTeamGoalUserRelByPlayIdsAndType(ctx context.Context, playType string, playIds ...int64) (map[int64][]*PlayGameTeamGoalUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
+	SetNoRewarded(ctx context.Context, id int64) error
 	GetPlayGameTeamGoalUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameTeamGoalUserRel, error)
 	CreatePlayGameTeamGoalUserRel(ctx context.Context, pr *PlayGameTeamGoalUserRel) (*PlayGameTeamGoalUserRel, error)
 }
@@ -216,6 +219,7 @@ type PlayGameTeamGoalUserRelRepo interface {
 type PlayGameTeamSortUserRelRepo interface {
 	GetPlayGameTeamSortUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*PlayGameTeamSortUserRel, error)
 	SetRewarded(ctx context.Context, id int64) error
+	SetNoRewarded(ctx context.Context, id int64) error
 }
 
 type UserBalanceRepo interface {
@@ -481,7 +485,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 			if 999999999 != v.UserId {
 				tmpTotalUserIdMap[v.UserId] = v.UserId
 			}
-			if strings.EqualFold("no_rewarded", v.Status) {
+			if strings.EqualFold("default", v.Status) {
 				tmpBackedUser = append(tmpBackedUser, v)
 			}
 		}
@@ -534,7 +538,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 					if 999999999 != v.UserId {
 						winTotalAmount += v.Pay
 					}
-					if strings.EqualFold("no_rewarded", v.Status) {
+					if strings.EqualFold("default", v.Status) {
 						winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
 							AmountBase int64
 							Pay        int64
@@ -542,6 +546,8 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 							Id         int64
 						}{AmountBase: amountBaseTmp, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
 					}
+				} else {
+					_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.UserId)
 				}
 
 			} else { // 非冠亚军
@@ -561,7 +567,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 					if 999999999 != v.UserId {
 						winTotalAmount += v.Pay
 					}
-					if strings.EqualFold("no_rewarded", v.Status) {
+					if strings.EqualFold("default", v.Status) {
 						winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
 							AmountBase int64
 							Pay        int64
@@ -569,6 +575,8 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 							Id         int64
 						}{AmountBase: 100, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
 					}
+				} else {
+					_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.UserId)
 				}
 
 			}
@@ -586,7 +594,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 			if nil != playRoomRel && strings.EqualFold("admin", kPlay.CreateUserType) {
 				for _, v := range playUserRel {
 					if 999999999 != v.UserId {
-						if strings.EqualFold("no_rewarded", v.Status) {
+						if strings.EqualFold("default", v.Status) || strings.EqualFold("no_rewarded", v.Status) {
 							tmpRoomBackedUser = append(tmpRoomBackedUser, v)
 						}
 					}
@@ -843,7 +851,7 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 			if 999999999 != v.UserId {
 				tmpTotalUserIdMap[v.UserId] = v.UserId
 			}
-			if strings.EqualFold("no_rewarded", v.Status) {
+			if strings.EqualFold("default", v.Status) {
 				tmpBackedUser = append(tmpBackedUser, v)
 			}
 		}
@@ -875,9 +883,11 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 				if 999999999 != v.UserId {
 					winTotalAmount += v.Pay
 				}
-				if strings.EqualFold("no_rewarded", v.Status) {
+				if strings.EqualFold("default", v.Status) {
 					winNoRewardedPlayGameScoreUserRel = append(winNoRewardedPlayGameScoreUserRel, v)
 				}
+			} else {
+				_ = p.playGameScoreUserRelRepo.SetNoRewarded(ctx, v.UserId)
 			}
 		}
 
@@ -891,7 +901,7 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 			if nil != playRoomRel && strings.EqualFold("admin", kPlay.CreateUserType) {
 				for _, v := range playUserRel {
 					if 999999999 != v.UserId {
-						if strings.EqualFold("no_rewarded", v.Status) {
+						if strings.EqualFold("default", v.Status) || strings.EqualFold("no_rewarded", v.Status) {
 							tmpRoomBackedUser = append(tmpRoomBackedUser, v)
 						}
 					}
@@ -1128,7 +1138,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 			if 999999999 != v.UserId {
 				tmpTotalUserIdMap[v.UserId] = v.UserId
 			}
-			if strings.EqualFold("no_rewarded", v.Status) {
+			if strings.EqualFold("default", v.Status) {
 				tmpBackedUser = append(tmpBackedUser, v)
 			}
 		}
@@ -1158,10 +1168,12 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 				if 999999999 != v.UserId {
 					winTotalAmount += v.Pay
 				}
-				if strings.EqualFold("no_rewarded", v.Status) {
+				if strings.EqualFold("default", v.Status) {
 					winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, v)
 				}
 				continue //赢钱的不加入奖池
+			} else {
+				_ = p.playGameTeamResultUserRelRepo.SetNoRewarded(ctx, v.UserId)
 			}
 			poolAmount += v.Pay
 		}
@@ -1176,7 +1188,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 			if nil != playRoomRel && strings.EqualFold("admin", kPlay.CreateUserType) {
 				for _, v := range playUserRel {
 					if 999999999 != v.UserId {
-						if strings.EqualFold("no_rewarded", v.Status) {
+						if strings.EqualFold("default", v.Status) || strings.EqualFold("no_rewarded", v.Status) {
 							tmpRoomBackedUser = append(tmpRoomBackedUser, v)
 						}
 					}
@@ -1447,7 +1459,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 			if 999999999 != v.UserId {
 				tmpTotalUserIdMap[v.UserId] = v.UserId
 			}
-			if strings.EqualFold("no_rewarded", v.Status) {
+			if strings.EqualFold("default", v.Status) {
 				tmpBackedUser = append(tmpBackedUser, v)
 			}
 		}
@@ -1479,16 +1491,18 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 					if 999999999 != v.UserId {
 						winTotalAmount += v.Pay
 					}
-					if strings.EqualFold("no_rewarded", v.Status) {
+					if strings.EqualFold("default", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else if v.TeamId == game.BlueTeamId && v.Goal == game.BlueTeamUpGoal+game.BlueTeamDownGoal {
 					if 999999999 != v.UserId {
 						winTotalAmount += v.Pay
 					}
-					if strings.EqualFold("no_rewarded", v.Status) {
+					if strings.EqualFold("default", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
+				} else {
+					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.UserId)
 				}
 
 			} else if strings.EqualFold("game_team_goal_up", v.Type) {
@@ -1496,16 +1510,18 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 					if 999999999 != v.UserId {
 						winTotalAmount += v.Pay
 					}
-					if strings.EqualFold("no_rewarded", v.Status) {
+					if strings.EqualFold("default", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else if v.TeamId == game.BlueTeamId && v.Goal == game.BlueTeamUpGoal {
 					if 999999999 != v.UserId {
 						winTotalAmount += v.Pay
 					}
-					if strings.EqualFold("no_rewarded", v.Status) {
+					if strings.EqualFold("default", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
+				} else {
+					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.UserId)
 				}
 
 			} else if strings.EqualFold("game_team_goal_down", v.Type) {
@@ -1513,16 +1529,18 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 					if 999999999 != v.UserId {
 						winTotalAmount += v.Pay
 					}
-					if strings.EqualFold("no_rewarded", v.Status) {
+					if strings.EqualFold("default", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
 				} else if v.TeamId == game.BlueTeamId && v.Goal == game.BlueTeamDownGoal {
 					if 999999999 != v.UserId {
 						winTotalAmount += v.Pay
 					}
-					if strings.EqualFold("no_rewarded", v.Status) {
+					if strings.EqualFold("default", v.Status) {
 						winNoRewardedPlayGameTeamGoalUserRel = append(winNoRewardedPlayGameTeamGoalUserRel, v)
 					}
+				} else {
+					_ = p.playGameTeamGoalUserRelRepo.SetNoRewarded(ctx, v.UserId)
 				}
 
 			}
@@ -1540,7 +1558,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 			if nil != playRoomRel && strings.EqualFold("admin", play.CreateUserType) {
 				for _, v := range playUserRel {
 					if 999999999 != v.UserId {
-						if strings.EqualFold("no_rewarded", v.Status) {
+						if strings.EqualFold("default", v.Status) || strings.EqualFold("no_rewarded", v.Status) {
 							tmpRoomBackedUser = append(tmpRoomBackedUser, v)
 						}
 					}

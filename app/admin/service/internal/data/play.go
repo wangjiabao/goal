@@ -520,6 +520,18 @@ func (psr *PlayGameScoreUserRelRepo) SetRewarded(ctx context.Context, id int64) 
 	return nil
 }
 
+// SetNoRewarded 在事务中使用
+func (psr *PlayGameScoreUserRelRepo) SetNoRewarded(ctx context.Context, id int64) error {
+	var err error
+	if err = psr.data.DB(ctx).Table("play_game_score_user_rel").
+		Where("id=?", id).
+		Update("status", "no_rewarded").Error; nil != err {
+		return errors.NotFound("play game score rel error", "play game score rel found")
+	}
+
+	return nil
+}
+
 func (pgtR *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*biz.PlayGameTeamResultUserRel, error) {
 	var l []*PlayGameTeamResultUserRel
 	if result := pgtR.data.DB(ctx).Table("play_game_team_result_user_rel").Where("play_id IN (?)", playIds).Find(&l); result.Error != nil {
@@ -589,6 +601,18 @@ func (pgtR *PlayGameTeamResultUserRelRepo) SetRewarded(ctx context.Context, id i
 	if err = pgtR.data.DB(ctx).Table("play_game_team_result_user_rel").
 		Where("id=?", id).
 		Update("status", "rewarded").Error; nil != err {
+		return errors.NotFound("play game team result rel error", "play game team result rel not found")
+	}
+
+	return nil
+}
+
+// SetNoRewarded 在事务中使用
+func (pgtR *PlayGameTeamResultUserRelRepo) SetNoRewarded(ctx context.Context, id int64) error {
+	var err error
+	if err = pgtR.data.DB(ctx).Table("play_game_team_result_user_rel").
+		Where("id=?", id).
+		Update("status", "no_rewarded").Error; nil != err {
 		return errors.NotFound("play game team result rel error", "play game team result rel not found")
 	}
 
@@ -681,6 +705,19 @@ func (pgtG *PlayGameTeamGoalUserRelRepo) SetRewarded(ctx context.Context, id int
 
 	return nil
 }
+
+// SetNoRewarded 在事务中使用
+func (pgtG *PlayGameTeamGoalUserRelRepo) SetNoRewarded(ctx context.Context, id int64) error {
+	var err error
+	if err = pgtG.data.DB(ctx).Table("play_game_team_goal_user_rel").
+		Where("id=?", id).
+		Update("status", "no_rewarded").Error; nil != err {
+		return errors.NotFound("play game team result rel error", "play game team goal rel not found")
+	}
+
+	return nil
+}
+
 func (pgtS *PlayGameTeamSortUserRelRepo) GetPlayGameTeamSortUserRelByPlayIds(ctx context.Context, playIds ...int64) (map[int64][]*biz.PlayGameTeamSortUserRel, error) {
 	var l []*PlayGameTeamSortUserRel
 	if result := pgtS.data.DB(ctx).Table("play_game_team_sort_user_rel").Where("play_id IN (?)", playIds).Find(&l); result.Error != nil {
@@ -735,6 +772,18 @@ func (pgtS *PlayGameTeamSortUserRelRepo) SetRewarded(ctx context.Context, id int
 	if err = pgtS.data.DB(ctx).Table("play_game_team_sort_user_rel").
 		Where("id=?", id).
 		Update("status", "rewarded").Error; nil != err {
+		return errors.NotFound("play game team sort rel error", "play game team sort rel not found")
+	}
+
+	return nil
+}
+
+// SetNoRewarded 在事务中使用
+func (pgtS *PlayGameTeamSortUserRelRepo) SetNoRewarded(ctx context.Context, id int64) error {
+	var err error
+	if err = pgtS.data.DB(ctx).Table("play_game_team_sort_user_rel").
+		Where("id=?", id).
+		Update("status", "no_rewarded").Error; nil != err {
 		return errors.NotFound("play game team sort rel error", "play game team sort rel not found")
 	}
 

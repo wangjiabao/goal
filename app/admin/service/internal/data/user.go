@@ -663,6 +663,21 @@ func (u *UserRepo) CreateUserProxy(ctx context.Context, userId int64, rate int64
 	}, nil
 }
 
+// UpdateUserProxy .
+func (u *UserRepo) UpdateUserProxy(ctx context.Context, userId int64, rate int64) (*biz.UserProxy, error) {
+	var userProxy UserProxy
+	userProxy.Rate = rate
+	res := u.data.DB(ctx).Table("user_proxy").Where("user_id=? and up_user_id=?", userId, 0).Updates(&userProxy)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_USER_PROXY_ERROR", "用户代理修改失败")
+	}
+
+	return &biz.UserProxy{
+		Rate:   userProxy.Rate,
+		UserId: userProxy.UserId,
+	}, nil
+}
+
 // GetUserProxyByUserId .
 func (u *UserRepo) GetUserProxyByUserId(ctx context.Context, userId int64) (*biz.UserProxy, error) {
 	var userProxy UserProxy

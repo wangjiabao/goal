@@ -195,6 +195,7 @@ type PlayRoomRelRepo interface {
 
 type UserBalanceRepo interface {
 	Pay(ctx context.Context, userId int64, pay int64) (int64, error)
+	RoomFee(ctx context.Context, userId int64, pay int64) (int64, error)
 	GetBalanceRecordIdRelMap(ctx context.Context, relType string, id ...int64) (map[int64]*BalanceRecordIdRel, error)
 	CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
@@ -1024,7 +1025,7 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 			Content:   strconv.FormatInt(req.SendBody.RedScore, 10) + ":" + strconv.FormatInt(req.SendBody.BlueScore, 10),
 			Pay:       pay,
 			OriginPay: originPay,
-			Status:    "no_rewarded",
+			Status:    "default",
 		})
 		if err != nil {
 			return err
@@ -1186,7 +1187,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 			Content:   gameResult,
 			OriginPay: originPay,
 			Pay:       pay,
-			Status:    "no_rewarded",
+			Status:    "default",
 		})
 		if err != nil {
 			return err
@@ -1342,7 +1343,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 			Content:   req.SendBody.Content,
 			Pay:       pay,
 			OriginPay: originPay,
-			Status:    "no_rewarded",
+			Status:    "default",
 		})
 		if err != nil {
 			return err
@@ -1487,7 +1488,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 			Goal:      req.SendBody.Goal,
 			Pay:       pay,
 			OriginPay: originPay,
-			Status:    "no_rewarded",
+			Status:    "default",
 		})
 		if err != nil {
 			return err

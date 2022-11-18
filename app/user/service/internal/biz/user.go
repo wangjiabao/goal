@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/base64"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-kratos/kratos/v2/errors"
@@ -107,9 +108,12 @@ func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAut
 		privateKey        string
 		publicAddress     string
 		err               error
+		decodeBytes       []byte
 	)
 
 	code := req.SendBody.Code // 查询推荐码
+	decodeBytes, err = base64.StdEncoding.DecodeString(code)
+	code = string(decodeBytes)
 	if 0 == len(code) {
 		return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
 	}
@@ -195,11 +199,13 @@ func (uc *UserUseCase) GetUserWithInfoAndBalance(ctx context.Context, u *User) (
 		return nil, err
 	}
 
+	codeByte := []byte(userInfo.Code)
+	encodeString := base64.StdEncoding.EncodeToString(codeByte)
 	return &v1.GetUserReply{
 		Address:         user.Address,
 		Balance:         userBalance.Balance / base,
 		Avatar:          userInfo.Avatar,
-		MyRecommendCode: userInfo.Code,
+		MyRecommendCode: encodeString,
 		ToAddress:       user.ToAddress,
 	}, nil
 }

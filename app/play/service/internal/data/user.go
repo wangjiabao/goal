@@ -171,6 +171,35 @@ func (ub *UserBalanceRepo) Pay(ctx context.Context, userId int64, pay int64) (in
 	return userBalanceRecode.ID, nil
 }
 
+// RoomFee 在事务中使用
+func (ub *UserBalanceRepo) RoomFee(ctx context.Context, userId int64, pay int64) (int64, error) {
+	var err error
+	if res := ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=? and balance>=?", userId, pay).
+		Updates(map[string]interface{}{"balance": gorm.Expr("balance - ?", pay)}); 0 == res.RowsAffected || nil != res.Error {
+		return 0, errors.NotFound("user balance err", "user balance error")
+	}
+
+	var userBalance UserBalance
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	if err != nil {
+		return 0, err
+	}
+
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = userBalance.Balance
+	userBalanceRecode.UserId = userBalance.UserId
+	userBalanceRecode.Type = "pay"
+	userBalanceRecode.Reason = "room_fee"
+	userBalanceRecode.Amount = pay
+	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return userBalanceRecode.ID, nil
+}
+
 func (ub *UserBalanceRepo) CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error {
 	var balanceRecordIdRel BalanceRecordIdRel
 	balanceRecordIdRel.RecordId = recordId

@@ -58,21 +58,23 @@ type RoomGameRelRepo interface {
 }
 
 type RoomUseCase struct {
-	roomRepo        RoomRepo
-	playRepo        PlayRepo
-	gameRepo        GameRepo
-	sortRepo        SortRepo
-	playRoomRelRepo PlayRoomRelRepo
-	roomUserRelRepo RoomUserRelRepo
-	playGameRelRepo PlayGameRelRepo
-	roomGameRelRepo RoomGameRelRepo
-	playSortRelRepo PlaySortRelRepo
-	tx              Transaction
-	log             *log.Helper
+	roomRepo         RoomRepo
+	playRepo         PlayRepo
+	gameRepo         GameRepo
+	sortRepo         SortRepo
+	systemConfigRepo SystemConfigRepo
+	playRoomRelRepo  PlayRoomRelRepo
+	roomUserRelRepo  RoomUserRelRepo
+	playGameRelRepo  PlayGameRelRepo
+	roomGameRelRepo  RoomGameRelRepo
+	playSortRelRepo  PlaySortRelRepo
+	userBalanceRepo  UserBalanceRepo
+	tx               Transaction
+	log              *log.Helper
 }
 
-func NewRoomUseCase(repo RoomRepo, roomUserRelRepo RoomUserRelRepo, roomGameRelRepo RoomGameRelRepo, playRepo PlayRepo, gameRepo GameRepo, playSortRelRepo PlaySortRelRepo, playRoomRelRepo PlayRoomRelRepo, playGameRelRepo PlayGameRelRepo, sortRepo SortRepo, tx Transaction, logger log.Logger) *RoomUseCase {
-	return &RoomUseCase{roomRepo: repo, playRepo: playRepo, roomGameRelRepo: roomGameRelRepo, roomUserRelRepo: roomUserRelRepo, gameRepo: gameRepo, playSortRelRepo: playSortRelRepo, playRoomRelRepo: playRoomRelRepo, playGameRelRepo: playGameRelRepo, sortRepo: sortRepo, tx: tx, log: log.NewHelper(logger)}
+func NewRoomUseCase(repo RoomRepo, roomUserRelRepo RoomUserRelRepo, userBalanceRepo UserBalanceRepo, systemConfigRepo SystemConfigRepo, roomGameRelRepo RoomGameRelRepo, playRepo PlayRepo, gameRepo GameRepo, playSortRelRepo PlaySortRelRepo, playRoomRelRepo PlayRoomRelRepo, playGameRelRepo PlayGameRelRepo, sortRepo SortRepo, tx Transaction, logger log.Logger) *RoomUseCase {
+	return &RoomUseCase{roomRepo: repo, playRepo: playRepo, systemConfigRepo: systemConfigRepo, userBalanceRepo: userBalanceRepo, roomGameRelRepo: roomGameRelRepo, roomUserRelRepo: roomUserRelRepo, gameRepo: gameRepo, playSortRelRepo: playSortRelRepo, playRoomRelRepo: playRoomRelRepo, playGameRelRepo: playGameRelRepo, sortRepo: sortRepo, tx: tx, log: log.NewHelper(logger)}
 }
 
 // GetRoomUserRel 获取房间内用户
@@ -130,11 +132,13 @@ func (r *RoomUseCase) InRoomByAccount(ctx context.Context, account string) (*v1.
 // CreateRoom 创建房间
 func (r *RoomUseCase) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest) (*v1.CreateRoomReply, error) {
 	var (
-		userId      int64
-		room        *Room
-		roomUserRel *RoomUserRel
-		roomGameRel *RoomGameRel
-		err         error
+		userId       int64
+		room         *Room
+		roomUserRel  *RoomUserRel
+		roomGameRel  *RoomGameRel
+		systemConfig *SystemConfig
+		base         int64 = 100000
+		err          error
 	)
 
 	if "game_team_goal" != req.SendBody.RoomType && // 验证type类型
@@ -148,6 +152,12 @@ func (r *RoomUseCase) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest)
 	if nil != err {
 		return nil, err
 	}
+
+	systemConfig, err = r.systemConfigRepo.GetSystemConfigByName(ctx, "room_rate")
+	if nil != err {
+		return nil, err
+	}
+	fee := systemConfig.Value * base
 
 	err = r.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 		room, err = r.roomRepo.CreateRoom(ctx, &Room{ // 新增房间
@@ -165,6 +175,17 @@ func (r *RoomUseCase) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest)
 		}
 
 		roomGameRel, err = r.roomGameRelRepo.CreateRoomGameRel(ctx, req.SendBody.GameId, room.ID)
+		if err != nil {
+			return err
+		}
+
+		var recordId int64
+		recordId, err = r.userBalanceRepo.RoomFee(ctx, userId, fee) // 余额扣除，先扣后加以防，给用户是代理余额增长了
+		if err != nil {
+			return err
+		}
+
+		err = r.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, "room_fee", room.ID)
 		if err != nil {
 			return err
 		}
