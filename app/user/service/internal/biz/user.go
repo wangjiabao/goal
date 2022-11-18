@@ -456,9 +456,17 @@ func (uc *UserUseCase) CreateProxy(ctx context.Context, u *User, req *v1.CreateP
 
 func (uc *UserUseCase) CreateDownProxy(ctx context.Context, u *User, req *v1.CreateDownProxyRequest) (*v1.CreateDownProxyReply, error) {
 	var (
-		user *User
-		err  error
+		user          *User
+		systemConfig  *SystemConfig
+		downProxyRate int64 = 5
+		err           error
 	)
+
+	systemConfig, err = uc.systemConfigRepo.GetSystemConfigByName(ctx, "down_proxy_rate")
+	if nil != err {
+		return nil, err
+	}
+	downProxyRate = systemConfig.Value
 
 	user, err = uc.repo.GetUserByAddress(ctx, req.SendBody.Address)
 	if err != nil {
@@ -475,7 +483,7 @@ func (uc *UserUseCase) CreateDownProxy(ctx context.Context, u *User, req *v1.Cre
 		return nil, errors.New(500, "USER_PROXY_NO_FOUND", "用户已经是代理")
 	}
 
-	_, err = uc.repo.CreateUserUpProxy(ctx, user.ID, u.ID, req.SendBody.Rate)
+	_, err = uc.repo.CreateUserUpProxy(ctx, user.ID, u.ID, downProxyRate)
 	if err != nil {
 		return nil, err
 	}

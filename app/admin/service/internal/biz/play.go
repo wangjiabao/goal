@@ -730,7 +730,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, playSort.Type, winV.Id); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, playSort.Type, winV.Id); nil != err {
 							return err
 						}
 					} else if 1 == k {
@@ -739,7 +739,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, playSort.Type, winV.Id); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, playSort.Type, winV.Id); nil != err {
 							return err
 						}
 
@@ -750,7 +750,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, playSort.Type, winV.Id); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, playSort.Type, winV.Id); nil != err {
 							return err
 						}
 					}
@@ -1005,7 +1005,7 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_score", winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_score", winV.ID); nil != err {
 							return err
 						}
 					} else if 1 == k {
@@ -1014,7 +1014,7 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_score", winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_score", winV.ID); nil != err {
 							return err
 						}
 					} else if 2 == k {
@@ -1024,7 +1024,7 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_score", winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_score", winV.ID); nil != err {
 							return err
 						}
 					}
@@ -1289,7 +1289,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_team_result", winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_team_result", winV.ID); nil != err {
 							return err
 						}
 					} else if 1 == k {
@@ -1298,7 +1298,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_team_result", winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_team_result", winV.ID); nil != err {
 							return err
 						}
 					} else if 2 == k {
@@ -1308,7 +1308,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, "game_team_result", winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_team_result", winV.ID); nil != err {
 							return err
 						}
 					}
@@ -1718,7 +1718,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, winV.Type, winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, winV.Type, winV.ID); nil != err {
 							return err
 						}
 					} else if 1 == k {
@@ -1727,7 +1727,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, winV.Type, winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, winV.Type, winV.ID); nil != err {
 							return err
 						}
 					} else if 2 == k {
@@ -1737,7 +1737,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 							return err
 						}
 
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendUserId, winV.Type, winV.ID); nil != err {
+						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, winV.Type, winV.ID); nil != err {
 							return err
 						}
 					}

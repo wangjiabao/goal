@@ -32,6 +32,13 @@ type LastTermPool struct {
 	OriginPlayType string
 }
 
+type BalanceRecordIdRel struct {
+	ID       int64
+	RecordId int64
+	RelType  string
+	RelId    int64
+}
+
 type PlayGameRel struct {
 	ID     int64
 	PlayId int64
@@ -48,6 +55,11 @@ type PlayRoomRel struct {
 	ID     int64
 	RoomId int64
 	PlayId int64
+}
+
+type UserBalanceRecord struct {
+	ID     int64
+	Amount int64
 }
 
 type PlayGameScoreUserRel struct {
@@ -183,8 +195,10 @@ type PlayRoomRelRepo interface {
 
 type UserBalanceRepo interface {
 	Pay(ctx context.Context, userId int64, pay int64) (int64, error)
+	GetBalanceRecordIdRelMap(ctx context.Context, relType string, id ...int64) (map[int64]*BalanceRecordIdRel, error)
 	CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
+	GetUserBalanceRecordGoalReward(ctx context.Context, ids ...int64) (map[int64]*UserBalanceRecord, error)
 	TransferIntoUserPlayProxyReward(ctx context.Context, userId int64, amount int64) (int64, error)
 }
 
@@ -513,19 +527,20 @@ func (p *PlayUseCase) GetRoomGameAndSortPlayList(ctx context.Context, roomId int
 // GetUserPlayList 获取用户参与的玩法列表
 func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListReply, error) {
 	var (
-		playGameScoreUserRel      []*PlayGameScoreUserRel
-		playGameTeamGoalUserRel   []*PlayGameTeamGoalUserRel
-		playGameTeamResultUserRel []*PlayGameTeamResultUserRel
-		playGameTeamSortUserRel   []*PlayGameTeamSortUserRel
-		playAllTypeUserRel        PlayAllTypeUserRelSlice
-		playGameRel               map[int64]*PlayGameRel
-		base                      int64 = 100000 // 基础精度0.00001 todo 加配置文件
-		userId                    int64
-		playIds                   []int64
-		gameIds                   []int64
-		play                      map[int64]*Play
-		game                      map[int64]*Game
-		err                       error
+		playGameScoreUserRel        []*PlayGameScoreUserRel
+		playGameTeamGoalUserRel     []*PlayGameTeamGoalUserRel
+		playGameTeamResultUserRel   []*PlayGameTeamResultUserRel
+		playGameTeamSortUserRel     []*PlayGameTeamSortUserRel
+		playAllTypeUserRel          PlayAllTypeUserRelSlice
+		userBalanceRecordGoalReward map[int64]*UserBalanceRecord
+		playGameRel                 map[int64]*PlayGameRel
+		base                        int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		userId                      int64
+		playIds                     []int64
+		gameIds                     []int64
+		play                        map[int64]*Play
+		game                        map[int64]*Game
+		err                         error
 	)
 
 	userId, _, err = getUserFromJwt(ctx) // 获取用户id
@@ -533,6 +548,11 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 		return nil, err
 	}
 
+	var (
+		balanceRecordIdRelScore    map[int64]*BalanceRecordIdRel
+		recordIds                  []int64
+		tmpPlayGameScoreUserRelIds []int64
+	)
 	playGameScoreUserRel, err = p.playGameScoreUserRelRepo.GetPlayGameScoreUserRelByUserId(ctx, userId) // 获取admin创建的玩法
 	for _, v := range playGameScoreUserRel {
 		playAllTypeUserRel = append(playAllTypeUserRel, &PlayAllTypeUserRel{
@@ -543,8 +563,17 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			CreatedAt: v.CreatedAt,
 			Content:   v.Content,
 		})
+		tmpPlayGameScoreUserRelIds = append(tmpPlayGameScoreUserRelIds, v.ID)
+	}
+	balanceRecordIdRelScore, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "game_score", tmpPlayGameScoreUserRelIds...)
+	for _, v := range balanceRecordIdRelScore {
+		recordIds = append(recordIds, v.RecordId)
 	}
 
+	var (
+		balanceRecordIdRelResult    map[int64]*BalanceRecordIdRel
+		tmpPlayGameResultUserRelIds []int64
+	)
 	playGameTeamResultUserRel, err = p.playGameTeamResultUserRelRepo.GetPlayGameTeamResultUserRelByUserId(ctx, userId) // 获取admin创建的玩法
 	for _, v := range playGameTeamResultUserRel {
 		playAllTypeUserRel = append(playAllTypeUserRel, &PlayAllTypeUserRel{
@@ -555,8 +584,17 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			CreatedAt: v.CreatedAt,
 			Content:   v.Content,
 		})
+		tmpPlayGameResultUserRelIds = append(tmpPlayGameResultUserRelIds, v.ID)
+	}
+	balanceRecordIdRelResult, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "game_team_result", tmpPlayGameResultUserRelIds...)
+	for _, v := range balanceRecordIdRelResult {
+		recordIds = append(recordIds, v.RecordId)
 	}
 
+	var (
+		balanceRecordIdRelGoal    map[int64]*BalanceRecordIdRel
+		tmpPlayGameGoalUserRelIds []int64
+	)
 	playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.GetPlayGameTeamGoalUserRelByUserId(ctx, userId) // 获取admin创建的玩法
 	for _, v := range playGameTeamGoalUserRel {
 		playAllTypeUserRel = append(playAllTypeUserRel, &PlayAllTypeUserRel{
@@ -568,8 +606,25 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			Goal:      v.Goal,
 			TeamId:    v.TeamId,
 		})
+		tmpPlayGameGoalUserRelIds = append(tmpPlayGameGoalUserRelIds, v.ID)
+	}
+	balanceRecordIdRelGoal, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "game_team_goal_all", tmpPlayGameGoalUserRelIds...)
+	for _, v := range balanceRecordIdRelGoal {
+		recordIds = append(recordIds, v.RecordId)
+	}
+	balanceRecordIdRelGoal, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "game_team_goal_up", tmpPlayGameGoalUserRelIds...)
+	for _, v := range balanceRecordIdRelGoal {
+		recordIds = append(recordIds, v.RecordId)
+	}
+	balanceRecordIdRelGoal, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "game_team_goal_down", tmpPlayGameGoalUserRelIds...)
+	for _, v := range balanceRecordIdRelGoal {
+		recordIds = append(recordIds, v.RecordId)
 	}
 
+	var (
+		balanceRecordIdRelSort    map[int64]*BalanceRecordIdRel
+		tmpPlayGameSortUserRelIds []int64
+	)
 	playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.GetPlayGameTeamSortUserRelByUserId(ctx, userId) // 获取admin创建的玩法
 	for _, v := range playGameTeamSortUserRel {
 		playAllTypeUserRel = append(playAllTypeUserRel, &PlayAllTypeUserRel{
@@ -581,7 +636,23 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			SortId:    v.SortId,
 			Content:   v.Content,
 		})
+
+		tmpPlayGameSortUserRelIds = append(tmpPlayGameSortUserRelIds, v.ID)
 	}
+	balanceRecordIdRelSort, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "team_sort_three", tmpPlayGameSortUserRelIds...)
+	for _, v := range balanceRecordIdRelSort {
+		recordIds = append(recordIds, v.RecordId)
+	}
+	balanceRecordIdRelSort, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "team_sort_eight", tmpPlayGameSortUserRelIds...)
+	for _, v := range balanceRecordIdRelSort {
+		recordIds = append(recordIds, v.RecordId)
+	}
+	balanceRecordIdRelSort, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "team_sort_sixteen", tmpPlayGameSortUserRelIds...)
+	for _, v := range balanceRecordIdRelSort {
+		recordIds = append(recordIds, v.RecordId)
+	}
+
+	userBalanceRecordGoalReward, _ = p.userBalanceRepo.GetUserBalanceRecordGoalReward(ctx, recordIds...)
 
 	sort.Sort(playAllTypeUserRel)
 
@@ -624,6 +695,33 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			}
 		}
 
+		tmpAmount := int64(0)
+		if "game_score" == playType {
+			if _, ok = balanceRecordIdRelScore[v.ID]; ok {
+				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId]; ok {
+					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId].Amount
+				}
+			}
+		} else if "game_team_result" == playType {
+			if _, ok = balanceRecordIdRelResult[v.ID]; ok {
+				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelResult[v.ID].RecordId]; ok {
+					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelResult[v.ID].RecordId].Amount
+				}
+			}
+		} else if "game_team_goal" == playType {
+			if _, ok = balanceRecordIdRelGoal[v.ID]; ok {
+				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId]; ok {
+					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId].Amount
+				}
+			}
+		} else if "game_team_sort" == playType {
+			if _, ok = balanceRecordIdRelSort[v.ID]; ok {
+				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId]; ok {
+					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId].Amount
+				}
+			}
+		}
+
 		rep.Items = append(rep.Items, &v1.GetUserPlayListReply_Item{
 			Id:         v.ID,
 			GameName:   gameName,
@@ -638,6 +736,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			Goal:       v.Goal,
 			TeamId:     v.TeamId,
 			SortId:     v.SortId,
+			Amount:     tmpAmount,
 		})
 	}
 
@@ -916,7 +1015,7 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 			return err
 		}
 
-		fee := pay / feeRate // 扣除手续费
+		fee := pay * feeRate / 1000 // 扣除手续费
 		pay -= fee
 		playGameScoreUserRel, err = p.playGameScoreUserRelRepo.CreatePlayGameScoreUserRel(ctx, &PlayGameScoreUserRel{
 			ID:        0,
@@ -940,14 +1039,14 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 			if 0 >= uv.Rate {
 				continue
 			}
-			uvFee = fee / (100 / uv.Rate)
+			uvFee = fee * uv.Rate / 1000
 			if dv, ok := downUserProxy[uv.UserId]; ok {
 				for _, v := range dv {
 					var vFee int64
 					if 0 >= v.Rate {
 						continue
 					}
-					vFee = uvFee / (100 / v.Rate)                                                          // 本次转给小代理金额
+					vFee = uvFee * v.Rate / 1000                                                           // 本次转给小代理金额
 					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
 					if err != nil {
 						return err
@@ -1078,7 +1177,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 			return err
 		}
 
-		fee := pay / feeRate // 扣除手续费
+		fee := pay * feeRate / 1000 // 扣除手续费
 		pay -= fee
 		playGameTeamResultUserRel, err = p.playGameTeamResultUserRelRepo.CreatePlayGameTeamResultUserRel(ctx, &PlayGameTeamResultUserRel{
 			ID:        0,
@@ -1103,14 +1202,14 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 			if 0 >= uv.Rate {
 				continue
 			}
-			uvFee = fee / (100 / uv.Rate)
+			uvFee = fee * uv.Rate / 1000
 			if dv, ok := downUserProxy[uv.UserId]; ok {
 				for _, v := range dv {
 					var vFee int64
 					if 0 >= v.Rate {
 						continue
 					}
-					vFee = uvFee / (100 / v.Rate)                                                          // 本次转给小代理金额
+					vFee = uvFee * v.Rate / 1000                                                           // 本次转给小代理金额
 					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
 					if err != nil {
 						return err
@@ -1233,7 +1332,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 			return err
 		}
 
-		fee := pay / feeRate // 扣除手续费
+		fee := pay * feeRate / 1000 // 扣除手续费
 		pay -= fee
 		playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.CreatePlayGameTeamSortUserRel(ctx, &PlayGameTeamSortUserRel{
 			ID:        0,
@@ -1258,14 +1357,14 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 			if 0 >= uv.Rate {
 				continue
 			}
-			uvFee = fee / (100 / uv.Rate)
+			uvFee = fee * uv.Rate / 1000
 			if dv, ok := downUserProxy[uv.UserId]; ok {
 				for _, v := range dv {
 					var vFee int64
 					if 0 >= v.Rate {
 						continue
 					}
-					vFee = uvFee / (100 / v.Rate)                                                          // 本次转给小代理金额
+					vFee = uvFee * v.Rate / 1000                                                           // 本次转给小代理金额
 					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
 					if err != nil {
 						return err
@@ -1377,7 +1476,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 			return err
 		}
 
-		fee := pay / feeRate // 扣除手续费
+		fee := pay * feeRate / 1000 // 扣除手续费
 		pay -= fee
 		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.CreatePlayGameTeamGoalUserRel(ctx, &PlayGameTeamGoalUserRel{
 			ID:        0,
@@ -1404,14 +1503,14 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 			if 0 >= uv.Rate {
 				continue
 			}
-			uvFee = fee / (100 / uv.Rate)
+			uvFee = fee * uv.Rate / 1000
 			if dv, ok := downUserProxy[uv.UserId]; ok {
 				for _, v := range dv {
 					var vFee int64
 					if 0 >= v.Rate {
 						continue
 					}
-					vFee = uvFee / (100 / v.Rate)                                                          // 本次转给小代理金额
+					vFee = uvFee * v.Rate / 1000                                                           // 本次转给小代理金额
 					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
 					if err != nil {
 						return err

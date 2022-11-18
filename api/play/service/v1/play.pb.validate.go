@@ -6987,6 +6987,8 @@ func (m *GetUserPlayListReply_Item) validate(all bool) error {
 
 	// no validation rules for SortId
 
+	// no validation rules for Amount
+
 	if len(errors) > 0 {
 		return GetUserPlayListReply_ItemMultiError(errors)
 	}

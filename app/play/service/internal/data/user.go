@@ -108,6 +108,23 @@ func (up *UserProxyRepo) GetUserProxyAndDown(ctx context.Context) ([]*biz.UserPr
 	return ul, dl, nil
 }
 
+func (ub *UserBalanceRepo) GetUserBalanceRecordGoalReward(ctx context.Context, ids ...int64) (map[int64]*biz.UserBalanceRecord, error) {
+	var userBalanceRecord []*UserBalanceRecord
+	res := make(map[int64]*biz.UserBalanceRecord, 0)
+	if err := ub.data.DB(ctx).Table("user_balance_record").Where("id IN (?) and reason=?", ids, "user_goal_reward").Find(&userBalanceRecord).Error; err != nil {
+		return res, errors.NotFound("ROOM_NOT_FOUND", "记录不存在")
+	}
+
+	for _, item := range userBalanceRecord {
+		res[item.ID] = &biz.UserBalanceRecord{
+			ID:     item.ID,
+			Amount: item.Amount,
+		}
+	}
+
+	return res, nil
+}
+
 func (ub *UserBalanceRepo) GetUserBalance(ctx context.Context, userId int64) (*biz.UserBalance, error) {
 	var userBalance UserBalance
 	if err := ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error; err != nil {
@@ -165,6 +182,24 @@ func (ub *UserBalanceRepo) CreateBalanceRecordIdRel(ctx context.Context, recordI
 	}
 
 	return nil
+}
+
+func (ub *UserBalanceRepo) GetBalanceRecordIdRelMap(ctx context.Context, relType string, id ...int64) (map[int64]*biz.BalanceRecordIdRel, error) {
+	var l []*BalanceRecordIdRel
+	if err := ub.data.DB(ctx).Table("balance_record_id_rel").Where("rel_id IN (?) and rel_type=?", id, relType).Find(&l).Error; err != nil {
+		return nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询代理失败")
+	}
+
+	res := make(map[int64]*biz.BalanceRecordIdRel, 0)
+	for _, v := range l {
+		res[v.RelId] = &biz.BalanceRecordIdRel{
+			ID:       v.ID,
+			RecordId: v.RecordId,
+			RelId:    v.RelId,
+		}
+	}
+
+	return res, nil
 }
 
 // TransferIntoUserPlayProxyReward 在事务中使用
