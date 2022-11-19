@@ -47,30 +47,34 @@ type Pagination struct {
 
 type UserRepo interface {
 	CreateUserProxy(ctx context.Context, userId int64, rate int64) (*UserProxy, error)
+	CreateDownUserProxy(ctx context.Context, userId int64, upUserId int64, rate int64) (*UserProxy, error)
 	UpdateUserProxy(ctx context.Context, userId int64, rate int64) (*UserProxy, error)
 	GetUserProxyByUserId(ctx context.Context, userId int64) (*UserProxy, error)
 	GetUserList(ctx context.Context, address string, b *Pagination) ([]*User, error, int64)
 	GetUserById(ctx context.Context, userId int64) (*User, error)
+	GetUserByAddress(ctx context.Context, address string) (*User, error)
 	GetUserListByUserIds(ctx context.Context, userIds ...int64) ([]*User, error)
 	GetUserMap(ctx context.Context, userIds ...int64) (map[int64]*User, error)
 	GetUserProxyList(ctx context.Context, userId ...int64) ([]*UserProxy, error)
 }
 
 type UserUseCase struct {
-	repo   UserRepo
-	uiRepo UserInfoRepo
-	ubRepo UserBalanceRepo
-	tx     Transaction
-	log    *log.Helper
+	repo             UserRepo
+	uiRepo           UserInfoRepo
+	ubRepo           UserBalanceRepo
+	systemConfigRepo SystemConfigRepo
+	tx               Transaction
+	log              *log.Helper
 }
 
-func NewUserUseCase(repo UserRepo, tx Transaction, uiRepo UserInfoRepo, ubRepo UserBalanceRepo, logger log.Logger) *UserUseCase {
+func NewUserUseCase(repo UserRepo, tx Transaction, uiRepo UserInfoRepo, systemConfigRepo SystemConfigRepo, ubRepo UserBalanceRepo, logger log.Logger) *UserUseCase {
 	return &UserUseCase{
-		repo:   repo,
-		tx:     tx,
-		uiRepo: uiRepo,
-		ubRepo: ubRepo,
-		log:    log.NewHelper(logger),
+		repo:             repo,
+		systemConfigRepo: systemConfigRepo,
+		tx:               tx,
+		uiRepo:           uiRepo,
+		ubRepo:           ubRepo,
+		log:              log.NewHelper(logger),
 	}
 }
 
@@ -528,6 +532,34 @@ func (u *UserUseCase) CreateProxy(ctx context.Context, user *User, req *v1.Creat
 		return nil, err
 	}
 	return &v1.CreateProxyReply{
+		Result: "提交成功",
+	}, nil
+}
+
+func (u *UserUseCase) CreateDownProxy(ctx context.Context, user *User, req *v1.CreateDownProxyRequest) (*v1.CreateDownProxyReply, error) {
+	var (
+		rate         int64 = 5
+		err          error
+		proxyUser    *User
+		ok           bool
+		systemConfig map[string]*SystemConfig
+	)
+	proxyUser, err = u.repo.GetUserByAddress(ctx, req.SendBody.Address)
+	if err != nil {
+		return nil, errors.New(500, "USER_NO_FOUND", "用户地址有误")
+	}
+
+	systemConfig, err = u.systemConfigRepo.GetSystemConfigByNames(ctx, "result_play_rate")
+	if _, ok = systemConfig["result_play_rate"]; !ok {
+		return nil, errors.New(500, "USER_NO_FOUND", "配置有误")
+	}
+	rate = systemConfig["result_play_rate"].Value
+
+	_, err = u.repo.CreateDownUserProxy(ctx, proxyUser.ID, user.ID, rate)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.CreateDownProxyReply{
 		Result: "提交成功",
 	}, nil
 }

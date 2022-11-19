@@ -49,7 +49,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	transaction := data.NewTransaction(dataData)
 	playUseCase := biz.NewPlayUseCase(userRepo, playRepo, roomRepo, systemConfigRepo, playGameRelRepo, playSortRelRepo, playRoomRelRepo, playGameScoreUserRelRepo, playGameTeamGoalUserRelRepo, playGameTeamResultUserRelRepo, playGameTeamSortUserRelRepo, gameRepo, sortRepo, userBalanceRepo, userProxyRepo, userInfoRepo, transaction, logger)
 	playService := service.NewPlayService(playUseCase, logger)
-	userUseCase := biz.NewUserUseCase(userRepo, transaction, userInfoRepo, userBalanceRepo, logger)
+	userUseCase := biz.NewUserUseCase(userRepo, transaction, userInfoRepo, systemConfigRepo, userBalanceRepo, logger)
 	userService := service.NewUserService(userUseCase, logger)
 	gameUseCase := biz.NewGameUseCase(gameRepo, playGameRelRepo, playRepo, playGameScoreUserRelRepo, playGameTeamGoalUserRelRepo, playGameTeamResultUserRelRepo, logger)
 	teamRepo := data.NewTeamRepo(dataData, logger)

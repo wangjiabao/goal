@@ -663,6 +663,24 @@ func (u *UserRepo) CreateUserProxy(ctx context.Context, userId int64, rate int64
 	}, nil
 }
 
+// CreateDownUserProxy .
+func (u *UserRepo) CreateDownUserProxy(ctx context.Context, userId int64, upUserId int64, rate int64) (*biz.UserProxy, error) {
+	var userProxy UserProxy
+	userProxy.UserId = userId
+	userProxy.UpUserId = upUserId
+	userProxy.Rate = rate
+	res := u.data.DB(ctx).Table("user_proxy").Create(&userProxy)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_USER_PROXY_ERROR", "用户代理创建失败")
+	}
+
+	return &biz.UserProxy{
+		ID:     userProxy.ID,
+		Rate:   userProxy.Rate,
+		UserId: userProxy.UserId,
+	}, nil
+}
+
 // UpdateUserProxy .
 func (u *UserRepo) UpdateUserProxy(ctx context.Context, userId int64, rate int64) (*biz.UserProxy, error) {
 	var userProxy UserProxy
@@ -699,6 +717,20 @@ func (u *UserRepo) GetUserProxyByUserId(ctx context.Context, userId int64) (*biz
 func (u *UserRepo) GetUserById(ctx context.Context, userId int64) (*biz.User, error) {
 	var user *User
 	if err := u.data.DB(ctx).Where("ID=?", userId).Table("user").First(&user).Error; err != nil {
+		return nil, errors.NotFound("USER_NOT_FOUND", "用户不存在")
+	}
+
+	return &biz.User{
+		ID:                  user.ID,
+		Address:             user.Address,
+		ToAddress:           user.ToAddress,
+		ToAddressPrivateKey: user.ToAddressPrivateKey,
+	}, nil
+}
+
+func (u *UserRepo) GetUserByAddress(ctx context.Context, address string) (*biz.User, error) {
+	var user *User
+	if err := u.data.DB(ctx).Where("address=?", address).Table("user").First(&user).Error; err != nil {
 		return nil, errors.NotFound("USER_NOT_FOUND", "用户不存在")
 	}
 

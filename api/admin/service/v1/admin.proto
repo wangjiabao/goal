@@ -147,6 +147,13 @@ service User {
 		};
 	};
 
+	rpc CreateDownProxy (CreateDownProxyRequest) returns (CreateDownProxyReply) {
+		option (google.api.http) = {
+			post: "/api/goal_admin/user_proxy_down_create"
+			body: "send_body"
+		};
+	};
+
 	rpc UserWithdraw (UserWithdrawRequest) returns (UserWithdrawReply){
 		option (google.api.http) = {
 			post: "/api/goal_admin/user/withdraw"
@@ -957,5 +964,18 @@ message CreateProxyRequest {
 }
 
 message CreateProxyReply {
+	string result = 1;
+}
+
+message CreateDownProxyRequest {
+	message SendBody{
+		int64 user_id = 1;
+		string address = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message CreateDownProxyReply {
 	string result = 1;
 }

@@ -722,6 +722,7 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 type UserClient interface {
 	UserDeposit(ctx context.Context, in *UserDepositRequest, opts ...grpc.CallOption) (*UserDepositReply, error)
 	CreateProxy(ctx context.Context, in *CreateProxyRequest, opts ...grpc.CallOption) (*CreateProxyReply, error)
+	CreateDownProxy(ctx context.Context, in *CreateDownProxyRequest, opts ...grpc.CallOption) (*CreateDownProxyReply, error)
 	UserWithdraw(ctx context.Context, in *UserWithdrawRequest, opts ...grpc.CallOption) (*UserWithdrawReply, error)
 	UserBalanceRecordTotal(ctx context.Context, in *UserBalanceRecordTotalRequest, opts ...grpc.CallOption) (*UserBalanceRecordTotalReply, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListReply, error)
@@ -754,6 +755,15 @@ func (c *userClient) UserDeposit(ctx context.Context, in *UserDepositRequest, op
 func (c *userClient) CreateProxy(ctx context.Context, in *CreateProxyRequest, opts ...grpc.CallOption) (*CreateProxyReply, error) {
 	out := new(CreateProxyReply)
 	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/CreateProxy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) CreateDownProxy(ctx context.Context, in *CreateDownProxyRequest, opts ...grpc.CallOption) (*CreateDownProxyReply, error) {
+	out := new(CreateDownProxyReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/CreateDownProxy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -856,6 +866,7 @@ func (c *userClient) UpdateUserBalanceRecord(ctx context.Context, in *UpdateUser
 type UserServer interface {
 	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 	CreateProxy(context.Context, *CreateProxyRequest) (*CreateProxyReply, error)
+	CreateDownProxy(context.Context, *CreateDownProxyRequest) (*CreateDownProxyReply, error)
 	UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error)
 	UserBalanceRecordTotal(context.Context, *UserBalanceRecordTotalRequest) (*UserBalanceRecordTotalReply, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error)
@@ -878,6 +889,9 @@ func (UnimplementedUserServer) UserDeposit(context.Context, *UserDepositRequest)
 }
 func (UnimplementedUserServer) CreateProxy(context.Context, *CreateProxyRequest) (*CreateProxyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProxy not implemented")
+}
+func (UnimplementedUserServer) CreateDownProxy(context.Context, *CreateDownProxyRequest) (*CreateDownProxyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDownProxy not implemented")
 }
 func (UnimplementedUserServer) UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserWithdraw not implemented")
@@ -954,6 +968,24 @@ func _User_CreateProxy_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServer).CreateProxy(ctx, req.(*CreateProxyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_CreateDownProxy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDownProxyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).CreateDownProxy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/CreateDownProxy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).CreateDownProxy(ctx, req.(*CreateDownProxyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1152,6 +1184,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateProxy",
 			Handler:    _User_CreateProxy_Handler,
+		},
+		{
+			MethodName: "CreateDownProxy",
+			Handler:    _User_CreateDownProxy_Handler,
 		},
 		{
 			MethodName: "UserWithdraw",

@@ -263,3 +263,10 @@ func (u *UserService) CreateProxy(ctx context.Context, req *v1.CreateProxyReques
 		ID: req.SendBody.UserId,
 	}, req)
 }
+
+// CreateDownProxy .
+func (u *UserService) CreateDownProxy(ctx context.Context, req *v1.CreateDownProxyRequest) (*v1.CreateDownProxyReply, error) {
+	return u.uc.CreateDownProxy(ctx, &biz.User{
+		ID: req.SendBody.UserId,
+	}, req)
+}
