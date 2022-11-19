@@ -141,6 +141,17 @@ type PlayAllTypeUserRel struct {
 	CreatedAt  time.Time
 }
 
+type UserInfo struct {
+	ID              int64
+	UserId          int64
+	Name            string
+	Avatar          string
+	RecommendCode   string
+	MyRecommendCode string
+	Code            string
+	CreatedAt       time.Time
+}
+
 type PlayAllTypeUserRelSlice []*PlayAllTypeUserRel
 
 func (p PlayAllTypeUserRelSlice) Len() int           { return len(p) }
@@ -151,6 +162,10 @@ type UserBalance struct {
 	ID      int64
 	UserId  int64
 	Balance int64
+}
+
+type UserInfoRepo interface {
+	GetUserInfoByUserId(ctx context.Context, userId int64) (*UserInfo, error)
 }
 
 type UserProxy struct {
@@ -195,6 +210,7 @@ type PlayRoomRelRepo interface {
 
 type UserBalanceRepo interface {
 	Pay(ctx context.Context, userId int64, pay int64) (int64, error)
+	TransferIntoUserGoalRecommendReward(ctx context.Context, userId int64, amount int64) (int64, error)
 	RoomFee(ctx context.Context, userId int64, pay int64) (int64, error)
 	GetBalanceRecordIdRelMap(ctx context.Context, relType string, id ...int64) (map[int64]*BalanceRecordIdRel, error)
 	CreateBalanceRecordIdRel(ctx context.Context, recordId int64, relType string, id int64) error
@@ -204,13 +220,14 @@ type UserBalanceRepo interface {
 }
 
 type UserProxyRepo interface {
-	GetUserProxyAndDown(ctx context.Context) ([]*UserProxy, map[int64][]*UserProxy, error)
+	GetUserProxyAndDown(ctx context.Context) (map[int64]*UserProxy, map[int64]*UserProxy, error)
 }
 
 type PlayGameTeamResultUserRelRepo interface {
 	GetPlayGameTeamResultUserRelByPlayIdTotal(ctx context.Context, playId int64) (*PlayGameTeamResultUserRelTotal, error)
 	GetPlayGameTeamResultUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamResultUserRel, error)
 	CreatePlayGameTeamResultUserRel(ctx context.Context, pr *PlayGameTeamResultUserRel) (*PlayGameTeamResultUserRel, error)
+	UpdatePlayGameTeamResultUserRel(ctx context.Context, pr *PlayGameTeamResultUserRel) (*PlayGameTeamResultUserRel, error)
 	GetPlayGameTeamResultUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamResultUserRel, error)
 	GetPlayGameTeamResultUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameTeamResultUserRel, error)
 }
@@ -220,6 +237,7 @@ type PlayGameTeamGoalUserRelRepo interface {
 	GetPlayGameTeamGoalUserRelByPlayIdTotal(ctx context.Context, playId int64) (*PlayGameTeamGoalUserRelTotal, error)
 	GetPlayGameTeamGoalUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamGoalUserRel, error)
 	CreatePlayGameTeamGoalUserRel(ctx context.Context, pr *PlayGameTeamGoalUserRel) (*PlayGameTeamGoalUserRel, error)
+	UpdatePlayGameTeamGoalUserRel(ctx context.Context, pr *PlayGameTeamGoalUserRel) (*PlayGameTeamGoalUserRel, error)
 	GetPlayGameTeamGoalUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamGoalUserRel, error)
 }
 
@@ -228,12 +246,14 @@ type PlayGameTeamSortUserRelRepo interface {
 	GetPlayGameTeamSortUserRelByPlayIdTotal(ctx context.Context, playId int64) (*PlayGameTeamSortUserRelTotal, error)
 	GetPlayGameTeamSortUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameTeamSortUserRel, error)
 	CreatePlayGameTeamSortUserRel(ctx context.Context, pr *PlayGameTeamSortUserRel) (*PlayGameTeamSortUserRel, error)
+	UpdatePlayGameTeamSortUserRel(ctx context.Context, pr *PlayGameTeamSortUserRel) (*PlayGameTeamSortUserRel, error)
 	GetPlayGameTeamScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameTeamSortUserRel, error)
 }
 
 type PlayGameScoreUserRelRepo interface {
 	GetPlayGameScoreUserRelByPlayIdTotal(ctx context.Context, playId int64) (*PlayGameScoreUserRelTotal, error)
 	CreatePlayGameScoreUserRel(ctx context.Context, pr *PlayGameScoreUserRel) (*PlayGameScoreUserRel, error)
+	UpdatePlayGameScoreUserRel(ctx context.Context, pr *PlayGameScoreUserRel) (*PlayGameScoreUserRel, error)
 	GetPlayGameScoreUserRelByUserId(ctx context.Context, userId int64) ([]*PlayGameScoreUserRel, error)
 	GetPlayGameScoreUserRelByPlayIds(ctx context.Context, playIds ...int64) ([]*PlayGameScoreUserRel, error)
 	GetPlayGameScoreUserRelByPlayId(ctx context.Context, playId int64) ([]*PlayGameScoreUserRel, error)
@@ -259,6 +279,7 @@ type PlayUseCase struct {
 	playSortRelRepo               PlaySortRelRepo
 	roomUserRelRepo               RoomUserRelRepo
 	roomRepo                      RoomRepo
+	userInfoRepo                  UserInfoRepo
 	playRoomRelRepo               PlayRoomRelRepo
 	playGameScoreUserRelRepo      PlayGameScoreUserRelRepo
 	playGameTeamSortUserRelRepo   PlayGameTeamSortUserRelRepo
@@ -276,6 +297,7 @@ func NewPlayUseCase(repo PlayRepo,
 	playSortRelRepo PlaySortRelRepo,
 	playRoomRelRepo PlayRoomRelRepo,
 	roomUserRelRepo RoomUserRelRepo,
+	userInfoRepo UserInfoRepo,
 	roomRepo RoomRepo,
 	gameRepo GameRepo,
 	sortRepo SortRepo,
@@ -292,6 +314,7 @@ func NewPlayUseCase(repo PlayRepo,
 		roomRepo:                      roomRepo,
 		sortRepo:                      sortRepo,
 		gameRepo:                      gameRepo,
+		userInfoRepo:                  userInfoRepo,
 		playGameRelRepo:               playGameRelRepo,
 		systemConfigRepo:              systemConfigRepo,
 		playSortRelRepo:               playSortRelRepo,
@@ -947,20 +970,28 @@ func (r *RoomUseCase) CreatePlaySort(ctx context.Context, req *v1.CreatePlaySort
 func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePlayGameScoreRequest) (*v1.CreatePlayGameScoreReply, error) {
 
 	var (
-		userId               int64
-		playGameScoreUserRel *PlayGameScoreUserRel
-		play                 *Play
-		pay                  int64
-		userBalance          *UserBalance
-		upUserProxy          []*UserProxy
-		downUserProxy        map[int64][]*UserProxy
-		systemConfig         *SystemConfig
-		err                  error
-		recordId             int64
-		originPay            int64
-		feeRate              int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
-		base                 int64 = 100000 // 基础精度0.00001
-		payLimit             int64 = 100    // 限额
+		userId                int64
+		playGameScoreUserRel  *PlayGameScoreUserRel
+		play                  *Play
+		pay                   int64
+		userBalance           *UserBalance
+		upUserProxy           map[int64]*UserProxy
+		downUserProxy         map[int64]*UserProxy
+		systemConfig          map[string]*SystemConfig
+		userInfo              *UserInfo
+		recommendUserIds      []int64
+		recommendThirdUserIds []int64
+		err                   error
+		ok                    bool
+		rateFirst             int64
+		rateSecond            int64
+		rateThird             int64
+		recommendRecordId     int64
+		recordId              int64
+		originPay             int64
+		feeRate               int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
+		base                  int64 = 100000 // 基础精度0.00001
+		payLimit              int64 = 100    // 限额
 	)
 	// todo 参数真实验证，房间人员验证
 	play, err = p.playRepo.GetPlayById(ctx, req.SendBody.PlayId) // 查玩法
@@ -980,11 +1011,26 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
 
-	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
-	if nil != err {
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "play_rate", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
+	if _, ok = systemConfig["play_rate"]; !ok {
 		return nil, err
 	}
-	feeRate = systemConfig.Value
+	feeRate = systemConfig["play_rate"].Value
+
+	if _, ok = systemConfig["recommend_rate_first"]; !ok {
+		return nil, err
+	}
+	rateFirst = systemConfig["recommend_rate_first"].Value
+
+	if _, ok = systemConfig["recommend_rate_second"]; !ok {
+		return nil, err
+	}
+	rateSecond = systemConfig["recommend_rate_second"].Value
+
+	if _, ok = systemConfig["recommend_rate_third"]; !ok {
+		return nil, err
+	}
+	rateThird = systemConfig["recommend_rate_third"].Value
 
 	userId, _, err = getUserFromJwt(ctx) // 获取用户id
 	if nil != err {
@@ -1005,6 +1051,20 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		return nil, err
 	}
 
+	userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, userId)   // 获取推荐关系
+	for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") { // 解析userId, 取前三代
+		tmp, _ := strconv.ParseInt(ruv, 10, 64)
+		if 0 < tmp {
+			recommendUserIds = append(recommendUserIds, tmp)
+		}
+	}
+	userIdsLen := len(recommendUserIds)
+	if userIdsLen > 3 {
+		recommendThirdUserIds = recommendUserIds[userIdsLen-3:]
+	} else {
+		recommendThirdUserIds = recommendUserIds
+	}
+
 	/* todo 优化点
 	 * 考虑项目规模和业务场景，同一个人正确使用自己余额并且并发的情况较少，为了简单和有效应对恶意的并发请求，代码逻辑上加个简单的乐观锁,
 	 * mysql使用innodb引擎隔离级别是读一致性读，读可加行锁，写会自动加排他锁，底层默认支持的情况更为见效，但是解决不了余额小于0的问题，
@@ -1017,7 +1077,7 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 		}
 
 		fee := pay * feeRate / 1000 // 扣除手续费
-		pay -= fee
+		relPay := pay - fee
 		playGameScoreUserRel, err = p.playGameScoreUserRelRepo.CreatePlayGameScoreUserRel(ctx, &PlayGameScoreUserRel{
 			ID:        0,
 			UserId:    userId,
@@ -1035,20 +1095,47 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 			return err
 		}
 
-		for _, uv := range upUserProxy {
-			var uvFee int64
-			if 0 >= uv.Rate {
-				continue
+		for k, recommendUserId := range recommendThirdUserIds { // 推荐人
+			var tmpPerAmount int64
+			if 0 == k {
+				tmpPerAmount = pay * rateThird / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameScoreUserRel.ID); nil != err {
+					return err
+				}
+			} else if 1 == k {
+				tmpPerAmount = pay * rateSecond / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameScoreUserRel.ID); nil != err {
+					return err
+				}
+
+			} else if 2 == k {
+				tmpPerAmount = pay * rateFirst / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameScoreUserRel.ID); nil != err {
+					return err
+				}
 			}
-			uvFee = fee * uv.Rate / 1000
-			if dv, ok := downUserProxy[uv.UserId]; ok {
-				for _, v := range dv {
-					var vFee int64
-					if 0 >= v.Rate {
-						continue
-					}
-					vFee = uvFee * v.Rate / 1000                                                           // 本次转给小代理金额
-					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+			relPay -= tmpPerAmount
+		}
+
+		proxyDownFee := false
+		proxyUpFee := false
+		for i := userIdsLen - 1; 0 <= i; i-- {
+			if !proxyDownFee {
+				if _, ok = downUserProxy[recommendUserIds[i]]; ok {
+					dFee := pay * downUserProxy[recommendUserIds[i]].Rate / 1000                                                            // 本次转给小代理金额
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, downUserProxy[recommendUserIds[i]].UserId, dFee) // 转给小代理
 					if err != nil {
 						return err
 					}
@@ -1056,25 +1143,33 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 					if err != nil {
 						return err
 					}
-					uvFee -= vFee
-					if uvFee < 0 { // 不足分
-						break
-					}
+					proxyDownFee = true
+					relPay -= dFee
 				}
 			}
-			recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
-			if err != nil {
-				return err
+
+			if !proxyUpFee {
+				if _, ok = upUserProxy[recommendUserIds[i]]; ok {
+					uFee := pay * upUserProxy[recommendUserIds[i]].Rate / 1000
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, upUserProxy[recommendUserIds[i]].UserId, uFee) // 转给大代理
+					if err != nil {
+						return err
+					}
+					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameScoreUserRel.ID)
+					if err != nil {
+						return err
+					}
+					proxyUpFee = true
+					relPay -= uFee
+				}
 			}
-			err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameScoreUserRel.ID)
-			if err != nil {
-				return err
-			}
-			fee -= uvFee
-			if fee < 0 {
-				break // 分红余额已经不足
-			}
+
 		}
+
+		_, err = p.playGameScoreUserRelRepo.UpdatePlayGameScoreUserRel(ctx, &PlayGameScoreUserRel{
+			ID:  playGameScoreUserRel.ID,
+			Pay: relPay,
+		})
 
 		return nil
 	}); nil != err {
@@ -1087,22 +1182,28 @@ func (p *PlayUseCase) CreatePlayGameScore(ctx context.Context, req *v1.CreatePla
 func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePlayGameResultRequest) (*v1.CreatePlayGameResultReply, error) {
 
 	var (
-		userId                        int64
-		playGameTeamResultUserRel     *PlayGameTeamResultUserRel
-		playGameTeamResultUserRelList []*PlayGameTeamResultUserRel
-		play                          *Play
-		pay                           int64
-		gameResult                    string
-		userBalance                   *UserBalance
-		systemConfig                  *SystemConfig
-		upUserProxy                   []*UserProxy
-		downUserProxy                 map[int64][]*UserProxy
-		recordId                      int64
-		originPay                     int64
-		err                           error
-		feeRate                       int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
-		base                          int64 = 100000 // 基础精度0.00001 todo 加配置文件
-		payLimit                      int64 = 100    // 限额 todo 后台可以设置
+		userId                    int64
+		playGameTeamResultUserRel *PlayGameTeamResultUserRel
+		play                      *Play
+		pay                       int64
+		gameResult                string
+		userBalance               *UserBalance
+		systemConfig              map[string]*SystemConfig
+		ok                        bool
+		upUserProxy               map[int64]*UserProxy
+		downUserProxy             map[int64]*UserProxy
+		rateFirst                 int64
+		rateSecond                int64
+		rateThird                 int64
+		recordId                  int64
+		userInfo                  *UserInfo
+		recommendUserIds          []int64
+		recommendThirdUserIds     []int64
+		originPay                 int64
+		err                       error
+		feeRate                   int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
+		base                      int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		payLimit                  int64 = 100    // 限额 todo 后台可以设置
 	)
 
 	if strings.EqualFold("red", req.SendBody.Result) {
@@ -1118,14 +1219,6 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 	userId, _, err = getUserFromJwt(ctx) // 获取用户id
 	if nil != err {
 		return nil, errors.New(500, "USER_ERROR", "用户信息错误")
-	}
-
-	//  todo 参数真实验证，房间人员验证
-	playGameTeamResultUserRelList, err = p.playGameTeamResultUserRelRepo.GetPlayGameTeamResultUserRelByUserId(ctx, userId)
-	for _, v := range playGameTeamResultUserRelList {
-		if req.SendBody.PlayId == v.PlayId {
-			return nil, errors.New(500, "RESULT_ERROR", "已经参加过本次玩法了")
-		}
 	}
 
 	play, err = p.playRepo.GetPlayById(ctx, req.SendBody.PlayId) // 查玩法
@@ -1145,11 +1238,26 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
 
-	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
-	if nil != err {
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "play_rate", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
+	if _, ok = systemConfig["play_rate"]; !ok {
 		return nil, err
 	}
-	feeRate = systemConfig.Value
+	feeRate = systemConfig["play_rate"].Value
+
+	if _, ok = systemConfig["recommend_rate_first"]; !ok {
+		return nil, err
+	}
+	rateFirst = systemConfig["recommend_rate_first"].Value
+
+	if _, ok = systemConfig["recommend_rate_second"]; !ok {
+		return nil, err
+	}
+	rateSecond = systemConfig["recommend_rate_second"].Value
+
+	if _, ok = systemConfig["recommend_rate_third"]; !ok {
+		return nil, err
+	}
+	rateThird = systemConfig["recommend_rate_third"].Value
 
 	userBalance, err = p.userBalanceRepo.GetUserBalance(ctx, userId) // 查余额
 	if nil != err {
@@ -1167,6 +1275,20 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		return nil, err
 	}
 
+	userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, userId)   // 获取推荐关系
+	for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") { // 解析userId, 取前三代
+		tmp, _ := strconv.ParseInt(ruv, 10, 64)
+		if 0 < tmp {
+			recommendUserIds = append(recommendUserIds, tmp)
+		}
+	}
+	userIdsLen := len(recommendUserIds)
+	if userIdsLen > 3 {
+		recommendThirdUserIds = recommendUserIds[userIdsLen-3:]
+	} else {
+		recommendThirdUserIds = recommendUserIds
+	}
+
 	/* todo 优化点
 	 * 考虑项目规模和业务场景，同一个人正确使用自己余额并且并发的情况较少，为了简单和有效应对恶意的并发请求，代码逻辑上加个简单的乐观锁,
 	 * mysql使用innodb引擎隔离级别是读一致性读，读可加行锁，写会自动加排他锁，底层默认支持的情况更为见效，但是解决不了余额小于0的问题，
@@ -1179,7 +1301,7 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 		}
 
 		fee := pay * feeRate / 1000 // 扣除手续费
-		pay -= fee
+		relPay := pay - fee
 		playGameTeamResultUserRel, err = p.playGameTeamResultUserRelRepo.CreatePlayGameTeamResultUserRel(ctx, &PlayGameTeamResultUserRel{
 			ID:        0,
 			UserId:    userId,
@@ -1198,20 +1320,51 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 			return err
 		}
 
-		for _, uv := range upUserProxy {
-			var uvFee int64
-			if 0 >= uv.Rate {
-				continue
+		for k, recommendUserId := range recommendThirdUserIds { // 推荐人
+			var (
+				tmpPerAmount      int64
+				recommendRecordId int64
+			)
+			if 0 == k {
+				tmpPerAmount = pay * rateThird / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamResultUserRel.ID); nil != err {
+					return err
+				}
+			} else if 1 == k {
+				tmpPerAmount = pay * rateSecond / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamResultUserRel.ID); nil != err {
+					return err
+				}
+
+			} else if 2 == k {
+				tmpPerAmount = pay * rateFirst / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamResultUserRel.ID); nil != err {
+					return err
+				}
 			}
-			uvFee = fee * uv.Rate / 1000
-			if dv, ok := downUserProxy[uv.UserId]; ok {
-				for _, v := range dv {
-					var vFee int64
-					if 0 >= v.Rate {
-						continue
-					}
-					vFee = uvFee * v.Rate / 1000                                                           // 本次转给小代理金额
-					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+			relPay -= tmpPerAmount
+		}
+
+		proxyDownFee := false
+		proxyUpFee := false
+		for i := userIdsLen - 1; 0 <= i; i-- {
+
+			if !proxyDownFee {
+				if _, ok = downUserProxy[recommendUserIds[i]]; ok {
+					dFee := pay * downUserProxy[recommendUserIds[i]].Rate / 1000                                                            // 本次转给小代理金额
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, downUserProxy[recommendUserIds[i]].UserId, dFee) // 转给小代理
 					if err != nil {
 						return err
 					}
@@ -1219,25 +1372,33 @@ func (p *PlayUseCase) CreatePlayGameResult(ctx context.Context, req *v1.CreatePl
 					if err != nil {
 						return err
 					}
-					uvFee -= vFee
-					if uvFee < 0 { // 不足分
-						break
-					}
+					proxyDownFee = true
+					relPay -= dFee
 				}
 			}
-			recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
-			if err != nil {
-				return err
+
+			if !proxyUpFee {
+				if _, ok = upUserProxy[recommendUserIds[i]]; ok {
+					uFee := pay * upUserProxy[recommendUserIds[i]].Rate / 1000
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, upUserProxy[recommendUserIds[i]].UserId, uFee) // 转给大代理
+					if err != nil {
+						return err
+					}
+					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamResultUserRel.ID)
+					if err != nil {
+						return err
+					}
+					proxyUpFee = true
+					relPay -= uFee
+				}
 			}
-			err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamResultUserRel.ID)
-			if err != nil {
-				return err
-			}
-			fee -= uvFee
-			if fee < 0 {
-				break // 分红余额已经不足
-			}
+
 		}
+
+		_, err = p.playGameTeamResultUserRelRepo.UpdatePlayGameTeamResultUserRel(ctx, &PlayGameTeamResultUserRel{
+			ID:  playGameTeamResultUserRel.ID,
+			Pay: relPay,
+		})
 
 		return nil
 	}); nil != err {
@@ -1255,12 +1416,19 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		play                    *Play
 		pay                     int64
 		userBalance             *UserBalance
-		upUserProxy             []*UserProxy
-		downUserProxy           map[int64][]*UserProxy
+		systemConfig            map[string]*SystemConfig
+		ok                      bool
+		upUserProxy             map[int64]*UserProxy
+		downUserProxy           map[int64]*UserProxy
+		rateFirst               int64
+		rateSecond              int64
+		rateThird               int64
+		userInfo                *UserInfo
+		recommendUserIds        []int64
+		recommendThirdUserIds   []int64
 		err                     error
 		recordId                int64
 		originPay               int64
-		systemConfig            *SystemConfig
 		feeRate                 int64 = 5      // 根据base运算，意味着百分之十 todo 后台可以设置
 		base                    int64 = 100000 // 基础精度0.00001 todo 加配置文件
 		payLimit                int64 = 100    // 限额 todo 后台可以设置
@@ -1296,11 +1464,26 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		return nil, errors.New(500, "PAY_ERROR", "玩法最低限额100")
 	}
 
-	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
-	if nil != err {
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "play_rate", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
+	if _, ok = systemConfig["play_rate"]; !ok {
 		return nil, err
 	}
-	feeRate = systemConfig.Value
+	feeRate = systemConfig["play_rate"].Value
+
+	if _, ok = systemConfig["recommend_rate_first"]; !ok {
+		return nil, err
+	}
+	rateFirst = systemConfig["recommend_rate_first"].Value
+
+	if _, ok = systemConfig["recommend_rate_second"]; !ok {
+		return nil, err
+	}
+	rateSecond = systemConfig["recommend_rate_second"].Value
+
+	if _, ok = systemConfig["recommend_rate_third"]; !ok {
+		return nil, err
+	}
+	rateThird = systemConfig["recommend_rate_third"].Value
 
 	userId, _, err = getUserFromJwt(ctx) // 获取用户id
 	if nil != err {
@@ -1322,6 +1505,20 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		return nil, err
 	}
 
+	userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, userId)   // 获取推荐关系
+	for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") { // 解析userId, 取前三代
+		tmp, _ := strconv.ParseInt(ruv, 10, 64)
+		if 0 < tmp {
+			recommendUserIds = append(recommendUserIds, tmp)
+		}
+	}
+	userIdsLen := len(recommendUserIds)
+	if userIdsLen > 3 {
+		recommendThirdUserIds = recommendUserIds[userIdsLen-3:]
+	} else {
+		recommendThirdUserIds = recommendUserIds
+	}
+
 	/* todo 优化点
 	 * 考虑项目规模和业务场景，同一个人正确使用自己余额并且并发的情况较少，为了简单和有效应对恶意的并发请求，代码逻辑上加个简单的乐观锁,
 	 * mysql使用innodb引擎隔离级别是读一致性读，读可加行锁，写会自动加排他锁，底层默认支持的情况更为见效，但是解决不了余额小于0的问题，
@@ -1334,7 +1531,7 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		}
 
 		fee := pay * feeRate / 1000 // 扣除手续费
-		pay -= fee
+		relPay := pay - fee
 		playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.CreatePlayGameTeamSortUserRel(ctx, &PlayGameTeamSortUserRel{
 			ID:        0,
 			UserId:    userId,
@@ -1353,46 +1550,88 @@ func (p *PlayUseCase) CreatePlayGameSort(ctx context.Context, req *v1.CreatePlay
 		if err != nil {
 			return err
 		}
-		for _, uv := range upUserProxy {
-			var uvFee int64
-			if 0 >= uv.Rate {
-				continue
+
+		for k, recommendUserId := range recommendThirdUserIds { // 推荐人
+			var (
+				tmpPerAmount      int64
+				recommendRecordId int64
+			)
+			if 0 == k {
+				tmpPerAmount = pay * rateThird / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamSortUserRel.ID); nil != err {
+					return err
+				}
+			} else if 1 == k {
+				tmpPerAmount = pay * rateSecond / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamSortUserRel.ID); nil != err {
+					return err
+				}
+
+			} else if 2 == k {
+				tmpPerAmount = pay * rateFirst / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamSortUserRel.ID); nil != err {
+					return err
+				}
 			}
-			uvFee = fee * uv.Rate / 1000
-			if dv, ok := downUserProxy[uv.UserId]; ok {
-				for _, v := range dv {
-					var vFee int64
-					if 0 >= v.Rate {
-						continue
-					}
-					vFee = uvFee * v.Rate / 1000                                                           // 本次转给小代理金额
-					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+			relPay -= tmpPerAmount
+		}
+
+		proxyDownFee := false
+		proxyUpFee := false
+		for i := userIdsLen - 1; 0 <= i; i-- {
+
+			if !proxyDownFee {
+				if _, ok = downUserProxy[recommendUserIds[i]]; ok {
+					dFee := pay * downUserProxy[recommendUserIds[i]].Rate / 1000                                                            // 本次转给小代理金额
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, downUserProxy[recommendUserIds[i]].UserId, dFee) // 转给小代理
 					if err != nil {
 						return err
 					}
-
 					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamSortUserRel.ID)
 					if err != nil {
 						return err
 					}
-					uvFee -= vFee
-					if uvFee < 0 { // 不足分
-						break
-					}
+					proxyDownFee = true
+					relPay -= dFee
 				}
 			}
-			recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
-			if err != nil {
-				return err
+
+			if !proxyUpFee {
+				if _, ok = upUserProxy[recommendUserIds[i]]; ok {
+					uFee := pay * upUserProxy[recommendUserIds[i]].Rate / 1000
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, upUserProxy[recommendUserIds[i]].UserId, uFee) // 转给大代理
+					if err != nil {
+						return err
+					}
+					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamSortUserRel.ID)
+					if err != nil {
+						return err
+					}
+					proxyUpFee = true
+					relPay -= uFee
+				}
 			}
-			err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamSortUserRel.ID)
-			if err != nil {
-				return err
-			}
-			fee -= uvFee
-			if fee < 0 {
-				break // 分红余额已经不足
-			}
+
+		}
+
+		_, err = p.playGameTeamSortUserRelRepo.UpdatePlayGameTeamSortUserRel(ctx, &PlayGameTeamSortUserRel{
+			ID:  playGameTeamSortUserRel.ID,
+			Pay: relPay,
+		})
+		if err != nil {
+			return err
 		}
 
 		return nil
@@ -1411,9 +1650,16 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		play                    *Play
 		pay                     int64
 		userBalance             *UserBalance
-		upUserProxy             []*UserProxy
-		downUserProxy           map[int64][]*UserProxy
-		systemConfig            *SystemConfig
+		systemConfig            map[string]*SystemConfig
+		ok                      bool
+		upUserProxy             map[int64]*UserProxy
+		downUserProxy           map[int64]*UserProxy
+		rateFirst               int64
+		rateSecond              int64
+		rateThird               int64
+		userInfo                *UserInfo
+		recommendUserIds        []int64
+		recommendThirdUserIds   []int64
 		err                     error
 		recordId                int64
 		originPay               int64
@@ -1454,16 +1700,45 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 	}
 	originPay = pay
 
-	systemConfig, err = p.systemConfigRepo.GetSystemConfigByName(ctx, "play_rate")
-	if nil != err {
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "play_rate", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
+	if _, ok = systemConfig["play_rate"]; !ok {
 		return nil, err
 	}
-	feeRate = systemConfig.Value
+	feeRate = systemConfig["play_rate"].Value
+
+	if _, ok = systemConfig["recommend_rate_first"]; !ok {
+		return nil, err
+	}
+	rateFirst = systemConfig["recommend_rate_first"].Value
+
+	if _, ok = systemConfig["recommend_rate_second"]; !ok {
+		return nil, err
+	}
+	rateSecond = systemConfig["recommend_rate_second"].Value
+
+	if _, ok = systemConfig["recommend_rate_third"]; !ok {
+		return nil, err
+	}
+	rateThird = systemConfig["recommend_rate_third"].Value
 
 	// 查找代理
 	upUserProxy, downUserProxy, err = p.userProxyRepo.GetUserProxyAndDown(ctx)
 	if nil != err {
 		return nil, err
+	}
+
+	userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, userId)   // 获取推荐关系
+	for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") { // 解析userId, 取前三代
+		tmp, _ := strconv.ParseInt(ruv, 10, 64)
+		if 0 < tmp {
+			recommendUserIds = append(recommendUserIds, tmp)
+		}
+	}
+	userIdsLen := len(recommendUserIds)
+	if userIdsLen > 3 {
+		recommendThirdUserIds = recommendUserIds[userIdsLen-3:]
+	} else {
+		recommendThirdUserIds = recommendUserIds
 	}
 
 	/* todo 优化点
@@ -1478,7 +1753,7 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 		}
 
 		fee := pay * feeRate / 1000 // 扣除手续费
-		pay -= fee
+		relPay := pay - fee
 		playGameTeamGoalUserRel, err = p.playGameTeamGoalUserRelRepo.CreatePlayGameTeamGoalUserRel(ctx, &PlayGameTeamGoalUserRel{
 			ID:        0,
 			UserId:    userId,
@@ -1499,20 +1774,51 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 			return err
 		}
 
-		for _, uv := range upUserProxy {
-			var uvFee int64
-			if 0 >= uv.Rate {
-				continue
+		for k, recommendUserId := range recommendThirdUserIds { // 推荐人
+			var (
+				tmpPerAmount      int64
+				recommendRecordId int64
+			)
+			if 0 == k {
+				tmpPerAmount = pay * rateThird / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamGoalUserRel.ID); nil != err {
+					return err
+				}
+			} else if 1 == k {
+				tmpPerAmount = pay * rateSecond / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamGoalUserRel.ID); nil != err {
+					return err
+				}
+
+			} else if 2 == k {
+				tmpPerAmount = pay * rateFirst / 1000
+				if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
+					return err
+				}
+
+				if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, play.Type, playGameTeamGoalUserRel.ID); nil != err {
+					return err
+				}
 			}
-			uvFee = fee * uv.Rate / 1000
-			if dv, ok := downUserProxy[uv.UserId]; ok {
-				for _, v := range dv {
-					var vFee int64
-					if 0 >= v.Rate {
-						continue
-					}
-					vFee = uvFee * v.Rate / 1000                                                           // 本次转给小代理金额
-					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, v.UserId, vFee) // 转给小代理
+			relPay -= tmpPerAmount
+		}
+
+		proxyDownFee := false
+		proxyUpFee := false
+		for i := userIdsLen - 1; 0 <= i; i-- {
+
+			if !proxyDownFee {
+				if _, ok = downUserProxy[recommendUserIds[i]]; ok {
+					dFee := pay * downUserProxy[recommendUserIds[i]].Rate / 1000                                                            // 本次转给小代理金额
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, downUserProxy[recommendUserIds[i]].UserId, dFee) // 转给小代理
 					if err != nil {
 						return err
 					}
@@ -1520,26 +1826,35 @@ func (p *PlayUseCase) CreatePlayGameGoal(ctx context.Context, req *v1.CreatePlay
 					if err != nil {
 						return err
 					}
-					uvFee -= vFee
-					if uvFee < 0 { // 不足分
-						break
-					}
+					proxyDownFee = true
+					relPay -= dFee
 				}
 			}
-			recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, uv.UserId, uvFee) // 转给大代理
-			if err != nil {
-				return err
+
+			if !proxyUpFee {
+				if _, ok = upUserProxy[recommendUserIds[i]]; ok {
+					uFee := pay * upUserProxy[recommendUserIds[i]].Rate / 1000
+					recordId, err = p.userBalanceRepo.TransferIntoUserPlayProxyReward(ctx, upUserProxy[recommendUserIds[i]].UserId, uFee) // 转给大代理
+					if err != nil {
+						return err
+					}
+					err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamGoalUserRel.ID)
+					if err != nil {
+						return err
+					}
+					proxyUpFee = true
+					relPay -= uFee
+				}
 			}
 
-			err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recordId, play.Type, playGameTeamGoalUserRel.ID)
-			if err != nil {
-				return err
-			}
+		}
 
-			fee -= uvFee
-			if fee < 0 {
-				break // 分红余额已经不足
-			}
+		_, err = p.playGameTeamGoalUserRelRepo.UpdatePlayGameTeamGoalUserRel(ctx, &PlayGameTeamGoalUserRel{
+			ID:  playGameTeamGoalUserRel.ID,
+			Pay: relPay,
+		})
+		if err != nil {
+			return err
 		}
 
 		return nil

@@ -3,7 +3,6 @@ package biz
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
@@ -409,35 +408,10 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 		rate                    int64 = 80 // 猜中分比率可后台设置
 		systemConfig            map[string]*SystemConfig
 		ok                      bool
-		rateZero                int64
-		rateFirst               int64
-		recommendRecordId       int64
 		goalBalanceRecordId     int64
-		rateSecond              int64
-		rateThird               int64
 	)
 
 	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third", "sort_play_rate")
-	if _, ok = systemConfig["recommend_rate_zero"]; !ok {
-		return false
-	}
-	rateZero = systemConfig["recommend_rate_zero"].Value
-
-	if _, ok = systemConfig["recommend_rate_first"]; !ok {
-		return false
-	}
-	rateFirst = systemConfig["recommend_rate_first"].Value
-
-	if _, ok = systemConfig["recommend_rate_second"]; !ok {
-		return false
-	}
-	rateSecond = systemConfig["recommend_rate_second"].Value
-
-	if _, ok = systemConfig["recommend_rate_third"]; !ok {
-		return false
-	}
-	rateThird = systemConfig["recommend_rate_third"].Value
-
 	if _, ok = systemConfig["sort_play_rate"]; !ok {
 		return false
 	}
@@ -710,61 +684,9 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 
 		poolAmount = poolAmount * rate / 100
 		for _, winV := range winNoRewardedPlayGameTeamResultUserRel {
-			var (
-				recommendUserIds []int64
-				userInfo         *UserInfo
-			)
 			perAmount := poolAmount * winV.Pay * winV.AmountBase / 100 / winTotalAmount // 加权分的钱
 
-			userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, winV.UserId) // 获取推荐关系
-			for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") {    // 解析userId, 取前三代
-				tmp, _ := strconv.ParseInt(ruv, 10, 64)
-				if 0 < tmp {
-					recommendUserIds = append(recommendUserIds, tmp)
-				}
-			}
-			userIdsLen := len(recommendUserIds)
-			if userIdsLen > 3 {
-				recommendUserIds = recommendUserIds[userIdsLen-3:]
-			}
-
 			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-
-				for k, recommendUserId := range recommendUserIds { // 推荐人
-					var tmpPerAmount int64
-					if 0 == k {
-						tmpPerAmount = perAmount * rateThird / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, playSort.Type, winV.Id); nil != err {
-							return err
-						}
-					} else if 1 == k {
-						tmpPerAmount = perAmount * rateSecond / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, playSort.Type, winV.Id); nil != err {
-							return err
-						}
-
-					} else if 2 == k {
-						tmpPerAmount = perAmount * rateFirst / 1000
-						tmpPerAmount += perAmount * rateZero / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, playSort.Type, winV.Id); nil != err {
-							return err
-						}
-					}
-					perAmount -= tmpPerAmount
-				}
-
 				if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != err {
 					return err
 				}
@@ -791,39 +713,11 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 		playIds              []int64
 		playGameScoreUserRel map[int64][]*PlayGameScoreUserRel
 		err                  error
-		systemConfig         map[string]*SystemConfig
-		ok                   bool
-		rateZero             int64
-		rateFirst            int64
-		rateSecond           int64
-		rateThird            int64
-		recommendRecordId    int64
 		goalBalanceRecordId  int64
 	)
 	for _, v := range play {
 		playIds = append(playIds, v.ID)
 	}
-
-	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
-	if _, ok = systemConfig["recommend_rate_zero"]; !ok {
-		return false
-	}
-	rateZero = systemConfig["recommend_rate_zero"].Value
-
-	if _, ok = systemConfig["recommend_rate_first"]; !ok {
-		return false
-	}
-	rateFirst = systemConfig["recommend_rate_first"].Value
-
-	if _, ok = systemConfig["recommend_rate_second"]; !ok {
-		return false
-	}
-	rateSecond = systemConfig["recommend_rate_second"].Value
-
-	if _, ok = systemConfig["recommend_rate_third"]; !ok {
-		return false
-	}
-	rateThird = systemConfig["recommend_rate_third"].Value
 
 	playGameScoreUserRel, err = p.playGameScoreUserRelRepo.GetPlayGameScoreUserRelByPlayIds(ctx, playIds...)
 	if err != nil {
@@ -985,62 +879,10 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 			poolAmount += lastTermPool.Total
 		}
 
-		fmt.Println(poolAmount)
 		for _, winV := range winNoRewardedPlayGameScoreUserRel {
-			var (
-				recommendUserIds []int64
-				userInfo         *UserInfo
-			)
 			perAmount := poolAmount * winV.Pay / winTotalAmount // 加权分的钱
 
-			userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, winV.UserId) // 获取推荐关系
-			for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") {    // 解析userId, 取前三代
-				tmp, _ := strconv.ParseInt(ruv, 10, 64)
-				if 0 < tmp {
-					recommendUserIds = append(recommendUserIds, tmp)
-				}
-			}
-			userIdsLen := len(recommendUserIds)
-			if userIdsLen > 3 {
-				recommendUserIds = recommendUserIds[userIdsLen-3:]
-			}
-
 			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-
-				for k, recommendUserId := range recommendUserIds { // 推荐人
-					var tmpPerAmount int64
-					if 0 == k {
-						tmpPerAmount = perAmount * rateThird / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_score", winV.ID); nil != err {
-							return err
-						}
-					} else if 1 == k {
-						tmpPerAmount = perAmount * rateSecond / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_score", winV.ID); nil != err {
-							return err
-						}
-					} else if 2 == k {
-						tmpPerAmount = perAmount * rateFirst / 1000
-						tmpPerAmount += perAmount * rateZero / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_score", winV.ID); nil != err {
-							return err
-						}
-					}
-					perAmount -= tmpPerAmount
-				}
-
 				if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != err {
 					return err
 				}
@@ -1071,12 +913,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 		rate                      int64 = 80 // 猜中分比率可后台设置
 		systemConfig              map[string]*SystemConfig
 		ok                        bool
-		rateZero                  int64
-		rateFirst                 int64
-		rateSecond                int64
-		rateThird                 int64
 		goalBalanceRecordId       int64
-		recommendRecordId         int64
 	)
 
 	for _, v := range play {
@@ -1096,26 +933,11 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 		content = "draw"
 	}
 
-	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
-	if _, ok = systemConfig["recommend_rate_zero"]; !ok {
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "result_play_rate")
+	if _, ok = systemConfig["result_play_rate"]; !ok {
 		return false
 	}
-	rateZero = systemConfig["recommend_rate_zero"].Value
-
-	if _, ok = systemConfig["recommend_rate_first"]; !ok {
-		return false
-	}
-	rateFirst = systemConfig["recommend_rate_first"].Value
-
-	if _, ok = systemConfig["recommend_rate_second"]; !ok {
-		return false
-	}
-	rateSecond = systemConfig["recommend_rate_second"].Value
-
-	if _, ok = systemConfig["recommend_rate_third"]; !ok {
-		return false
-	}
-	rateThird = systemConfig["recommend_rate_third"].Value
+	rate = systemConfig["result_play_rate"].Value
 
 	for playId, playUserRel := range playGameTeamResultUserRel {
 		// 每一场玩法
@@ -1273,60 +1095,9 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 
 		poolAmount = poolAmount * rate / 100
 		for _, winV := range winNoRewardedPlayGameTeamResultUserRel {
-			var (
-				recommendUserIds []int64
-				userInfo         *UserInfo
-			)
 			perAmount := poolAmount * winV.Pay / winTotalAmount // 加权分的钱
 
-			userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, winV.UserId) // 获取推荐关系
-			for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") {    // 解析userId, 取前三代
-				tmp, _ := strconv.ParseInt(ruv, 10, 64)
-				if 0 < tmp {
-					recommendUserIds = append(recommendUserIds, tmp)
-				}
-			}
-			userIdsLen := len(recommendUserIds)
-			if userIdsLen > 3 {
-				recommendUserIds = recommendUserIds[userIdsLen-3:]
-			}
-
 			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-
-				for k, recommendUserId := range recommendUserIds { // 推荐人
-					var tmpPerAmount int64
-					if 0 == k {
-						tmpPerAmount = perAmount * rateThird / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_team_result", winV.ID); nil != err {
-							return err
-						}
-					} else if 1 == k {
-						tmpPerAmount = perAmount * rateSecond / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_team_result", winV.ID); nil != err {
-							return err
-						}
-					} else if 2 == k {
-						tmpPerAmount = perAmount * rateFirst / 1000
-						tmpPerAmount += perAmount * rateZero / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, "game_team_result", winV.ID); nil != err {
-							return err
-						}
-					}
-					perAmount -= tmpPerAmount
-				}
-
 				perAmount += winV.Pay // 押注的钱原路返回
 
 				if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != err {
@@ -1350,6 +1121,7 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 
 	return true
 }
+
 func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []*Play) bool {
 
 	var (
@@ -1402,14 +1174,6 @@ func (p *PlayUseCase) grantTypeGameGoal(ctx context.Context, game *Game, play []
 func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamGoalUserRel map[int64][]*PlayGameTeamGoalUserRel, game *Game) bool {
 	var (
 		err                 error
-		rate                int64 = 80 // 猜中分比率可后台设置
-		systemConfig        map[string]*SystemConfig
-		ok                  bool
-		rateZero            int64
-		rateFirst           int64
-		rateSecond          int64
-		rateThird           int64
-		recommendRecordId   int64
 		goalBalanceRecordId int64
 	)
 
@@ -1425,32 +1189,6 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 		if nil == play {
 			continue
 		}
-
-		systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third", "sort_play_rate")
-		if _, ok = systemConfig["recommend_rate_zero"]; !ok {
-			return false
-		}
-		rateZero = systemConfig["recommend_rate_zero"].Value
-
-		if _, ok = systemConfig["recommend_rate_first"]; !ok {
-			return false
-		}
-		rateFirst = systemConfig["recommend_rate_first"].Value
-
-		if _, ok = systemConfig["recommend_rate_second"]; !ok {
-			return false
-		}
-		rateSecond = systemConfig["recommend_rate_second"].Value
-
-		if _, ok = systemConfig["recommend_rate_third"]; !ok {
-			return false
-		}
-		rateThird = systemConfig["recommend_rate_third"].Value
-
-		if _, ok = systemConfig["sort_play_rate"]; !ok {
-			return false
-		}
-		rate = systemConfig["sort_play_rate"].Value
 
 		// 不足两人退钱
 		tmpTotalUserIdMap := make(map[int64]int64, 0)
@@ -1706,62 +1444,10 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 			poolAmount += lastTermPool.Total
 		}
 
-		poolAmount = poolAmount * rate / 100
 		for _, winV := range winNoRewardedPlayGameTeamGoalUserRel {
-			var (
-				recommendUserIds []int64
-				userInfo         *UserInfo
-			)
 			perAmount := poolAmount * winV.Pay / winTotalAmount // 加权分的钱
 
-			userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, winV.UserId) // 获取推荐关系
-			for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") {    // 解析userId, 取前三代
-				tmp, _ := strconv.ParseInt(ruv, 10, 64)
-				if 0 < tmp {
-					recommendUserIds = append(recommendUserIds, tmp)
-				}
-			}
-			userIdsLen := len(recommendUserIds)
-			if userIdsLen > 3 {
-				recommendUserIds = recommendUserIds[userIdsLen-3:]
-			}
-
 			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-
-				for k, recommendUserId := range recommendUserIds { // 推荐人
-					var tmpPerAmount int64
-					if 0 == k {
-						tmpPerAmount = perAmount * rateThird / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, winV.Type, winV.ID); nil != err {
-							return err
-						}
-					} else if 1 == k {
-						tmpPerAmount = perAmount * rateSecond / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, winV.Type, winV.ID); nil != err {
-							return err
-						}
-					} else if 2 == k {
-						tmpPerAmount = perAmount * rateFirst / 1000
-						tmpPerAmount += perAmount * rateZero / 1000
-						if recommendRecordId, err = p.userBalanceRepo.TransferIntoUserGoalRecommendReward(ctx, recommendUserId, tmpPerAmount); nil != err {
-							return err
-						}
-
-						if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, recommendRecordId, winV.Type, winV.ID); nil != err {
-							return err
-						}
-					}
-					perAmount -= tmpPerAmount
-				}
-
 				if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserGoalReward(ctx, winV.UserId, perAmount); nil != err {
 					return err
 				}

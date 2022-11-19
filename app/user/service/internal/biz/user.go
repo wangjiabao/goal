@@ -112,24 +112,24 @@ func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAut
 		decodeBytes       []byte
 	)
 
-	code := req.SendBody.Code // 查询推荐码
-	decodeBytes, err = base64.StdEncoding.DecodeString(code)
-	code = string(decodeBytes)
-	if 0 == len(code) {
-		return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
-	}
-
-	userInfo, err = uc.uiRepo.GetUserInfoByCode(ctx, code)
-	if err != nil {
-		return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
-	}
-
-	if privateKey, publicAddress = ethAccount(); 0 == len(privateKey) || 0 == len(publicAddress) {
-		return nil, errors.New(500, "USER_ERROR", "生成账户失败，请重试")
-	}
-
 	user, err = uc.repo.GetUserByAddress(ctx, u.Address) // 查询用户
-	if err != nil {
+	if nil == user || nil != err {
+		code := req.SendBody.Code // 查询推荐码
+		decodeBytes, err = base64.StdEncoding.DecodeString(code)
+		code = string(decodeBytes)
+		if 0 == len(code) {
+			return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+		}
+
+		userInfo, err = uc.uiRepo.GetUserInfoByCode(ctx, code)
+		if err != nil {
+			return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+		}
+
+		if privateKey, publicAddress = ethAccount(); 0 == len(privateKey) || 0 == len(publicAddress) {
+			return nil, errors.New(500, "USER_ERROR", "生成账户失败，请重试")
+		}
+
 		if err = uc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 			u.ToAddressPrivateKey = privateKey
 			u.ToAddress = publicAddress

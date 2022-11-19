@@ -593,6 +593,25 @@ func (p *PlayGameScoreUserRelRepo) CreatePlayGameScoreUserRel(ctx context.Contex
 	}, nil
 }
 
+// UpdatePlayGameScoreUserRel .
+func (p *PlayGameScoreUserRelRepo) UpdatePlayGameScoreUserRel(ctx context.Context, pr *biz.PlayGameScoreUserRel) (*biz.PlayGameScoreUserRel, error) {
+	var playGameScoreUserRel PlayGameScoreUserRel
+	playGameScoreUserRel.Pay = pr.Pay
+	res := p.data.DB(ctx).Table("play_game_score_user_rel").Where("id=?", pr.ID).Updates(&playGameScoreUserRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_SCORE_REL_ERROR", "玩法比赛比分竞猜修改失败")
+	}
+
+	return &biz.PlayGameScoreUserRel{
+		ID:      playGameScoreUserRel.ID,
+		UserId:  playGameScoreUserRel.UserId,
+		PlayId:  playGameScoreUserRel.PlayId,
+		Pay:     playGameScoreUserRel.Pay,
+		Content: playGameScoreUserRel.Content,
+		Status:  playGameScoreUserRel.Status,
+	}, nil
+}
+
 func (p *PlayGameScoreUserRelRepo) GetPlayGameScoreUserRelByUserId(ctx context.Context, userId int64) ([]*biz.PlayGameScoreUserRel, error) {
 	var l []*PlayGameScoreUserRel
 	if result := p.data.DB(ctx).Table("play_game_score_user_rel").Where(&PlayGameScoreUserRel{UserId: userId}).Find(&l); result.Error != nil {
@@ -833,6 +852,24 @@ func (p *PlayGameTeamResultUserRelRepo) CreatePlayGameTeamResultUserRel(ctx cont
 	}, nil
 }
 
+// UpdatePlayGameTeamResultUserRel .
+func (p *PlayGameTeamResultUserRelRepo) UpdatePlayGameTeamResultUserRel(ctx context.Context, pr *biz.PlayGameTeamResultUserRel) (*biz.PlayGameTeamResultUserRel, error) {
+	var playGameTeamResultUserRel PlayGameTeamResultUserRel
+	playGameTeamResultUserRel.Pay = pr.Pay
+	res := p.data.DB(ctx).Table("play_game_team_result_user_rel").Where("id=?", pr.ID).Updates(&playGameTeamResultUserRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_RESULT_REL_ERROR", "玩法比赛结果竞猜修改失败")
+	}
+
+	return &biz.PlayGameTeamResultUserRel{
+		ID:      playGameTeamResultUserRel.ID,
+		UserId:  playGameTeamResultUserRel.UserId,
+		PlayId:  playGameTeamResultUserRel.PlayId,
+		Pay:     playGameTeamResultUserRel.Pay,
+		Content: playGameTeamResultUserRel.Content,
+	}, nil
+}
+
 func (p *PlayGameTeamResultUserRelRepo) GetPlayGameTeamResultUserRelByUserId(ctx context.Context, userId int64) ([]*biz.PlayGameTeamResultUserRel, error) {
 	var l []*PlayGameTeamResultUserRel
 	if result := p.data.DB(ctx).Table("play_game_team_result_user_rel").Where(&PlayGameTeamResultUserRel{UserId: userId}).Find(&l); result.Error != nil {
@@ -869,6 +906,27 @@ func (p *PlayGameTeamGoalUserRelRepo) CreatePlayGameTeamGoalUserRel(ctx context.
 	res := p.data.DB(ctx).Table("play_game_team_goal_user_rel").Create(&playGameTeamGoalUserRel)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_PLAY_GAME_GOAL_REL_ERROR", "玩法比赛进球数竞猜创建失败")
+	}
+
+	return &biz.PlayGameTeamGoalUserRel{
+		ID:     playGameTeamGoalUserRel.ID,
+		UserId: playGameTeamGoalUserRel.UserId,
+		PlayId: playGameTeamGoalUserRel.PlayId,
+		Pay:    playGameTeamGoalUserRel.Pay,
+		Status: playGameTeamGoalUserRel.Status,
+		Goal:   playGameTeamGoalUserRel.Goal,
+		TeamId: playGameTeamGoalUserRel.TeamId,
+		Type:   playGameTeamGoalUserRel.Type,
+	}, nil
+}
+
+// UpdatePlayGameTeamGoalUserRel .
+func (p *PlayGameTeamGoalUserRelRepo) UpdatePlayGameTeamGoalUserRel(ctx context.Context, pr *biz.PlayGameTeamGoalUserRel) (*biz.PlayGameTeamGoalUserRel, error) {
+	var playGameTeamGoalUserRel PlayGameTeamGoalUserRel
+	playGameTeamGoalUserRel.Pay = pr.Pay
+	res := p.data.DB(ctx).Table("play_game_team_goal_user_rel").Where("id=?", pr.ID).Updates(&playGameTeamGoalUserRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_GOAL_REL_ERROR", "玩法比赛进球数竞猜修改失败")
 	}
 
 	return &biz.PlayGameTeamGoalUserRel{
@@ -920,6 +978,27 @@ func (p *PlayGameTeamSortUserRelRepo) CreatePlayGameTeamSortUserRel(ctx context.
 	res := p.data.DB(ctx).Table("play_game_team_sort_user_rel").Create(&playGameTeamSortUserRel)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_PLAY_GAME_SORT_REL_ERROR", "玩法比赛排名结果竞猜创建失败")
+	}
+
+	return &biz.PlayGameTeamSortUserRel{
+		ID:      playGameTeamSortUserRel.ID,
+		UserId:  playGameTeamSortUserRel.UserId,
+		PlayId:  playGameTeamSortUserRel.PlayId,
+		Pay:     playGameTeamSortUserRel.Pay,
+		Status:  playGameTeamSortUserRel.Status,
+		Content: playGameTeamSortUserRel.Content,
+		SortId:  playGameTeamSortUserRel.SortId,
+	}, nil
+
+}
+
+// UpdatePlayGameTeamSortUserRel .
+func (p *PlayGameTeamSortUserRelRepo) UpdatePlayGameTeamSortUserRel(ctx context.Context, pr *biz.PlayGameTeamSortUserRel) (*biz.PlayGameTeamSortUserRel, error) {
+	var playGameTeamSortUserRel PlayGameTeamSortUserRel
+	playGameTeamSortUserRel.Pay = pr.Pay
+	res := p.data.DB(ctx).Table("play_game_team_sort_user_rel").Where("id=?", pr.ID).Updates(&playGameTeamSortUserRel)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_PLAY_GAME_SORT_REL_ERROR", "玩法比赛排名结果竞猜修改失败")
 	}
 
 	return &biz.PlayGameTeamSortUserRel{
