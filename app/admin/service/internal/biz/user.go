@@ -562,10 +562,10 @@ func (u *UserUseCase) CreateDownProxy(ctx context.Context, user *User, req *v1.C
 	}
 
 	systemConfig, err = u.systemConfigRepo.GetSystemConfigByNames(ctx, "down_proxy_rate")
-	if _, ok = systemConfig["result_play_rate"]; !ok {
+	if _, ok = systemConfig["down_proxy_rate"]; !ok {
 		return nil, errors.New(500, "USER_NO_FOUND", "配置有误")
 	}
-	rate = systemConfig["result_play_rate"].Value
+	rate = systemConfig["down_proxy_rate"].Value
 
 	_, err = u.repo.CreateDownUserProxy(ctx, proxyUser.ID, user.ID, rate)
 	if err != nil {
