@@ -248,10 +248,10 @@ message PlayAmountTotalResultRequest {
 }
 
 message PlayAmountTotalResultReply {
-	int64 totalAmount = 3;
-	int64 RedTotal = 1;
-	int64 DrawTotal = 2;
-	int64 BlueTotal = 4;
+	string totalAmount = 3;
+	string RedTotal = 1;
+	string DrawTotal = 2;
+	string BlueTotal = 4;
 }
 
 message PlayAmountTotalScoreRequest {
@@ -259,11 +259,11 @@ message PlayAmountTotalScoreRequest {
 }
 
 message PlayAmountTotalScoreReply {
-	int64 total = 2;
+	string total = 2;
 	repeated Item items = 1;
 	message Item {
 		string content  = 1;
-		int64 total = 2;
+		string total = 2;
 	}
 }
 
@@ -272,16 +272,16 @@ message PlayAmountTotalGoalRequest {
 }
 
 message PlayAmountTotalGoalReply {
-	int64 total = 2;
+	string total = 2;
 	repeated RedItem redItems = 1;
 	message RedItem {
 		int64 content = 1;
-		int64 total = 2;
+		string total = 2;
 	}
 	repeated BlueItem blueItems = 3;
 	message BlueItem {
 		int64 content = 1;
-		int64 total = 2;
+		string total = 2;
 	}
 }
 
@@ -290,23 +290,23 @@ message PlayAmountTotalSortRequest {
 }
 
 message PlayAmountTotalSortReply {
-	int64 total = 4;
+	string total = 4;
 	repeated First firstItems = 1;
 	message First {
 		string content = 1;
-		int64 total = 2;
+		string total = 2;
 	}
 
 	repeated Second secondItems = 2;
 	message Second {
 		string content = 1;
-		int64 total = 2;
+		string total = 2;
 	}
 
 	repeated Third thirdItems = 3;
 	message Third {
 		string content = 1;
-		int64 total = 2;
+		string total = 2;
 	}
 }
 
@@ -315,11 +315,11 @@ message PlayAmountTotalSortOtherRequest {
 }
 
 message PlayAmountTotalSortOtherReply {
-	int64 total = 4;
+	string total = 4;
 	repeated Item Items = 1;
 	message Item {
 		string content = 1;
-		int64 total = 2;
+		string total = 2;
 	}
 }
 

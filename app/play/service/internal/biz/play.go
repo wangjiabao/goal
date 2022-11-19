@@ -426,7 +426,6 @@ func (p *PlayUseCase) GetAdminCreateGameAndSortPlayUserList(ctx context.Context,
 	if nil == err {
 		var scoreUserIds []int64
 		for _, v := range playGameScoreUserRel {
-			fmt.Println(v.UserId)
 			scoreUserIds = append(scoreUserIds, v.UserId)
 		}
 
@@ -1954,10 +1953,10 @@ func (p *PlayUseCase) PlayAmountTotalResult(ctx context.Context, req *v1.PlayAmo
 	}
 
 	return &v1.PlayAmountTotalResultReply{
-		TotalAmount: (total + poolTotal) / base,
-		RedTotal:    redTotal / base,
-		DrawTotal:   drawTotal / base,
-		BlueTotal:   blueTotal / base,
+		TotalAmount: fmt.Sprintf("%.2f", float64(total+poolTotal)/float64(base)),
+		RedTotal:    fmt.Sprintf("%.2f", float64(redTotal)/float64(base)),
+		DrawTotal:   fmt.Sprintf("%.2f", float64(drawTotal)/float64(base)),
+		BlueTotal:   fmt.Sprintf("%.2f", float64(blueTotal)/float64(base)),
 	}, nil
 
 }
@@ -1997,14 +1996,14 @@ func (p *PlayUseCase) PlayAmountTotalScore(ctx context.Context, req *v1.PlayAmou
 	}
 
 	res := &v1.PlayAmountTotalScoreReply{
-		Total: (total + poolTotal) / base,
+		Total: fmt.Sprintf("%.2f", float64(total+poolTotal)/float64(base)),
 		Items: nil,
 	}
 	res.Items = make([]*v1.PlayAmountTotalScoreReply_Item, 0)
 	for k, v := range totalRes {
 		res.Items = append(res.Items, &v1.PlayAmountTotalScoreReply_Item{
 			Content: k,
-			Total:   v / base,
+			Total:   fmt.Sprintf("%.2f", float64(v)/float64(base)),
 		})
 	}
 	return res, nil
@@ -2069,7 +2068,7 @@ func (p *PlayUseCase) PlayAmountTotalSort(ctx context.Context, req *v1.PlayAmoun
 	}
 
 	res := &v1.PlayAmountTotalSortReply{
-		Total:       (total + poolTotal) / base,
+		Total:       fmt.Sprintf("%.2f", float64(total+poolTotal)/float64(base)),
 		FirstItems:  nil,
 		SecondItems: nil,
 		ThirdItems:  nil,
@@ -2078,21 +2077,21 @@ func (p *PlayUseCase) PlayAmountTotalSort(ctx context.Context, req *v1.PlayAmoun
 	for k, v := range totalFirstRes {
 		res.FirstItems = append(res.FirstItems, &v1.PlayAmountTotalSortReply_First{
 			Content: k,
-			Total:   v / base,
+			Total:   fmt.Sprintf("%.2f", float64(v)/float64(base)),
 		})
 	}
 	res.SecondItems = make([]*v1.PlayAmountTotalSortReply_Second, 0)
 	for k, v := range totalSecondRes {
 		res.SecondItems = append(res.SecondItems, &v1.PlayAmountTotalSortReply_Second{
 			Content: k,
-			Total:   v / base,
+			Total:   fmt.Sprintf("%.2f", float64(v)/float64(base)),
 		})
 	}
 	res.ThirdItems = make([]*v1.PlayAmountTotalSortReply_Third, 0)
 	for k, v := range totalThirdRes {
 		res.ThirdItems = append(res.ThirdItems, &v1.PlayAmountTotalSortReply_Third{
 			Content: k,
-			Total:   v / base,
+			Total:   fmt.Sprintf("%.2f", float64(v)/float64(base)),
 		})
 	}
 	return res, nil
@@ -2133,14 +2132,14 @@ func (p *PlayUseCase) PlayAmountTotalSortOther(ctx context.Context, req *v1.Play
 	}
 
 	res := &v1.PlayAmountTotalSortOtherReply{
-		Total: (total + poolTotal) / base,
+		Total: fmt.Sprintf("%.2f", float64(total+poolTotal)/float64(base)),
 		Items: nil,
 	}
 	res.Items = make([]*v1.PlayAmountTotalSortOtherReply_Item, 0)
 	for k, v := range totalRes {
 		res.Items = append(res.Items, &v1.PlayAmountTotalSortOtherReply_Item{
 			Content: k,
-			Total:   v / base,
+			Total:   fmt.Sprintf("%.2f", float64(v)/float64(base)),
 		})
 	}
 	return res, nil
@@ -2201,7 +2200,7 @@ func (p *PlayUseCase) PlayAmountTotalGoal(ctx context.Context, req *v1.PlayAmoun
 	}
 
 	res := &v1.PlayAmountTotalGoalReply{
-		Total:     (total + poolTotal) / base,
+		Total:     fmt.Sprintf("%.2f", float64(total+poolTotal)/float64(base)),
 		RedItems:  nil,
 		BlueItems: nil,
 	}
@@ -2209,14 +2208,14 @@ func (p *PlayUseCase) PlayAmountTotalGoal(ctx context.Context, req *v1.PlayAmoun
 	for k, v := range redTotalRes {
 		res.RedItems = append(res.RedItems, &v1.PlayAmountTotalGoalReply_RedItem{
 			Content: k,
-			Total:   v / base,
+			Total:   fmt.Sprintf("%.2f", float64(v)/float64(base)),
 		})
 	}
 	res.BlueItems = make([]*v1.PlayAmountTotalGoalReply_BlueItem, 0)
 	for k, v := range blueTotalRes {
 		res.BlueItems = append(res.BlueItems, &v1.PlayAmountTotalGoalReply_BlueItem{
 			Content: k,
-			Total:   v / base,
+			Total:   fmt.Sprintf("%.2f", float64(v)/float64(base)),
 		})
 	}
 	return res, nil
