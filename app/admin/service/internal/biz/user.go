@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
@@ -178,9 +179,9 @@ func (u *UserUseCase) GetUserDepositList(ctx context.Context, req *v1.GetUserDep
 		}
 		res.Items = append(res.Items, &v1.GetUserDepositListReply_Item{
 			Address:   tempAddress,
-			Balance:   item.Balance / base,
+			Balance:   fmt.Sprintf("%.2f", float64(item.Balance)/float64(base)),
 			Type:      item.Type,
-			Amount:    item.Amount / base,
+			Amount:    fmt.Sprintf("%.2f", float64(item.Amount)/float64(base)),
 			Reason:    item.Reason,
 			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
 		})

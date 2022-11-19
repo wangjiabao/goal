@@ -1728,11 +1728,9 @@ components:
                 address:
                     type: string
                 balance:
-                    type: integer
-                    format: int64
+                    type: string
                 amount:
-                    type: integer
-                    format: int64
+                    type: string
                 reason:
                     type: string
                 type:

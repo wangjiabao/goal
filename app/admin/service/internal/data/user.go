@@ -674,6 +674,7 @@ func (u *UserRepo) GetUserList(ctx context.Context, address string, b *biz.Pagin
 			Address:             item.Address,
 			ToAddress:           item.ToAddress,
 			ToAddressPrivateKey: item.ToAddressPrivateKey,
+			CreatedAt:           item.CreatedAt,
 		})
 	}
 
