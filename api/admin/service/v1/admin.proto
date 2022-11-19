@@ -480,7 +480,7 @@ message GetUserRequest {
 }
 
 message GetUserReply {
-	int64 userBalance = 1;
+	string userBalance = 1;
 }
 
 message GetUserRecommendListRequest {

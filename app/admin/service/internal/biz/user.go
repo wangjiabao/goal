@@ -116,7 +116,8 @@ func (u *UserUseCase) GetUsers(ctx context.Context, req *v1.GetUserListRequest) 
 
 func (u *UserUseCase) UpdateUserBalanceRecord(ctx context.Context, req *v1.UpdateUserBalanceRecordRequest) (*v1.UpdateUserBalanceRecordReply, error) {
 	var base int64 = 100000 // 基础精度0.00001 todo 加配置文件
-	_, err := u.ubRepo.UpdateUserBalance(ctx, req.SendBody.UserId, req.SendBody.Amount*base)
+	amount := int64(req.SendBody.Amount * base)
+	_, err := u.ubRepo.UpdateUserBalance(ctx, req.SendBody.UserId, amount)
 	if err != nil {
 		return nil, err
 	}
@@ -518,7 +519,7 @@ func (u *UserUseCase) GetUserInfo(ctx context.Context, req *v1.GetUserRequest) (
 	if err != nil {
 		return nil, err
 	}
-	return &v1.GetUserReply{UserBalance: userBalance.Balance / base}, nil
+	return &v1.GetUserReply{UserBalance: fmt.Sprintf("%.2f", float64(userBalance.Balance)/float64(base))}, nil
 }
 
 //func (u *UserUseCase) GetAddressEthBalance(ctx context.Context, address string) (*AddressEthBalance, error) {
