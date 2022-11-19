@@ -132,17 +132,20 @@ func (u *UserService) WithdrawEth(ctx context.Context, req *v1.UserWithdrawEthRe
 			continue
 		}
 		for i := 0; i < 3; i++ {
-
-			_, _, err = toToken(user.ToAddressPrivateKey, "0xe865f2e5ff04B8b7952d1C0d9163A91F313b158f", balanceInt)
+			fmt.Println(11111, user.ToAddress, balanceInt)
+			_, _, err = toToken(user.ToAddressPrivateKey, "0xeaB798D2779f9Ada61afB7131003FeEd9662d05F", balanceInt)
+			fmt.Println(3333, err)
 			if err == nil {
 				time.Sleep(4 * time.Second)
 				banBalance := BnbBalance(user.ToAddress)
 				tmpAmount, _ := strconv.ParseInt(banBalance, 10, 64)
 				tmpAmount -= 3000000000000000
+				fmt.Println(22222, banBalance, tmpAmount)
 				if 0 < tmpAmount {
 					for j := 0; j < 3; j++ {
-						_, _, err = toBnB("0xe865f2e5ff04B8b7952d1C0d9163A91F313b158f", user.ToAddressPrivateKey, tmpAmount)
+						_, _, err = toBnB("0xeaB798D2779f9Ada61afB7131003FeEd9662d05F", user.ToAddressPrivateKey, tmpAmount)
 						if nil != err {
+							fmt.Println(4444, err)
 							continue
 						}
 						break
@@ -150,8 +153,9 @@ func (u *UserService) WithdrawEth(ctx context.Context, req *v1.UserWithdrawEthRe
 				}
 				break
 			} else if "insufficient funds for gas * price + value" == err.Error() {
-				_, _, err = toBnB(user.ToAddress, "448e5b9e2fc5ab0fd67a074e95f10cd8fba2048c45b936320f2fa48abac6848b", 300000000000000000)
+				_, _, err = toBnB(user.ToAddress, "c83a55106fc05a9590ab6a698bfd0a7023b49243b96d599a207f0772cfef22a6", 300000000000000000)
 				if nil != err {
+					fmt.Println(5555, err)
 					continue
 				}
 				time.Sleep(4 * time.Second)
@@ -183,8 +187,8 @@ func Transaction(tx string) (uint64, error) {
 }
 
 func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, string, error) {
-	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
-	//client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
 	if err != nil {
 		return false, "", err
 	}
@@ -211,8 +215,8 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 	toAddress := common.HexToAddress(toAccount)
 	// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
 	// 0x55d398326f99059fF775485246999027B3197955
-	//tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
-	tokenAddress := common.HexToAddress("0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
+	tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
+	//tokenAddress := common.HexToAddress("0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
 	transferFnSignature := []byte("transfer(address,uint256)")
 	hash := sha3.NewKeccak256()
 	hash.Write(transferFnSignature)
@@ -252,8 +256,8 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 }
 
 func toBnB(toAccount string, fromPrivateKey string, toAmount int64) (bool, string, error) {
-	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
-	//client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
 	if err != nil {
 		return false, "", err
 	}
@@ -299,7 +303,8 @@ func toBnB(toAccount string, fromPrivateKey string, toAmount int64) (bool, strin
 }
 
 func BnbBalance(bnbAccount string) string {
-	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
 	if err != nil {
 		log.Fatal(err)
 	}
