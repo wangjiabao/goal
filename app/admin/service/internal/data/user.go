@@ -299,6 +299,27 @@ func (ub *UserBalanceRepo) GetAddressEthBalanceByAddress(ctx context.Context, ad
 	}, nil
 }
 
+func (ub *UserBalanceRepo) GetAddressEthBalance(ctx context.Context) ([]*biz.AddressEthBalance, error) {
+	var l []*AddressEthBalance
+	if err := ub.data.DB(ctx).Table("address_eth_balance").Find(&l).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("ADDRESS_ETH_BALANCE_NOT_FOUND", "地址余额记录不存在")
+		}
+
+		return nil, errors.New(500, "ADDRESS_ETH_BALANCE_NOT_FOUND", err.Error())
+	}
+	var res []*biz.AddressEthBalance
+	for _, v := range l {
+		res = append(res, &biz.AddressEthBalance{
+			ID:      v.ID,
+			Balance: v.Balance,
+			Address: v.Address,
+		})
+	}
+
+	return res, nil
+}
+
 func (ub *UserBalanceRepo) WithdrawById(ctx context.Context, id int64) (*biz.UserWithdraw, error) {
 	var userWithdraw UserWithdraw
 	if err := ub.data.DB(ctx).Table("user_withdraw").Where("id=?", id).First(&userWithdraw).Error; err != nil {
@@ -312,6 +333,19 @@ func (ub *UserBalanceRepo) WithdrawById(ctx context.Context, id int64) (*biz.Use
 		Status:    userWithdraw.Status,
 		Tx:        userWithdraw.Tx,
 		CreatedAt: userWithdraw.CreatedAt,
+	}, nil
+}
+
+func (ub *UserBalanceRepo) GetUserByToAddress(ctx context.Context, address string) (*biz.User, error) {
+	var user User
+	if err := ub.data.DB(ctx).Table("user").Where("to_address=?", address).First(&user).Error; err != nil {
+		return nil, errors.NotFound("USER_WITHDRAW_NOT_FOUND", "用户记录不存在")
+	}
+
+	return &biz.User{
+		ID:                  user.ID,
+		ToAddress:           user.ToAddress,
+		ToAddressPrivateKey: user.ToAddressPrivateKey,
 	}, nil
 }
 

@@ -234,8 +234,10 @@ type UserBalanceRepo interface {
 	UpdateUserBalance(ctx context.Context, userId int64, amount int64) (bool, error)
 	Withdraw(ctx context.Context, userId int64, amount int64) error
 	Deposit(ctx context.Context, userId int64, amount int64) (*UserBalance, error)
+	GetAddressEthBalance(ctx context.Context) ([]*AddressEthBalance, error)
 	WithdrawList(ctx context.Context, status string, b *Pagination, userIds ...int64) ([]*UserWithdraw, error, int64)
 	WithdrawById(ctx context.Context, id int64) (*UserWithdraw, error)
+	GetUserByToAddress(ctx context.Context, address string) (*User, error)
 	UpdateWithdraw(ctx context.Context, Id int64, status string, tx string) error
 	UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error)
 }

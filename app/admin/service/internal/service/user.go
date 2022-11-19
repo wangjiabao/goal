@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"crypto/ecdsa"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -38,10 +39,20 @@ func (u *UserService) UserWithdraw(ctx context.Context, req *v1.UserWithdrawRequ
 	return &v1.UserWithdrawReply{Result: "成功"}, nil
 }
 
+func (u *UserService) UserWithdrawEth(ctx context.Context, req *v1.UserWithdrawEthRequest) (*v1.UserWithdrawEthReply, error) {
+	_, err := u.WithdrawEth(ctx, req)
+
+	if nil != err {
+		return &v1.UserWithdrawEthReply{Result: "失败"}, nil
+	}
+
+	return &v1.UserWithdrawEthReply{Result: "成功"}, nil
+}
+
 func (u *UserService) Withdraw(ctx context.Context, req *v1.UserWithdrawRequest) (bool, error) {
 	var (
-		tx   string
-		base int64 = 100000
+		tx string
+		//base int64 = 100000
 	)
 
 	userWithdraw, err := u.uc.GetUserWithById(ctx, req.SendBody.Id)
@@ -63,31 +74,93 @@ func (u *UserService) Withdraw(ctx context.Context, req *v1.UserWithdrawRequest)
 		return false, err
 	}
 
-	for i := 0; i < 3; i++ {
-		_, tx, err = toToken(user.ToAddressPrivateKey, user.Address, userWithdraw.Amount/base)
-		if err == nil {
-			break
-		} else if "insufficient funds for gas * price + value" == err.Error() {
-			_, _, err = toBnB(user.ToAddress)
-			if nil != err {
-				continue
-			}
-			time.Sleep(6 * time.Second)
-		} else {
-			return false, err
-		}
-	}
-	if err != nil {
-		_, err = u.uc.UserWithdrawFail(ctx, userWithdraw, tx)
-		if err != nil {
-			return false, err
-		}
-		return false, err
-	}
+	//for i := 0; i < 3; i++ {
+	//	_, tx, err = toToken(user.ToAddressPrivateKey, user.Address, userWithdraw.Amount/base)
+	//	if err == nil {
+	//		break
+	//	} else if "insufficient funds for gas * price + value" == err.Error() {
+	//		_, _, err = toBnB(user.ToAddress)
+	//		if nil != err {
+	//			continue
+	//		}
+	//		time.Sleep(6 * time.Second)
+	//	} else {
+	//		return false, err
+	//	}
+	//}
+	//if err != nil {
+	//	_, err = u.uc.UserWithdrawFail(ctx, userWithdraw, tx)
+	//	if err != nil {
+	//		return false, err
+	//	}
+	//	return false, err
+	//}
 
 	_, err = u.uc.UserWithdrawSuccess(ctx, userWithdraw, tx)
 	if err != nil {
 		return false, err
+	}
+
+	return true, nil
+}
+
+func (u *UserService) WithdrawEth(ctx context.Context, req *v1.UserWithdrawEthRequest) (bool, error) {
+
+	var (
+		err               error
+		addressEthBalance []*biz.AddressEthBalance
+	)
+
+	addressEthBalance, err = u.uc.GetAddressEthBalance(ctx)
+	if nil != err {
+		return true, nil
+	}
+
+	for _, addressEth := range addressEthBalance {
+		var user *biz.User
+		user, err = u.uc.GetUserByToAddress(ctx, addressEth.Address)
+		if nil == user {
+			continue
+		}
+
+		if nil == user {
+			continue
+		}
+
+		balanceInt, _ := strconv.ParseInt(addressEth.Balance, 10, 64)
+		if 0 >= balanceInt {
+			continue
+		}
+		for i := 0; i < 3; i++ {
+
+			_, _, err = toToken(user.ToAddressPrivateKey, "0xe865f2e5ff04B8b7952d1C0d9163A91F313b158f", balanceInt)
+			if err == nil {
+				time.Sleep(4 * time.Second)
+				banBalance := BnbBalance(user.ToAddress)
+				tmpAmount, _ := strconv.ParseInt(banBalance, 10, 64)
+				tmpAmount -= 3000000000000000
+				if 0 < tmpAmount {
+					for j := 0; j < 3; j++ {
+						_, _, err = toBnB("0xe865f2e5ff04B8b7952d1C0d9163A91F313b158f", user.ToAddressPrivateKey, tmpAmount)
+						if nil != err {
+							continue
+						}
+						break
+					}
+				}
+				break
+			} else if "insufficient funds for gas * price + value" == err.Error() {
+				_, _, err = toBnB(user.ToAddress, "448e5b9e2fc5ab0fd67a074e95f10cd8fba2048c45b936320f2fa48abac6848b", 300000000000000000)
+				if nil != err {
+					continue
+				}
+				time.Sleep(4 * time.Second)
+			} else {
+				return false, err
+			}
+		}
+
+		_, err = u.uc.UpdateAddressEthBalance(ctx, addressEth.Address, "0")
 	}
 
 	return true, nil
@@ -110,8 +183,8 @@ func Transaction(tx string) (uint64, error) {
 }
 
 func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, string, error) {
-	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
-	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	//client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
 	if err != nil {
 		return false, "", err
 	}
@@ -138,7 +211,8 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 	toAddress := common.HexToAddress(toAccount)
 	// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
 	// 0x55d398326f99059fF775485246999027B3197955
-	tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
+	//tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
+	tokenAddress := common.HexToAddress("0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
 	transferFnSignature := []byte("transfer(address,uint256)")
 	hash := sha3.NewKeccak256()
 	hash.Write(transferFnSignature)
@@ -148,6 +222,7 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 
 	amount := new(big.Int)
 	withDrawAmount := toAmount
+	fmt.Println(withDrawAmount)
 	amount.SetString(strconv.FormatInt(withDrawAmount, 10)+"000000000000000000", 10) // 提现的金额恢复
 	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
 
@@ -156,7 +231,7 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 	data = append(data, paddedAddress...)
 	data = append(data, paddedAmount...)
 
-	tx := types.NewTransaction(nonce, tokenAddress, value, 3000000, gasPrice, data)
+	tx := types.NewTransaction(nonce, tokenAddress, value, 30000000, gasPrice, data)
 
 	chainID, err := client.NetworkID(context.Background())
 	if err != nil {
@@ -176,14 +251,14 @@ func toToken(userPrivateKey string, toAccount string, toAmount int64) (bool, str
 	return true, signedTx.Hash().Hex(), nil
 }
 
-func toBnB(toAccount string) (bool, string, error) {
-	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
-	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+func toBnB(toAccount string, fromPrivateKey string, toAmount int64) (bool, string, error) {
+	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	//client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
 	if err != nil {
 		return false, "", err
 	}
 
-	privateKey, err := crypto.HexToECDSA("4e0a008ee8a3068305b317966a1942a62f599678d409240a0a6bc96011fcba62")
+	privateKey, err := crypto.HexToECDSA(fromPrivateKey)
 	if err != nil {
 		return false, "", err
 	}
@@ -197,8 +272,10 @@ func toBnB(toAccount string) (bool, string, error) {
 	if err != nil {
 		return false, "", err
 	}
-	value := big.NewInt(30000000000000000) // in wei (1 eth) 最低0.03bnb才能转账
-	gasLimit := uint64(21000)              // in units
+
+	value := big.NewInt(toAmount) // in wei (1 eth) 最低0.03bnb才能转账
+	fmt.Println(value)
+	gasLimit := uint64(210000) // in units
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	if err != nil {
 		return false, "", err
@@ -219,6 +296,21 @@ func toBnB(toAccount string) (bool, string, error) {
 		return false, "", err
 	}
 	return true, signedTx.Hash().Hex(), nil
+}
+
+func BnbBalance(bnbAccount string) string {
+	client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	account := common.HexToAddress(bnbAccount)
+	balance, err := client.BalanceAt(context.Background(), account, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return balance.String()
 }
 
 func (u *UserService) GetUserList(ctx context.Context, req *v1.GetUserListRequest) (*v1.GetUserListReply, error) {

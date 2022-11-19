@@ -5,7 +5,6 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
-	"strconv"
 	"time"
 )
 
@@ -331,6 +330,10 @@ func (u *UserUseCase) GetUserWithById(ctx context.Context, id int64) (*UserWithd
 	return u.ubRepo.WithdrawById(ctx, id)
 }
 
+func (u *UserUseCase) GetUserByToAddress(ctx context.Context, address string) (*User, error) {
+	return u.ubRepo.GetUserByToAddress(ctx, address)
+}
+
 func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWithdrawListRequest) (*v1.GetUserWithdrawListReply, error) {
 	var (
 		userMap      map[int64]*User
@@ -396,24 +399,32 @@ func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 	return res, nil
 }
 
+func (u *UserUseCase) GetAddressEthBalance(ctx context.Context) ([]*AddressEthBalance, error) {
+	return u.ubRepo.GetAddressEthBalance(ctx)
+}
+
+func (u *UserUseCase) UpdateAddressEthBalance(ctx context.Context, address string, balance string) (bool, error) {
+	return u.ubRepo.UpdateEthBalanceByAddress(ctx, address, balance)
+}
+
 func (u *UserUseCase) UserWithdraw(ctx context.Context, withdraw *UserWithdraw, user *User) (bool, error) {
 	var (
-		err               error
-		base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
-		addressEthBalance *AddressEthBalance
-		lastBalance       int64
-		nowAmount         int64
+		err error
+		//base              int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		//addressEthBalance *AddressEthBalance
+		//lastBalance       int64
+		//nowAmount         int64
 	)
-	addressEthBalance, err = u.ubRepo.GetAddressEthBalanceByAddress(ctx, user.ToAddress)
-	if err != nil {
-		return false, err
-	}
-	nowAmount = withdraw.Amount / base
-	lastBalance, _ = strconv.ParseInt(addressEthBalance.Balance, 10, 64)
-	if lastBalance < nowAmount {
-		return false, errors.New(500, "BALANCE_ETH_ERROR", "余额不足eth")
-	}
-	lastBalance -= nowAmount
+	//addressEthBalance, err = u.ubRepo.GetAddressEthBalanceByAddress(ctx, user.ToAddress)
+	//if err != nil {
+	//	return false, err
+	//}
+	//nowAmount = withdraw.Amount / base
+	//lastBalance, _ = strconv.ParseInt(addressEthBalance.Balance, 10, 64)
+	//if lastBalance < nowAmount {
+	//	return false, errors.New(500, "BALANCE_ETH_ERROR", "余额不足eth")
+	//}
+	//lastBalance -= nowAmount
 
 	if err = u.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 		err = u.ubRepo.Withdraw(ctx, user.ID, withdraw.Amount)
@@ -425,10 +436,10 @@ func (u *UserUseCase) UserWithdraw(ctx context.Context, withdraw *UserWithdraw, 
 			return err
 		}
 
-		_, err = u.ubRepo.UpdateEthBalanceByAddress(ctx, user.ToAddress, strconv.FormatInt(lastBalance, 10))
-		if nil != err {
-			return err
-		}
+		//_, err = u.ubRepo.UpdateEthBalanceByAddress(ctx, user.ToAddress, strconv.FormatInt(lastBalance, 10))
+		//if nil != err {
+		//	return err
+		//}
 
 		return nil
 	}); nil != err {

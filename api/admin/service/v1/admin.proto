@@ -161,6 +161,12 @@ service User {
 		};
 	};
 
+	rpc UserWithdrawEth (UserWithdrawEthRequest) returns (UserWithdrawEthReply){
+		option (google.api.http) = {
+			get: "/api/goal_admin/user/withdraw_eth"
+		};
+	};
+
 	rpc UserBalanceRecordTotal (UserBalanceRecordTotalRequest) returns (UserBalanceRecordTotalReply){
 		option (google.api.http) = {
 			get: "/api/goal_admin/user_balance_record_total"
@@ -940,6 +946,14 @@ message UserWithdrawRequest {
 }
 
 message UserWithdrawReply {
+	string result = 1;
+}
+
+message UserWithdrawEthRequest {
+
+}
+
+message UserWithdrawEthReply {
 	string result = 1;
 }
 

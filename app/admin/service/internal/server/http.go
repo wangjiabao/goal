@@ -52,6 +52,7 @@ func NewHTTPServer(c *conf.Server, playService *service.PlayService, userService
 func NewWhiteListMatcher() selector.MatchFunc {
 	whiteList := make(map[string]struct{})
 	whiteList["/api.admin.service.v1.Admin/Login"] = struct{}{}
+	whiteList["/api.admin.service.v1.User/UserWithdrawEth"] = struct{}{}
 	return func(ctx context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
 			return false

@@ -724,6 +724,7 @@ type UserClient interface {
 	CreateProxy(ctx context.Context, in *CreateProxyRequest, opts ...grpc.CallOption) (*CreateProxyReply, error)
 	CreateDownProxy(ctx context.Context, in *CreateDownProxyRequest, opts ...grpc.CallOption) (*CreateDownProxyReply, error)
 	UserWithdraw(ctx context.Context, in *UserWithdrawRequest, opts ...grpc.CallOption) (*UserWithdrawReply, error)
+	UserWithdrawEth(ctx context.Context, in *UserWithdrawEthRequest, opts ...grpc.CallOption) (*UserWithdrawEthReply, error)
 	UserBalanceRecordTotal(ctx context.Context, in *UserBalanceRecordTotalRequest, opts ...grpc.CallOption) (*UserBalanceRecordTotalReply, error)
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListReply, error)
 	GetUserProxyList(ctx context.Context, in *GetUserProxyListRequest, opts ...grpc.CallOption) (*GetUserProxyListReply, error)
@@ -773,6 +774,15 @@ func (c *userClient) CreateDownProxy(ctx context.Context, in *CreateDownProxyReq
 func (c *userClient) UserWithdraw(ctx context.Context, in *UserWithdrawRequest, opts ...grpc.CallOption) (*UserWithdrawReply, error) {
 	out := new(UserWithdrawReply)
 	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/UserWithdraw", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userClient) UserWithdrawEth(ctx context.Context, in *UserWithdrawEthRequest, opts ...grpc.CallOption) (*UserWithdrawEthReply, error) {
+	out := new(UserWithdrawEthReply)
+	err := c.cc.Invoke(ctx, "/api.admin.service.v1.User/UserWithdrawEth", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -868,6 +878,7 @@ type UserServer interface {
 	CreateProxy(context.Context, *CreateProxyRequest) (*CreateProxyReply, error)
 	CreateDownProxy(context.Context, *CreateDownProxyRequest) (*CreateDownProxyReply, error)
 	UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error)
+	UserWithdrawEth(context.Context, *UserWithdrawEthRequest) (*UserWithdrawEthReply, error)
 	UserBalanceRecordTotal(context.Context, *UserBalanceRecordTotalRequest) (*UserBalanceRecordTotalReply, error)
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListReply, error)
 	GetUserProxyList(context.Context, *GetUserProxyListRequest) (*GetUserProxyListReply, error)
@@ -895,6 +906,9 @@ func (UnimplementedUserServer) CreateDownProxy(context.Context, *CreateDownProxy
 }
 func (UnimplementedUserServer) UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserWithdraw not implemented")
+}
+func (UnimplementedUserServer) UserWithdrawEth(context.Context, *UserWithdrawEthRequest) (*UserWithdrawEthReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserWithdrawEth not implemented")
 }
 func (UnimplementedUserServer) UserBalanceRecordTotal(context.Context, *UserBalanceRecordTotalRequest) (*UserBalanceRecordTotalReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserBalanceRecordTotal not implemented")
@@ -1004,6 +1018,24 @@ func _User_UserWithdraw_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServer).UserWithdraw(ctx, req.(*UserWithdrawRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _User_UserWithdrawEth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserWithdrawEthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServer).UserWithdrawEth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.admin.service.v1.User/UserWithdrawEth",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServer).UserWithdrawEth(ctx, req.(*UserWithdrawEthRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1192,6 +1224,10 @@ var User_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UserWithdraw",
 			Handler:    _User_UserWithdraw_Handler,
+		},
+		{
+			MethodName: "UserWithdrawEth",
+			Handler:    _User_UserWithdrawEth_Handler,
 		},
 		{
 			MethodName: "UserBalanceRecordTotal",

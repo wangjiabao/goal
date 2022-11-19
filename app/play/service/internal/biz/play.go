@@ -760,7 +760,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			Goal:       v.Goal,
 			TeamId:     v.TeamId,
 			SortId:     v.SortId,
-			Amount:     tmpAmount,
+			Amount:     tmpAmount / base,
 		})
 	}
 

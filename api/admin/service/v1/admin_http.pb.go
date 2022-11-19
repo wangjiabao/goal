@@ -744,6 +744,7 @@ const OperationUserUpdateUserBalanceRecord = "/api.admin.service.v1.User/UpdateU
 const OperationUserUserBalanceRecordTotal = "/api.admin.service.v1.User/UserBalanceRecordTotal"
 const OperationUserUserDeposit = "/api.admin.service.v1.User/UserDeposit"
 const OperationUserUserWithdraw = "/api.admin.service.v1.User/UserWithdraw"
+const OperationUserUserWithdrawEth = "/api.admin.service.v1.User/UserWithdrawEth"
 
 type UserHTTPServer interface {
 	CreateDownProxy(context.Context, *CreateDownProxyRequest) (*CreateDownProxyReply, error)
@@ -759,6 +760,7 @@ type UserHTTPServer interface {
 	UserBalanceRecordTotal(context.Context, *UserBalanceRecordTotalRequest) (*UserBalanceRecordTotalReply, error)
 	UserDeposit(context.Context, *UserDepositRequest) (*UserDepositReply, error)
 	UserWithdraw(context.Context, *UserWithdrawRequest) (*UserWithdrawReply, error)
+	UserWithdrawEth(context.Context, *UserWithdrawEthRequest) (*UserWithdrawEthReply, error)
 }
 
 func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
@@ -767,6 +769,7 @@ func RegisterUserHTTPServer(s *http.Server, srv UserHTTPServer) {
 	r.POST("/api/goal_admin/user_proxy_create", _User_CreateProxy0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/user_proxy_down_create", _User_CreateDownProxy0_HTTP_Handler(srv))
 	r.POST("/api/goal_admin/user/withdraw", _User_UserWithdraw0_HTTP_Handler(srv))
+	r.GET("/api/goal_admin/user/withdraw_eth", _User_UserWithdrawEth0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_balance_record_total", _User_UserBalanceRecordTotal0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_list", _User_GetUserList0_HTTP_Handler(srv))
 	r.GET("/api/goal_admin/user_proxy_list", _User_GetUserProxyList0_HTTP_Handler(srv))
@@ -862,6 +865,25 @@ func _User_UserWithdraw0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context)
 			return err
 		}
 		reply := out.(*UserWithdrawReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _User_UserWithdrawEth0_HTTP_Handler(srv UserHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UserWithdrawEthRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationUserUserWithdrawEth)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UserWithdrawEth(ctx, req.(*UserWithdrawEthRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UserWithdrawEthReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1060,6 +1082,7 @@ type UserHTTPClient interface {
 	UserBalanceRecordTotal(ctx context.Context, req *UserBalanceRecordTotalRequest, opts ...http.CallOption) (rsp *UserBalanceRecordTotalReply, err error)
 	UserDeposit(ctx context.Context, req *UserDepositRequest, opts ...http.CallOption) (rsp *UserDepositReply, err error)
 	UserWithdraw(ctx context.Context, req *UserWithdrawRequest, opts ...http.CallOption) (rsp *UserWithdrawReply, err error)
+	UserWithdrawEth(ctx context.Context, req *UserWithdrawEthRequest, opts ...http.CallOption) (rsp *UserWithdrawEthReply, err error)
 }
 
 type UserHTTPClientImpl struct {
@@ -1233,6 +1256,19 @@ func (c *UserHTTPClientImpl) UserWithdraw(ctx context.Context, in *UserWithdrawR
 	opts = append(opts, http.Operation(OperationUserUserWithdraw))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *UserHTTPClientImpl) UserWithdrawEth(ctx context.Context, in *UserWithdrawEthRequest, opts ...http.CallOption) (*UserWithdrawEthReply, error) {
+	var out UserWithdrawEthReply
+	pattern := "/api/goal_admin/user/withdraw_eth"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationUserUserWithdrawEth))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

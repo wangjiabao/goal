@@ -9957,6 +9957,212 @@ var _ interface {
 	ErrorName() string
 } = UserWithdrawReplyValidationError{}
 
+// Validate checks the field values on UserWithdrawEthRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UserWithdrawEthRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UserWithdrawEthRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserWithdrawEthRequestMultiError, or nil if none found.
+func (m *UserWithdrawEthRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UserWithdrawEthRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return UserWithdrawEthRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UserWithdrawEthRequestMultiError is an error wrapping multiple validation
+// errors returned by UserWithdrawEthRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UserWithdrawEthRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UserWithdrawEthRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UserWithdrawEthRequestMultiError) AllErrors() []error { return m }
+
+// UserWithdrawEthRequestValidationError is the validation error returned by
+// UserWithdrawEthRequest.Validate if the designated constraints aren't met.
+type UserWithdrawEthRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UserWithdrawEthRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UserWithdrawEthRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UserWithdrawEthRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UserWithdrawEthRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UserWithdrawEthRequestValidationError) ErrorName() string {
+	return "UserWithdrawEthRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UserWithdrawEthRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUserWithdrawEthRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UserWithdrawEthRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UserWithdrawEthRequestValidationError{}
+
+// Validate checks the field values on UserWithdrawEthReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UserWithdrawEthReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UserWithdrawEthReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UserWithdrawEthReplyMultiError, or nil if none found.
+func (m *UserWithdrawEthReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UserWithdrawEthReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Result
+
+	if len(errors) > 0 {
+		return UserWithdrawEthReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// UserWithdrawEthReplyMultiError is an error wrapping multiple validation
+// errors returned by UserWithdrawEthReply.ValidateAll() if the designated
+// constraints aren't met.
+type UserWithdrawEthReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UserWithdrawEthReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UserWithdrawEthReplyMultiError) AllErrors() []error { return m }
+
+// UserWithdrawEthReplyValidationError is the validation error returned by
+// UserWithdrawEthReply.Validate if the designated constraints aren't met.
+type UserWithdrawEthReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UserWithdrawEthReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UserWithdrawEthReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UserWithdrawEthReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UserWithdrawEthReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UserWithdrawEthReplyValidationError) ErrorName() string {
+	return "UserWithdrawEthReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UserWithdrawEthReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUserWithdrawEthReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UserWithdrawEthReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UserWithdrawEthReplyValidationError{}
+
 // Validate checks the field values on UserBalanceRecordTotalRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
