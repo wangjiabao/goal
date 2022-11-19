@@ -750,7 +750,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			Id:         v.ID,
 			GameName:   gameName,
 			Status:     v.Status,
-			Pay:        v.Pay / base, // 展示余额是除以系统金额基数返回
+			Pay:        fmt.Sprintf("%.2f", float64(v.Pay)/float64(base)), // 展示余额是除以系统金额基数返回
 			PlayId:     v.PlayId,
 			CreatedAt:  v.CreatedAt.Format("2006-01-02 15:04:05"),
 			RedTeamId:  RedTeamId,
@@ -760,7 +760,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			Goal:       v.Goal,
 			TeamId:     v.TeamId,
 			SortId:     v.SortId,
-			Amount:     tmpAmount / base,
+			Amount:     fmt.Sprintf("%.2f", float64(tmpAmount)/float64(base)),
 		})
 	}
 
