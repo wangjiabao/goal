@@ -561,7 +561,7 @@ func (u *UserUseCase) CreateDownProxy(ctx context.Context, user *User, req *v1.C
 		return nil, errors.New(500, "USER_NO_FOUND", "用户地址有误")
 	}
 
-	systemConfig, err = u.systemConfigRepo.GetSystemConfigByNames(ctx, "result_play_rate")
+	systemConfig, err = u.systemConfigRepo.GetSystemConfigByNames(ctx, "down_proxy_rate")
 	if _, ok = systemConfig["result_play_rate"]; !ok {
 		return nil, errors.New(500, "USER_NO_FOUND", "配置有误")
 	}
