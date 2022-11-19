@@ -553,6 +553,7 @@ func (u *UserUseCase) CreateDownProxy(ctx context.Context, user *User, req *v1.C
 		rate         int64 = 5
 		err          error
 		proxyUser    *User
+		userProxy    *UserProxy
 		ok           bool
 		systemConfig map[string]*SystemConfig
 	)
@@ -566,7 +567,10 @@ func (u *UserUseCase) CreateDownProxy(ctx context.Context, user *User, req *v1.C
 		return nil, errors.New(500, "USER_NO_FOUND", "配置有误")
 	}
 	rate = systemConfig["down_proxy_rate"].Value
-
+	userProxy, err = u.repo.GetUserProxyByUserId(ctx, proxyUser.ID)
+	if nil != userProxy && userProxy.UpUserId == user.ID {
+		return nil, errors.New(500, "USER_NO_FOUND", "用户已是代理")
+	}
 	_, err = u.repo.CreateDownUserProxy(ctx, proxyUser.ID, user.ID, rate)
 	if err != nil {
 		return nil, err

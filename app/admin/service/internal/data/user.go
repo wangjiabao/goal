@@ -743,8 +743,9 @@ func (u *UserRepo) GetUserProxyByUserId(ctx context.Context, userId int64) (*biz
 	}
 
 	return &biz.UserProxy{
-		UserId: userProxy.UserId,
-		Rate:   userProxy.Rate,
+		UserId:   userProxy.UserId,
+		UpUserId: userProxy.UpUserId,
+		Rate:     userProxy.Rate,
 	}, nil
 }
 
