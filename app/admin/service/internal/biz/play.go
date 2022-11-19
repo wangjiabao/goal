@@ -411,7 +411,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 		goalBalanceRecordId     int64
 	)
 
-	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "recommend_rate_zero", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third", "sort_play_rate")
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "sort_play_rate")
 	if _, ok = systemConfig["sort_play_rate"]; !ok {
 		return false
 	}
@@ -537,18 +537,68 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 					num++
 				}
 
-				if (16 == num && 16 == len(tmpTeams) && "team_sort_sixteen" == playSort.Type) || (8 == num && 8 == len(tmpTeams) && "team_sort_eight" == playSort.Type) { // 16强或8强全部猜中并且没发奖励
-					if 999999999 != v.UserId {
-						winTotalAmount += v.Pay
+				if 16 == len(tmpTeams) && "team_sort_eight" == playSort.Type { // 16强或8强全部猜中并且没发奖励
+					amountBaseTmp := int64(0)
+					if 8 == num {
+						amountBaseTmp += 100
+					} else if 7 == num {
+						amountBaseTmp += 70
+					} else if 6 == num {
+						amountBaseTmp += 10
 					}
-					if strings.EqualFold("default", v.Status) {
-						winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
-							AmountBase int64
-							Pay        int64
-							UserId     int64
-							Id         int64
-						}{AmountBase: 100, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
+
+					if 0 < amountBaseTmp {
+						if 999999999 != v.UserId {
+							winTotalAmount += v.Pay
+						}
+						if strings.EqualFold("default", v.Status) {
+							winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
+								AmountBase int64
+								Pay        int64
+								UserId     int64
+								Id         int64
+							}{AmountBase: amountBaseTmp, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
+
+						}
+					} else {
+						_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.ID)
 					}
+
+				} else if 8 == len(tmpTeams) && "team_sort_sixteen" == playSort.Type {
+					amountBaseTmp := int64(0)
+					if 10 == num {
+						amountBaseTmp += 1
+					} else if 11 == num {
+						amountBaseTmp += 3
+					} else if 12 == num {
+						amountBaseTmp += 6
+					} else if 13 == num {
+						amountBaseTmp += 12
+					} else if 14 == num {
+						amountBaseTmp += 22
+					} else if 15 == num {
+						amountBaseTmp += 42
+					} else if 16 == num {
+						amountBaseTmp += 100
+					}
+
+					if 0 < amountBaseTmp {
+						if 999999999 != v.UserId {
+							winTotalAmount += v.Pay
+						}
+						if strings.EqualFold("default", v.Status) {
+							winNoRewardedPlayGameTeamResultUserRel = append(winNoRewardedPlayGameTeamResultUserRel, &struct {
+								AmountBase int64
+								Pay        int64
+								UserId     int64
+								Id         int64
+							}{AmountBase: amountBaseTmp, Pay: v.Pay, UserId: v.UserId, Id: v.ID})
+
+						}
+					} else {
+						_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.ID)
+					}
+
 				} else {
 					_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.ID)
 				}
