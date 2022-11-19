@@ -564,7 +564,7 @@ message GetPlayRelListReply {
 	message Item {
 		string address = 1;
 		string status = 2;
-		int64 Pay = 3;
+		string Pay = 3;
 	}
 }
 
@@ -622,7 +622,7 @@ message GetUserWithdrawListReply {
 		string tx = 6;
 		string address = 5;
 		string status = 2;
-		int64 amount = 3;
+		string amount = 3;
 		string createdAt = 4;
 	}
 }
@@ -638,8 +638,8 @@ message GetUserBalanceRecordReply {
 	repeated Item items = 1;
 	message Item {
 		string address = 7;
-		int64 balance = 1;
-		int64 amount = 2;
+		string balance = 1;
+		string amount = 2;
 		string reason = 3;
 		string type = 4;
 		string CreatedAt = 6;

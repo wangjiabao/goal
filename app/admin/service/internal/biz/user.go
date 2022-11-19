@@ -229,9 +229,9 @@ func (u *UserUseCase) GetUserBalanceRecord(ctx context.Context, req *v1.GetUserB
 		}
 		res.Items = append(res.Items, &v1.GetUserBalanceRecordReply_Item{
 			Address:   tempAddress,
-			Balance:   item.Balance / base,
+			Balance:   fmt.Sprintf("%.2f", float64(item.Balance)/float64(base)),
 			Type:      item.Type,
-			Amount:    item.Amount / base,
+			Amount:    fmt.Sprintf("%.2f", float64(item.Amount)/float64(base)),
 			Reason:    item.Reason,
 			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
@@ -392,7 +392,7 @@ func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 			Address:   tempAddress,
 			Status:    item.Status,
 			ID:        item.ID,
-			Amount:    item.Amount / base,
+			Amount:    fmt.Sprintf("%.2f", float64(item.Amount)/float64(base)),
 			Tx:        item.Tx,
 			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
 		})

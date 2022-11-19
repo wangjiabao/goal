@@ -1613,8 +1613,7 @@ components:
                 status:
                     type: string
                 Pay:
-                    type: integer
-                    format: int64
+                    type: string
         GetPlaySortListReply:
             type: object
             properties:
@@ -1701,11 +1700,9 @@ components:
                 address:
                     type: string
                 balance:
-                    type: integer
-                    format: int64
+                    type: string
                 amount:
-                    type: integer
-                    format: int64
+                    type: string
                 reason:
                     type: string
                 type:
@@ -1825,8 +1822,7 @@ components:
                 status:
                     type: string
                 amount:
-                    type: integer
-                    format: int64
+                    type: string
                 createdAt:
                     type: string
         GoogleProtobufAny:

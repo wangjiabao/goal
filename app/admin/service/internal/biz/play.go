@@ -3,6 +3,7 @@ package biz
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
@@ -1891,7 +1892,7 @@ func (p *PlayUseCase) GetPlayUserRelList(ctx context.Context, req *v1.GetPlayRel
 		}
 		res.Items = append(res.Items, &v1.GetPlayRelListReply_Item{
 			Address: tempAddress,
-			Pay:     item.Pay / base,
+			Pay:     fmt.Sprintf("%.2f", float64(item.Pay)/float64(base)),
 			Status:  item.Status,
 		})
 	}
