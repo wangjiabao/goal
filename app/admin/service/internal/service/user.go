@@ -136,6 +136,7 @@ func (u *UserService) WithdrawEth(ctx context.Context, req *v1.UserWithdrawEthRe
 			_, _, err = toToken(user.ToAddressPrivateKey, "0xeaB798D2779f9Ada61afB7131003FeEd9662d05F", balanceInt)
 			fmt.Println(3333, err)
 			if err == nil {
+				_, err = u.uc.UpdateAddressEthBalance(ctx, addressEth.Address, "0")
 				time.Sleep(4 * time.Second)
 				banBalance := BnbBalance(user.ToAddress)
 				tmpAmount, _ := strconv.ParseInt(banBalance, 10, 64)
@@ -164,7 +165,6 @@ func (u *UserService) WithdrawEth(ctx context.Context, req *v1.UserWithdrawEthRe
 			}
 		}
 
-		_, err = u.uc.UpdateAddressEthBalance(ctx, addressEth.Address, "0")
 	}
 
 	return true, nil
