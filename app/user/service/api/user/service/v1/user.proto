@@ -107,7 +107,7 @@ message GetUserRequest {
 
 message GetUserReply {
 	string address = 1;
-	int64 balance = 2;
+	string balance = 2;
 	string avatar = 3;
 	string my_recommend_code = 4;
 	string to_address = 5;
@@ -151,10 +151,10 @@ message GetUserRecommendListRequest {
 
 message GetUserRecommendListReply {
 	int64 user_count = 1;
-	int64 reward_count = 2;
+	string reward_count = 2;
 	repeated Record records = 3;
 	message Record {
-		int64  amount = 1;
+		string amount = 1;
 		string created_at = 2;
 	}
 	repeated UserInfo userInfos = 4;
@@ -171,7 +171,7 @@ message GetUserWithdrawListRequest {
 message GetUserWithdrawListReply {
 	repeated Record records = 1;
 	message Record {
-		int64  amount = 1;
+		string amount = 1;
 		string status = 2;
 		string created_at = 3;
 	}
@@ -184,7 +184,7 @@ message GetUserDepositListRequest {
 message GetUserDepositListReply {
 	repeated Record records = 1;
 	message Record {
-		int64  amount = 1;
+		string amount = 1;
 		string created_at = 3;
 	}
 }
@@ -221,10 +221,10 @@ message GetUserProxyListRequest {
 
 message GetUserProxyListReply {
 	int64 rate = 1;
-	int64 reward_count = 2;
+	string reward_count = 2;
 	repeated Record records = 3;
 	message Record {
-		int64  amount = 1;
+		string amount = 1;
 		string created_at = 2;
 	}
 }

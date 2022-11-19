@@ -205,7 +205,7 @@ func (uc *UserUseCase) GetUserWithInfoAndBalance(ctx context.Context, u *User) (
 	encodeString := base64.StdEncoding.EncodeToString(codeByte)
 	return &v1.GetUserReply{
 		Address:         user.Address,
-		Balance:         userBalance.Balance / base,
+		Balance:         fmt.Sprintf("%.2f", float64(userBalance.Balance)/float64(base)),
 		Avatar:          userInfo.Avatar,
 		MyRecommendCode: encodeString,
 		ToAddress:       user.ToAddress,
@@ -309,7 +309,7 @@ func (uc *UserUseCase) WithdrawList(ctx context.Context, u *User, req *v1.GetUse
 	for _, v := range userWithDraw {
 		res.Records = append(res.Records, &v1.GetUserWithdrawListReply_Record{
 			Status:    v.Status,
-			Amount:    v.Amount / base,
+			Amount:    fmt.Sprintf("%.2f", float64(v.Amount)/float64(base)),
 			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
@@ -333,7 +333,7 @@ func (uc *UserUseCase) DepositList(ctx context.Context, u *User, req *v1.GetUser
 
 	for _, v := range userBalanceRecord {
 		res.Records = append(res.Records, &v1.GetUserDepositListReply_Record{
-			Amount:    v.Amount / base,
+			Amount:    fmt.Sprintf("%.2f", float64(v.Amount)/float64(base)),
 			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
@@ -363,14 +363,16 @@ func (uc *UserUseCase) GetUserRecommendList(ctx context.Context, u *User, req *v
 		Records: make([]*v1.GetUserRecommendListReply_Record, 0),
 	}
 
+	var tmpRewardCount float64
 	for _, v := range userBalanceRecord {
-		tmpAmount := v.Amount / base
-		res.RewardCount += tmpAmount
+		tmpAmount := float64(v.Amount) / float64(base)
+		tmpRewardCount += tmpAmount
 		res.Records = append(res.Records, &v1.GetUserRecommendListReply_Record{
-			Amount:    tmpAmount,
+			Amount:    fmt.Sprintf("%.2f", tmpAmount),
 			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
+	res.RewardCount = fmt.Sprintf("%.2f", tmpRewardCount)
 
 	for _, v := range recommendUserInfo {
 		userId = append(userId, v.UserId)
@@ -521,15 +523,17 @@ func (uc *UserUseCase) GetUserProxyList(ctx context.Context, u *User, req *v1.Ge
 		Records: make([]*v1.GetUserProxyListReply_Record, 0),
 	}
 
+	var tmpRewardCount float64
 	for _, v := range userBalanceRecord {
-		tmpAmount := v.Amount / base
-		res.RewardCount += tmpAmount
+		tmpAmount := float64(v.Amount) / float64(base)
+		tmpRewardCount += tmpAmount
 		res.Records = append(res.Records, &v1.GetUserProxyListReply_Record{
-			Amount:    tmpAmount,
+			Amount:    fmt.Sprintf("%.2f", tmpAmount),
 			CreatedAt: v.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 
+	res.RewardCount = fmt.Sprintf("%.2f", tmpRewardCount)
 	return res, nil
 }
 

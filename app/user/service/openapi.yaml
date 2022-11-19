@@ -315,8 +315,7 @@ components:
             type: object
             properties:
                 amount:
-                    type: integer
-                    format: int64
+                    type: string
                 createdAt:
                     type: string
         GetUserProxyConfigListReply:
@@ -341,8 +340,7 @@ components:
                     type: integer
                     format: int64
                 rewardCount:
-                    type: integer
-                    format: int64
+                    type: string
                 records:
                     type: array
                     items:
@@ -351,8 +349,7 @@ components:
             type: object
             properties:
                 amount:
-                    type: integer
-                    format: int64
+                    type: string
                 createdAt:
                     type: string
         GetUserRecommendListReply:
@@ -362,8 +359,7 @@ components:
                     type: integer
                     format: int64
                 rewardCount:
-                    type: integer
-                    format: int64
+                    type: string
                 records:
                     type: array
                     items:
@@ -376,8 +372,7 @@ components:
             type: object
             properties:
                 amount:
-                    type: integer
-                    format: int64
+                    type: string
                 createdAt:
                     type: string
         GetUserRecommendListReply_UserInfo:
@@ -393,8 +388,7 @@ components:
                 address:
                     type: string
                 balance:
-                    type: integer
-                    format: int64
+                    type: string
                 avatar:
                     type: string
                 myRecommendCode:
@@ -412,8 +406,7 @@ components:
             type: object
             properties:
                 amount:
-                    type: integer
-                    format: int64
+                    type: string
                 status:
                     type: string
                 createdAt:
