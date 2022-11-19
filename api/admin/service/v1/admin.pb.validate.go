@@ -13179,6 +13179,8 @@ func (m *GetUserProxyListReply_Item) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for UserId
+
 	// no validation rules for Address
 
 	// no validation rules for CreatedAt

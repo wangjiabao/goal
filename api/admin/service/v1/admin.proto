@@ -653,6 +653,7 @@ message GetUserProxyListRequest {
 message GetUserProxyListReply {
 	repeated Item items = 1;
 	message Item {
+		int64 userId = 3;
 		string address = 2;
 		string CreatedAt = 4;
 		int64 rate = 1;

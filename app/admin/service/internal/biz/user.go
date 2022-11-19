@@ -318,6 +318,7 @@ func (u *UserUseCase) GetUserProxyList(ctx context.Context, req *v1.GetUserProxy
 		}
 		res.Items = append(res.Items, &v1.GetUserProxyListReply_Item{
 			Address:   tempAddress,
+			UserId:    item.UserId,
 			Rate:      item.Rate,
 			CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
