@@ -725,6 +725,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 
 				fmt.Println(v.ID, balanceRecordIdRelScore)
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId]; ok {
+					fmt.Println(v.ID, userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId])
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId].Amount
 				}
 			}
@@ -734,6 +735,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 
 				fmt.Println(v.ID, balanceRecordIdRelResult[v.ID])
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelResult[v.ID].RecordId]; ok {
+					fmt.Println(v.ID, userBalanceRecordGoalReward[balanceRecordIdRelResult[v.ID].RecordId])
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelResult[v.ID].RecordId].Amount
 				}
 			}
@@ -742,6 +744,8 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			if _, ok = balanceRecordIdRelGoal[v.ID]; ok {
 				fmt.Println(v.ID, balanceRecordIdRelGoal[v.ID])
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId]; ok {
+
+					fmt.Println(v.ID, userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId])
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId].Amount
 				}
 			}
@@ -751,6 +755,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 
 				fmt.Println(v.ID, balanceRecordIdRelSort[v.ID])
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId]; ok {
+					fmt.Println(v.ID, userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId])
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId].Amount
 				}
 			}
