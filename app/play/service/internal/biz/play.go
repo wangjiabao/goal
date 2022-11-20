@@ -725,7 +725,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 
 				fmt.Println(v.ID, balanceRecordIdRelScore)
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId]; ok {
-					fmt.Println(v.ID, userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId])
+					fmt.Println(v.ID, balanceRecordIdRelScore[v.ID], userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId])
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId].Amount
 				}
 			}
