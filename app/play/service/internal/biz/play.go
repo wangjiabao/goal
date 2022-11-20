@@ -759,7 +759,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			Goal:       v.Goal,
 			TeamId:     v.TeamId,
 			SortId:     v.SortId,
-			Amount:     fmt.Sprintf("%.2f", float64(tmpAmount)/float64(base)),
+			Amount:     tmpAmount,
 		})
 	}
 
