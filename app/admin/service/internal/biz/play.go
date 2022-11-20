@@ -487,39 +487,6 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 			continue
 		}
 
-		// 不足两人退钱
-		tmpTotalUserIdMap := make(map[int64]int64, 0)
-		var tmpBackedUser []*PlayGameTeamSortUserRel
-		for _, v := range playUserRel {
-			if 999999999 != v.UserId {
-				tmpTotalUserIdMap[v.UserId] = v.UserId
-			}
-			if strings.EqualFold("default", v.Status) {
-				tmpBackedUser = append(tmpBackedUser, v)
-			}
-		}
-		if 2 > len(tmpTotalUserIdMap) {
-			for _, v := range tmpBackedUser {
-				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
-						return err
-					}
-					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, playSort.Type, v.ID); nil != err {
-						return err
-					}
-					if res := p.playGameTeamSortUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
-						return res
-					}
-					return nil
-				}); nil != err {
-					continue
-				}
-			}
-
-			continue
-		}
-
-		// 解析中奖人
 		for _, v := range playUserRel {
 			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 				userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, v.UserId) // 获取推荐关系
@@ -610,6 +577,42 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 			}); nil != err {
 				continue
 			}
+		}
+
+		// 不足两人退钱
+		tmpTotalUserIdMap := make(map[int64]int64, 0)
+		var tmpBackedUser []*PlayGameTeamSortUserRel
+		for _, v := range playUserRel {
+			if 999999999 != v.UserId {
+				tmpTotalUserIdMap[v.UserId] = v.UserId
+			}
+			if strings.EqualFold("default", v.Status) {
+				tmpBackedUser = append(tmpBackedUser, v)
+			}
+		}
+		if 2 > len(tmpTotalUserIdMap) {
+			for _, v := range tmpBackedUser {
+				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
+						return err
+					}
+					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, playSort.Type, v.ID); nil != err {
+						return err
+					}
+					if res := p.playGameTeamSortUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+						return res
+					}
+					return nil
+				}); nil != err {
+					continue
+				}
+			}
+
+			continue
+		}
+
+		// 解析中奖人
+		for _, v := range playUserRel {
 
 			tmpTeams := strings.Split(v.Content, ":") // 解析
 			if "team_sort_three" == playSort.Type {
@@ -950,39 +953,6 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 			continue
 		}
 
-		// 不足两人退钱，排除加池子
-		tmpTotalUserIdMap := make(map[int64]int64, 0)
-		var tmpBackedUser []*PlayGameScoreUserRel
-		for _, v := range playUserRel {
-			if 999999999 != v.UserId {
-				tmpTotalUserIdMap[v.UserId] = v.UserId
-			}
-			if strings.EqualFold("default", v.Status) {
-				tmpBackedUser = append(tmpBackedUser, v)
-			}
-		}
-
-		if 2 > len(tmpTotalUserIdMap) {
-			for _, v := range tmpBackedUser {
-				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
-						return err
-					}
-					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_score", v.ID); nil != err {
-						return err
-					}
-					if res := p.playGameScoreUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
-						return res
-					}
-					return nil
-				}); nil != err {
-					continue
-				}
-			}
-
-			continue
-		}
-
 		for _, v := range playUserRel {
 			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 				userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, v.UserId) // 获取推荐关系
@@ -1073,7 +1043,42 @@ func (p *PlayUseCase) grantTypeGameScore(ctx context.Context, game *Game, play [
 			}); nil != err {
 				continue
 			}
+		}
 
+		// 不足两人退钱，排除加池子
+		tmpTotalUserIdMap := make(map[int64]int64, 0)
+		var tmpBackedUser []*PlayGameScoreUserRel
+		for _, v := range playUserRel {
+			if 999999999 != v.UserId {
+				tmpTotalUserIdMap[v.UserId] = v.UserId
+			}
+			if strings.EqualFold("default", v.Status) {
+				tmpBackedUser = append(tmpBackedUser, v)
+			}
+		}
+
+		if 2 > len(tmpTotalUserIdMap) {
+			for _, v := range tmpBackedUser {
+				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
+						return err
+					}
+					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_score", v.ID); nil != err {
+						return err
+					}
+					if res := p.playGameScoreUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+						return res
+					}
+					return nil
+				}); nil != err {
+					continue
+				}
+			}
+
+			continue
+		}
+
+		for _, v := range playUserRel {
 			poolAmount += v.Pay
 			if strings.EqualFold(game.Result, v.Content) { // 判断是否猜中
 				if 999999999 != v.UserId {
@@ -1286,38 +1291,6 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 			continue
 		}
 
-		// 不足两人退钱
-		tmpTotalUserIdMap := make(map[int64]int64, 0)
-		var tmpBackedUser []*PlayGameTeamResultUserRel
-		for _, v := range playUserRel {
-			if 999999999 != v.UserId {
-				tmpTotalUserIdMap[v.UserId] = v.UserId
-			}
-			if strings.EqualFold("default", v.Status) {
-				tmpBackedUser = append(tmpBackedUser, v)
-			}
-		}
-		if 2 > len(tmpTotalUserIdMap) {
-			for _, v := range tmpBackedUser {
-				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
-						return err
-					}
-					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_team_result", v.ID); nil != err {
-						return err
-					}
-					if res := p.playGameTeamResultUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
-						return res
-					}
-					return nil
-				}); nil != err {
-					continue
-				}
-			}
-
-			continue
-		}
-
 		for _, v := range playUserRel {
 			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 				userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, v.UserId) // 获取推荐关系
@@ -1408,7 +1381,41 @@ func (p *PlayUseCase) grantTypeGameResult(ctx context.Context, game *Game, play 
 			}); nil != err {
 				continue
 			}
+		}
 
+		// 不足两人退钱
+		tmpTotalUserIdMap := make(map[int64]int64, 0)
+		var tmpBackedUser []*PlayGameTeamResultUserRel
+		for _, v := range playUserRel {
+			if 999999999 != v.UserId {
+				tmpTotalUserIdMap[v.UserId] = v.UserId
+			}
+			if strings.EqualFold("default", v.Status) {
+				tmpBackedUser = append(tmpBackedUser, v)
+			}
+		}
+		if 2 > len(tmpTotalUserIdMap) {
+			for _, v := range tmpBackedUser {
+				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
+						return err
+					}
+					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, "game_team_result", v.ID); nil != err {
+						return err
+					}
+					if res := p.playGameTeamResultUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+						return res
+					}
+					return nil
+				}); nil != err {
+					continue
+				}
+			}
+
+			continue
+		}
+
+		for _, v := range playUserRel {
 			if strings.EqualFold(content, v.Content) { // 判断是否猜中
 				if 999999999 != v.UserId {
 					winTotalAmount += v.Pay
@@ -1647,41 +1654,7 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 			continue
 		}
 
-		// 不足两人退钱
-		tmpTotalUserIdMap := make(map[int64]int64, 0)
-		var tmpBackedUser []*PlayGameTeamGoalUserRel
 		for _, v := range playUserRel {
-			if 999999999 != v.UserId {
-				tmpTotalUserIdMap[v.UserId] = v.UserId
-			}
-			if strings.EqualFold("default", v.Status) {
-				tmpBackedUser = append(tmpBackedUser, v)
-			}
-		}
-		if 2 > len(tmpTotalUserIdMap) {
-			for _, v := range tmpBackedUser {
-				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
-						return err
-					}
-					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, v.Type, v.ID); nil != err {
-						return err
-					}
-
-					if res := p.playGameTeamGoalUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
-						return res
-					}
-					return nil
-				}); nil != err {
-					continue
-				}
-			}
-
-			continue
-		}
-
-		for _, v := range playUserRel { // 当前玩法，全为上半场或下半场或全场
-
 			if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 				userInfo, err = p.userInfoRepo.GetUserInfoByUserId(ctx, v.UserId) // 获取推荐关系
 				for _, ruv := range strings.Split(userInfo.RecommendCode, "GA") { // 解析userId, 取前三代
@@ -1771,7 +1744,42 @@ func (p *PlayUseCase) grantTypeGameGoalHandle(ctx context.Context, playGameTeamG
 			}); nil != err {
 				continue
 			}
+		}
 
+		// 不足两人退钱
+		tmpTotalUserIdMap := make(map[int64]int64, 0)
+		var tmpBackedUser []*PlayGameTeamGoalUserRel
+		for _, v := range playUserRel {
+			if 999999999 != v.UserId {
+				tmpTotalUserIdMap[v.UserId] = v.UserId
+			}
+			if strings.EqualFold("default", v.Status) {
+				tmpBackedUser = append(tmpBackedUser, v)
+			}
+		}
+		if 2 > len(tmpTotalUserIdMap) {
+			for _, v := range tmpBackedUser {
+				if err = p.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					if goalBalanceRecordId, err = p.userBalanceRepo.TransferIntoUserBack(ctx, v.UserId, v.OriginPay); nil != err {
+						return err
+					}
+					if err = p.userBalanceRepo.CreateBalanceRecordIdRel(ctx, goalBalanceRecordId, v.Type, v.ID); nil != err {
+						return err
+					}
+
+					if res := p.playGameTeamGoalUserRelRepo.SetRewarded(ctx, v.ID); nil != res {
+						return res
+					}
+					return nil
+				}); nil != err {
+					continue
+				}
+			}
+
+			continue
+		}
+
+		for _, v := range playUserRel { // 当前玩法，全为上半场或下半场或全场
 			if strings.EqualFold("game_team_goal_all", v.Type) { // 判断是否猜中
 				if v.TeamId == game.RedTeamId && v.Goal == game.RedTeamUpGoal+game.RedTeamDownGoal {
 					if 999999999 != v.UserId {
