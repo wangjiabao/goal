@@ -150,31 +150,31 @@ func NewUserInfoRepo(data *Data, logger log.Logger) biz.UserInfoRepo {
 	}
 }
 
-func (up *UserProxyRepo) GetUserProxyAndDown(ctx context.Context) ([]*biz.UserProxy, map[int64][]*biz.UserProxy, error) {
+func (up *UserProxyRepo) GetUserProxyAndDown(ctx context.Context) (map[int64]*biz.UserProxy, map[int64]*biz.UserProxy, error) {
 	var l []*UserProxy
 	if err := up.data.DB(ctx).Table("user_proxy").Find(&l).Error; err != nil {
 		return nil, nil, errors.InternalServer("SELECT_PLAY_ERROR", "查询代理失败")
 	}
 
-	ul := make([]*biz.UserProxy, 0)
-	dl := make(map[int64][]*biz.UserProxy, 0)
+	ul := make(map[int64]*biz.UserProxy, 0)
+	dl := make(map[int64]*biz.UserProxy, 0)
 	for _, v := range l {
 		if 0 != v.UpUserId {
-			dl[v.UpUserId] = append(dl[v.UpUserId], &biz.UserProxy{
+			dl[v.UserId] = &biz.UserProxy{
 				ID:       v.ID,
 				UserId:   v.UserId,
 				UpUserId: v.UpUserId,
 				Rate:     v.Rate,
-			})
+			}
 			continue
 		}
 
-		ul = append(ul, &biz.UserProxy{
+		ul[v.UserId] = &biz.UserProxy{
 			ID:       v.ID,
 			UserId:   v.UserId,
 			UpUserId: v.UpUserId,
 			Rate:     v.Rate,
-		})
+		}
 	}
 	return ul, dl, nil
 }
@@ -422,6 +422,36 @@ func (ub *UserBalanceRepo) TransferIntoUserBack(ctx context.Context, userId int6
 	userBalanceRecode.Type = "transfer_into"
 	userBalanceRecode.Reason = "user_goal_back"
 	userBalanceRecode.Amount = amount
+	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
+	if err != nil {
+		return 0, err
+	}
+
+	return userBalanceRecode.ID, nil
+}
+
+// TransferIntoUserPlayProxyReward 在事务中使用
+func (ub *UserBalanceRepo) TransferIntoUserPlayProxyReward(ctx context.Context, userId int64, amount int64) (int64, error) {
+	var err error
+	if err = ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		// UpdateColumn("balance", gorm.Expr("balance + ?", pay))
+		Updates(map[string]interface{}{"balance": gorm.Expr("balance + ?", amount)}).Error; nil != err {
+		return 0, errors.NotFound("user balance err", "user balance not found")
+	}
+
+	var userBalance UserBalance
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	if err != nil {
+		return 0, err
+	}
+
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = userBalance.Balance
+	userBalanceRecode.UserId = userBalance.UserId
+	userBalanceRecode.Type = "transfer_into"
+	userBalanceRecode.Amount = amount
+	userBalanceRecode.Reason = "proxy_user_play_reward"
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
 		return 0, err
