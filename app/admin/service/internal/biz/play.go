@@ -626,13 +626,13 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 					}
 					if _, ok := contentTeamId[tmp]; ok && k == contentTeamId[tmp] { // 不存在
 						if 0 == k {
-							amountBaseTmp += 50
+							amountBaseTmp = 50
 							break
 						} else if 1 == k {
-							amountBaseTmp += 30
+							amountBaseTmp = 30
 							break
 						} else if 2 == k {
-							amountBaseTmp += 20
+							amountBaseTmp = 20
 							break
 						}
 					}
@@ -671,11 +671,11 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 				if 8 == len(tmpTeams) && "team_sort_eight" == playSort.Type { // 16强或8强全部猜中并且没发奖励
 					amountBaseTmp := int64(0)
 					if 8 == num {
-						amountBaseTmp += 100
+						amountBaseTmp = 60
 					} else if 7 == num {
-						amountBaseTmp += 70
+						amountBaseTmp = 30
 					} else if 6 == num {
-						amountBaseTmp += 10
+						amountBaseTmp = 10
 					}
 
 					if 0 < amountBaseTmp {
@@ -699,19 +699,19 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 				} else if 16 == len(tmpTeams) && "team_sort_sixteen" == playSort.Type {
 					amountBaseTmp := int64(0)
 					if 10 == num {
-						amountBaseTmp += 1
+						amountBaseTmp = 1
 					} else if 11 == num {
-						amountBaseTmp += 3
+						amountBaseTmp = 2
 					} else if 12 == num {
-						amountBaseTmp += 6
+						amountBaseTmp = 3
 					} else if 13 == num {
-						amountBaseTmp += 12
+						amountBaseTmp = 6
 					} else if 14 == num {
-						amountBaseTmp += 22
+						amountBaseTmp = 10
 					} else if 15 == num {
-						amountBaseTmp += 42
+						amountBaseTmp = 20
 					} else if 16 == num {
-						amountBaseTmp += 100
+						amountBaseTmp = 60
 					}
 
 					if 0 < amountBaseTmp {
