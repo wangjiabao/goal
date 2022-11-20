@@ -424,7 +424,11 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 		recommendRecordId       int64
 	)
 
-	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx, "sort_play_rate", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third")
+	systemConfig, err = p.systemConfigRepo.GetSystemConfigByNames(ctx,
+		"sort_play_rate", "recommend_rate_first", "recommend_rate_second", "recommend_rate_third",
+		"eight_six", "eight_seven", "eight_eight", "sixteen_ten", "sixteen_eleven", "sixteen_twelve", "sixteen_thirteen",
+		"sixteen_fourteen", "sixteen_fifteen", "sixteen_sixteen",
+	)
 	if _, ok = systemConfig["sort_play_rate"]; !ok {
 		return false
 	}
@@ -444,6 +448,46 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 		return false
 	}
 	rateThird = systemConfig["recommend_rate_third"].Value
+
+	if _, ok = systemConfig["eight_six"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["eight_seven"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["eight_eight"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["sixteen_ten"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["sixteen_eleven"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["sixteen_twelve"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["sixteen_thirteen"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["sixteen_fourteen"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["sixteen_fifteen"]; !ok {
+		return false
+	}
+
+	if _, ok = systemConfig["sixteen_sixteen"]; !ok {
+		return false
+	}
 
 	// 查找代理
 	upUserProxy, downUserProxy, err = p.userProxyRepo.GetUserProxyAndDown(ctx)
@@ -671,11 +715,11 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 				if 8 == len(tmpTeams) && "team_sort_eight" == playSort.Type { // 16强或8强全部猜中并且没发奖励
 					amountBaseTmp := int64(0)
 					if 8 == num {
-						amountBaseTmp = 60
+						amountBaseTmp = systemConfig["eight_eight"].Value
 					} else if 7 == num {
-						amountBaseTmp = 30
+						amountBaseTmp = systemConfig["eight_seven"].Value
 					} else if 6 == num {
-						amountBaseTmp = 10
+						amountBaseTmp = systemConfig["eight_six"].Value
 					}
 
 					if 0 < amountBaseTmp {
@@ -699,19 +743,19 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 				} else if 16 == len(tmpTeams) && "team_sort_sixteen" == playSort.Type {
 					amountBaseTmp := int64(0)
 					if 10 == num {
-						amountBaseTmp = 1
+						amountBaseTmp = systemConfig["sixteen_ten"].Value
 					} else if 11 == num {
-						amountBaseTmp = 2
+						amountBaseTmp = systemConfig["sixteen_eleven"].Value
 					} else if 12 == num {
-						amountBaseTmp = 3
+						amountBaseTmp = systemConfig["sixteen_twelve"].Value
 					} else if 13 == num {
-						amountBaseTmp = 6
+						amountBaseTmp = systemConfig["sixteen_thirteen"].Value
 					} else if 14 == num {
-						amountBaseTmp = 10
+						amountBaseTmp = systemConfig["sixteen_fourteen"].Value
 					} else if 15 == num {
-						amountBaseTmp = 20
+						amountBaseTmp = systemConfig["sixteen_fifteen"].Value
 					} else if 16 == num {
-						amountBaseTmp = 60
+						amountBaseTmp = systemConfig["sixteen_sixteen"].Value
 					}
 
 					if 0 < amountBaseTmp {
