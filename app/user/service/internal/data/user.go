@@ -131,6 +131,7 @@ func (ub *UserBalanceRepo) GetAddressEthBalanceByAddress(ctx context.Context, ad
 		ID:      addressEthBalance.ID,
 		Balance: addressEthBalance.Balance,
 		Address: addressEthBalance.Address,
+		Version: addressEthBalance.Version,
 	}, nil
 }
 
