@@ -645,8 +645,10 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 	}
 
 	var (
-		balanceRecordIdRelSort    map[int64]*BalanceRecordIdRel
-		tmpPlayGameSortUserRelIds []int64
+		balanceRecordIdRelSort        map[int64]*BalanceRecordIdRel
+		balanceRecordIdRelSortEight   map[int64]*BalanceRecordIdRel
+		balanceRecordIdRelSortSixteen map[int64]*BalanceRecordIdRel
+		tmpPlayGameSortUserRelIds     []int64
 	)
 	playGameTeamSortUserRel, err = p.playGameTeamSortUserRelRepo.GetPlayGameTeamSortUserRelByUserId(ctx, userId) // 获取admin创建的玩法
 	for _, v := range playGameTeamSortUserRel {
@@ -666,12 +668,12 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 	for _, v := range balanceRecordIdRelSort {
 		recordIds = append(recordIds, v.RecordId)
 	}
-	balanceRecordIdRelSort, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "team_sort_eight", tmpPlayGameSortUserRelIds...)
-	for _, v := range balanceRecordIdRelSort {
+	balanceRecordIdRelSortEight, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "team_sort_eight", tmpPlayGameSortUserRelIds...)
+	for _, v := range balanceRecordIdRelSortEight {
 		recordIds = append(recordIds, v.RecordId)
 	}
-	balanceRecordIdRelSort, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "team_sort_sixteen", tmpPlayGameSortUserRelIds...)
-	for _, v := range balanceRecordIdRelSort {
+	balanceRecordIdRelSortSixteen, err = p.userBalanceRepo.GetBalanceRecordIdRelMap(ctx, "team_sort_sixteen", tmpPlayGameSortUserRelIds...)
+	for _, v := range balanceRecordIdRelSortSixteen {
 		recordIds = append(recordIds, v.RecordId)
 	}
 
@@ -749,7 +751,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId].Amount
 				}
 			}
-		} else if "team_sort_three" == playType || "team_sort_eight" == playType || "team_sort_sixteen" == playType {
+		} else if "team_sort_three" == playType {
 			fmt.Println(11411, v.ID, balanceRecordIdRelSort, userBalanceRecordGoalReward)
 			if _, ok = balanceRecordIdRelSort[v.ID]; ok {
 
@@ -757,6 +759,26 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId]; ok {
 					fmt.Println(v.ID, userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId])
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId].Amount
+				}
+			}
+		} else if "team_sort_eight" == playType {
+			fmt.Println(11511, v.ID, balanceRecordIdRelSortEight, userBalanceRecordGoalReward)
+			if _, ok = balanceRecordIdRelSortEight[v.ID]; ok {
+
+				fmt.Println(v.ID, balanceRecordIdRelSortEight[v.ID])
+				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelSortEight[v.ID].RecordId]; ok {
+					fmt.Println(v.ID, userBalanceRecordGoalReward[balanceRecordIdRelSortEight[v.ID].RecordId])
+					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelSortEight[v.ID].RecordId].Amount
+				}
+			}
+		} else if "team_sort_sixteen" == playType {
+			fmt.Println(11611, v.ID, balanceRecordIdRelSortSixteen, userBalanceRecordGoalReward)
+			if _, ok = balanceRecordIdRelSortSixteen[v.ID]; ok {
+
+				fmt.Println(v.ID, balanceRecordIdRelSortSixteen[v.ID])
+				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelSortSixteen[v.ID].RecordId]; ok {
+					fmt.Println(v.ID, userBalanceRecordGoalReward[balanceRecordIdRelSortSixteen[v.ID].RecordId])
+					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelSortSixteen[v.ID].RecordId].Amount
 				}
 			}
 		}
