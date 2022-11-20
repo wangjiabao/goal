@@ -739,7 +739,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelResult[v.ID].RecordId].Amount
 				}
 			}
-		} else if "game_team_goal" == playType {
+		} else if "game_team_goal_all" == playType || "game_team_goal_down" == playType || "game_team_goal_up" == playType {
 			fmt.Println(11311)
 			if _, ok = balanceRecordIdRelGoal[v.ID]; ok {
 				fmt.Println(v.ID, balanceRecordIdRelGoal[v.ID])
@@ -749,7 +749,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId].Amount
 				}
 			}
-		} else if "game_team_sort" == playType {
+		} else if "team_sort_three" == playType || "team_sort_eight" == playType || "team_sort_sixteen" == playType {
 			fmt.Println(11311)
 			if _, ok = balanceRecordIdRelSort[v.ID]; ok {
 
