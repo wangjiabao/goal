@@ -391,6 +391,9 @@ components:
                     type: string
                 avatar:
                     type: string
+                roomAmount:
+                    type: integer
+                    format: int64
                 myRecommendCode:
                     type: string
                 toAddress:

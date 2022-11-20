@@ -179,11 +179,13 @@ func ethAccount() (string, string) {
 
 func (uc *UserUseCase) GetUserWithInfoAndBalance(ctx context.Context, u *User) (*v1.GetUserReply, error) {
 	var (
-		user        *User
-		userInfo    *UserInfo
-		userBalance *UserBalance
-		base        int64 = 100000 // 基础精度0.00001 todo 加配置文件
-		err         error
+		user         *User
+		userInfo     *UserInfo
+		userBalance  *UserBalance
+		systemConfig map[string]*SystemConfig
+		base         int64 = 100000 // 基础精度0.00001 todo 加配置文件
+		err          error
+		ok           bool
 	)
 
 	user, err = uc.repo.GetUserById(ctx, u.ID)
@@ -200,6 +202,11 @@ func (uc *UserUseCase) GetUserWithInfoAndBalance(ctx context.Context, u *User) (
 	if err != nil {
 		return nil, err
 	}
+	systemConfig, err = uc.systemConfigRepo.GetSystemConfigByNames(ctx, "room_amount")
+
+	if _, ok = systemConfig["room_amount"]; !ok {
+		return nil, err
+	}
 
 	codeByte := []byte(userInfo.Code)
 	encodeString := base64.StdEncoding.EncodeToString(codeByte)
@@ -208,6 +215,7 @@ func (uc *UserUseCase) GetUserWithInfoAndBalance(ctx context.Context, u *User) (
 		Balance:         fmt.Sprintf("%.2f", float64(userBalance.Balance)/float64(base)),
 		Avatar:          userInfo.Avatar,
 		MyRecommendCode: encodeString,
+		RoomAmount:      systemConfig["room_amount"].Value,
 		ToAddress:       user.ToAddress,
 	}, nil
 }

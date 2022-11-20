@@ -109,6 +109,7 @@ message GetUserReply {
 	string address = 1;
 	string balance = 2;
 	string avatar = 3;
+	int64  roomAmount = 6;
 	string my_recommend_code = 4;
 	string to_address = 5;
 }
