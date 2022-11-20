@@ -668,7 +668,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 					num++
 				}
 
-				if 16 == len(tmpTeams) && "team_sort_eight" == playSort.Type { // 16强或8强全部猜中并且没发奖励
+				if 8 == len(tmpTeams) && "team_sort_eight" == playSort.Type { // 16强或8强全部猜中并且没发奖励
 					amountBaseTmp := int64(0)
 					if 8 == num {
 						amountBaseTmp += 100
@@ -696,7 +696,7 @@ func (p *PlayUseCase) grantTypeGameSort(ctx context.Context, playSort *Sort, pla
 						_ = p.playGameTeamSortUserRelRepo.SetNoRewarded(ctx, v.ID)
 					}
 
-				} else if 8 == len(tmpTeams) && "team_sort_sixteen" == playSort.Type {
+				} else if 16 == len(tmpTeams) && "team_sort_sixteen" == playSort.Type {
 					amountBaseTmp := int64(0)
 					if 10 == num {
 						amountBaseTmp += 1

@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/crypto/sha3"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "goal/api/admin/service/v1"
 	"goal/app/admin/service/internal/biz"
@@ -58,9 +57,6 @@ func (u *UserService) Withdraw(ctx context.Context, req *v1.UserWithdrawRequest)
 	userWithdraw, err := u.uc.GetUserWithById(ctx, req.SendBody.Id)
 	if err != nil {
 		return false, err
-	}
-	if "wait" != userWithdraw.Status {
-		return false, errors.New(500, "STATUS ERROR", err.Error())
 	}
 
 	user, err := u.uc.GetUserById(ctx, userWithdraw.UserId)
