@@ -676,7 +676,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 	}
 
 	userBalanceRecordGoalReward, _ = p.userBalanceRepo.GetUserBalanceRecordGoalReward(ctx, recordIds...)
-
+	fmt.Println(userBalanceRecordGoalReward)
 	sort.Sort(playAllTypeUserRel)
 
 	for _, v := range playAllTypeUserRel {
