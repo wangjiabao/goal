@@ -420,7 +420,7 @@ message GetUserPlayListReply {
 		int64 goal = 11;
 		int64 teamId= 12;
 		int64 sort_id = 13;
-		int64 amount = 14;
+		string amount = 14;
 	}
 }
 

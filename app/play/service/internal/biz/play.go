@@ -720,25 +720,36 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 
 		tmpAmount := int64(0)
 		if "game_score" == playType {
+			fmt.Println(1111)
 			if _, ok = balanceRecordIdRelScore[v.ID]; ok {
+
+				fmt.Println(v.ID, balanceRecordIdRelScore)
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId]; ok {
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelScore[v.ID].RecordId].Amount
 				}
 			}
 		} else if "game_team_result" == playType {
+			fmt.Println(11211)
 			if _, ok = balanceRecordIdRelResult[v.ID]; ok {
+
+				fmt.Println(v.ID, balanceRecordIdRelResult[v.ID])
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelResult[v.ID].RecordId]; ok {
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelResult[v.ID].RecordId].Amount
 				}
 			}
 		} else if "game_team_goal" == playType {
+			fmt.Println(11311)
 			if _, ok = balanceRecordIdRelGoal[v.ID]; ok {
+				fmt.Println(v.ID, balanceRecordIdRelGoal[v.ID])
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId]; ok {
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelGoal[v.ID].RecordId].Amount
 				}
 			}
 		} else if "game_team_sort" == playType {
+			fmt.Println(11311)
 			if _, ok = balanceRecordIdRelSort[v.ID]; ok {
+
+				fmt.Println(v.ID, balanceRecordIdRelSort[v.ID])
 				if _, ok = userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId]; ok {
 					tmpAmount = userBalanceRecordGoalReward[balanceRecordIdRelSort[v.ID].RecordId].Amount
 				}
@@ -759,7 +770,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 			Goal:       v.Goal,
 			TeamId:     v.TeamId,
 			SortId:     v.SortId,
-			Amount:     tmpAmount,
+			Amount:     fmt.Sprintf("%.2f", float64(tmpAmount)/float64(base)),
 		})
 	}
 

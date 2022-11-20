@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"goal/app/play/service/internal/biz"
@@ -140,6 +141,7 @@ func (ub *UserBalanceRepo) GetUserBalanceRecordGoalReward(ctx context.Context, i
 	}
 
 	for _, item := range userBalanceRecord {
+		fmt.Println(item)
 		res[item.ID] = &biz.UserBalanceRecord{
 			ID:     item.ID,
 			Amount: item.Amount,
