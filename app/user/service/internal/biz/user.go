@@ -114,16 +114,20 @@ func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAut
 
 	user, err = uc.repo.GetUserByAddress(ctx, u.Address) // 查询用户
 	if nil == user || nil != err {
-		code := req.SendBody.Code // 查询推荐码
-		decodeBytes, err = base64.StdEncoding.DecodeString(code)
-		code = string(decodeBytes)
-		if 0 == len(code) {
-			return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
-		}
+		tmpRecommendCode := ""
+		if "0x032d7e87ddceabc73447782676ab72aDC11D9870" != req.SendBody.Address {
+			code := req.SendBody.Code // 查询推荐码
+			decodeBytes, err = base64.StdEncoding.DecodeString(code)
+			code = string(decodeBytes)
+			if 0 == len(code) {
+				return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+			}
 
-		userInfo, err = uc.uiRepo.GetUserInfoByCode(ctx, code)
-		if err != nil {
-			return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+			userInfo, err = uc.uiRepo.GetUserInfoByCode(ctx, code)
+			if err != nil {
+				return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+			}
+			tmpRecommendCode = userInfo.MyRecommendCode
 		}
 
 		if privateKey, publicAddress = ethAccount(); 0 == len(privateKey) || 0 == len(publicAddress) {
@@ -138,7 +142,7 @@ func (uc *UserUseCase) EthAuthorize(ctx context.Context, u *User, req *v1.EthAut
 				return err
 			}
 
-			userInfo, err = uc.uiRepo.CreateUserInfo(ctx, user, userInfo.MyRecommendCode) // 创建用户信息
+			userInfo, err = uc.uiRepo.CreateUserInfo(ctx, user, tmpRecommendCode) // 创建用户信息
 			if err != nil {
 				return err
 			}
