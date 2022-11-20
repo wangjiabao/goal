@@ -750,7 +750,7 @@ func (p *PlayUseCase) GetUserPlayList(ctx context.Context) (*v1.GetUserPlayListR
 				}
 			}
 		} else if "team_sort_three" == playType || "team_sort_eight" == playType || "team_sort_sixteen" == playType {
-			fmt.Println(11411)
+			fmt.Println(11411, v.ID, balanceRecordIdRelSort, userBalanceRecordGoalReward)
 			if _, ok = balanceRecordIdRelSort[v.ID]; ok {
 
 				fmt.Println(v.ID, balanceRecordIdRelSort[v.ID])
