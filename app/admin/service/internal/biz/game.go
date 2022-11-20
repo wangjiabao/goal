@@ -120,12 +120,16 @@ func (g *GameUseCase) CreateGame(ctx context.Context, req *v1.CreateGameRequest)
 func (g *GameUseCase) UpdateGame(ctx context.Context, req *v1.UpdateGameRequest) (*v1.UpdateGameReply, error) {
 
 	var (
-		err           error
-		game          *Game
-		downStartTime time.Time
-		upEndTime     time.Time
-		startTime     time.Time
-		endTime       time.Time
+		err              error
+		game             *Game
+		downStartTime    time.Time
+		upEndTime        time.Time
+		startTime        time.Time
+		endTime          time.Time
+		RedTeamDownGoal  int64 = 0
+		BlueTeamDownGoal int64 = 0
+		RedTeamUpGoal    int64 = 0
+		BlueTeamUpGoal   int64 = 0
 	)
 
 	startTime, err = time.Parse("2006-01-02 15:04:05", req.SendBody.StartTime) // 时间进行格式校验
@@ -145,6 +149,18 @@ func (g *GameUseCase) UpdateGame(ctx context.Context, req *v1.UpdateGameRequest)
 		return nil, err
 	}
 
+	if 0 < req.SendBody.RedTeamDownGoal {
+		RedTeamDownGoal = req.SendBody.RedTeamDownGoal
+	}
+	if 0 < req.SendBody.BlueTeamDownGoal {
+		BlueTeamDownGoal = req.SendBody.BlueTeamDownGoal
+	}
+	if 0 < req.SendBody.RedTeamUpGoal {
+		RedTeamUpGoal = req.SendBody.RedTeamUpGoal
+	}
+	if 0 < req.SendBody.BlueTeamUpGoal {
+		BlueTeamUpGoal = req.SendBody.BlueTeamUpGoal
+	}
 	if game, err = g.gameRepo.UpdateGame(ctx, &Game{
 		ID:               req.SendBody.GameId,
 		Name:             req.SendBody.Name, // todo 参数校验
@@ -153,10 +169,10 @@ func (g *GameUseCase) UpdateGame(ctx context.Context, req *v1.UpdateGameRequest)
 		StartTime:        startTime,
 		EndTime:          endTime,
 		Status:           req.SendBody.Status,
-		RedTeamDownGoal:  req.SendBody.RedTeamDownGoal,
-		BlueTeamDownGoal: req.SendBody.BlueTeamDownGoal,
-		RedTeamUpGoal:    req.SendBody.RedTeamUpGoal,
-		BlueTeamUpGoal:   req.SendBody.BlueTeamUpGoal,
+		RedTeamDownGoal:  RedTeamDownGoal,
+		BlueTeamDownGoal: BlueTeamDownGoal,
+		RedTeamUpGoal:    RedTeamUpGoal,
+		BlueTeamUpGoal:   BlueTeamUpGoal,
 		WinTeamId:        req.SendBody.WinTeamId,
 	}); nil != err {
 		return nil, err
