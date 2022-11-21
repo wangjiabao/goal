@@ -241,6 +241,8 @@ type UserBalanceRepo interface {
 	WithdrawById(ctx context.Context, id int64) (*UserWithdraw, error)
 	GetUserByToAddress(ctx context.Context, address string) (*User, error)
 	UpdateWithdraw(ctx context.Context, Id int64, status string, tx string) error
+	LockEthBalanceByAddress(ctx context.Context, address string) (bool, error)
+	UnLockEthBalanceByAddress(ctx context.Context, address string) (bool, error)
 	UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error)
 }
 

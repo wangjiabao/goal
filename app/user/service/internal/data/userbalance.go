@@ -35,6 +35,7 @@ type AddressEthBalance struct {
 	Version   int64     `gorm:"type:int;not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+	Status    int64     `gorm:"type:int;not null"`
 }
 
 type UserWithdraw struct {

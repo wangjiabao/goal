@@ -38,6 +38,7 @@ type AddressEthBalance struct {
 	ID      int64
 	Address string
 	Balance string
+	Status  int64
 }
 
 type Pagination struct {
@@ -400,6 +401,14 @@ func (u *UserUseCase) GetUserWithdrawList(ctx context.Context, req *v1.GetUserWi
 	}
 
 	return res, nil
+}
+
+func (u *UserUseCase) LockAddressEthBalance(ctx context.Context, address string) (bool, error) {
+	return u.ubRepo.LockEthBalanceByAddress(ctx, address)
+}
+
+func (u *UserUseCase) UnLockAddressEthBalance(ctx context.Context, address string) (bool, error) {
+	return u.ubRepo.UnLockEthBalanceByAddress(ctx, address)
 }
 
 func (u *UserUseCase) GetAddressEthBalance(ctx context.Context) ([]*AddressEthBalance, error) {

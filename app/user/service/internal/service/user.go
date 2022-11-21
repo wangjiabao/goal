@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -229,9 +230,7 @@ func (u *UserService) UserDeposit(ctx context.Context, req *v1.UserDepositReques
 }
 
 func (u *UserService) DepositHandle(ctx context.Context) (bool, error) {
-	var (
-		user []*biz.User
-	)
+	var user []*biz.User
 
 	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
 	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
@@ -242,6 +241,15 @@ func (u *UserService) DepositHandle(ctx context.Context) (bool, error) {
 	user, _ = u.uc.GetUserList(ctx)
 
 	for _, v := range user {
+		//加锁
+		var lock bool
+
+		lock, err = u.uc.LockAddressEthBalance(ctx, v.ToAddress)
+		fmt.Println(lock, err)
+		if false == lock || nil != err {
+			continue
+		}
+
 		//tokenAddress := common.HexToAddress("0x337610d27c682E347C9cD60BD4b3b107C9d34dDd")
 		//instance, err := NewToken(tokenAddress, client)
 		tokenAddress := common.HexToAddress("0x55d398326f99059fF775485246999027B3197955")
@@ -259,6 +267,7 @@ func (u *UserService) DepositHandle(ctx context.Context) (bool, error) {
 		if err != nil {
 			continue
 		}
+
 	}
 
 	return false, nil

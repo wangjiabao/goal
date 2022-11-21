@@ -24,6 +24,7 @@ type AddressEthBalance struct {
 	Balance   string    `gorm:"type:varchar(100);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+	Status    int64     `gorm:"type:int;not null"`
 }
 
 type User struct {
@@ -314,6 +315,7 @@ func (ub *UserBalanceRepo) GetAddressEthBalance(ctx context.Context) ([]*biz.Add
 			ID:      v.ID,
 			Balance: v.Balance,
 			Address: v.Address,
+			Status:  v.Status,
 		})
 	}
 
@@ -386,15 +388,31 @@ func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *b
 	return res, nil, count
 }
 
-func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error) {
-	if err := ub.data.DB(ctx).Where("address=?", address).
+func (ub *UserBalanceRepo) LockEthBalanceByAddress(ctx context.Context, address string) (bool, error) {
+	if res := ub.data.DB(ctx).Where("address=? and status <= ?", address, 2).
 		Table("address_eth_balance").
-		Update("balance", balance).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, errors.NotFound("ADDRESS_ETH_BALANCE_NOT_FOUND", "地址余额不存在")
-		}
+		Updates(map[string]interface{}{"status": 1}); res.Error != nil {
+		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", res.Error.Error())
+	}
 
-		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", err.Error())
+	return true, nil
+}
+
+func (ub *UserBalanceRepo) UnLockEthBalanceByAddress(ctx context.Context, address string) (bool, error) {
+	if res := ub.data.DB(ctx).Where("address=? and status=?", address, 1).
+		Table("address_eth_balance").
+		Updates(map[string]interface{}{"status": 2}); res.Error != nil {
+		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", res.Error.Error())
+	}
+
+	return true, nil
+}
+
+func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error) {
+	if res := ub.data.DB(ctx).Where("address=? and status=?", address, 1).
+		Table("address_eth_balance").
+		Updates(map[string]interface{}{"balance": balance, "status": 2}); res.Error != nil {
+		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", res.Error.Error())
 	}
 
 	return true, nil

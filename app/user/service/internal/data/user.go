@@ -102,16 +102,31 @@ func (u *UserRepo) CreateUser(ctx context.Context, uc *biz.User) (*biz.User, err
 	}, nil
 }
 
-func (ub *UserBalanceRepo) UpdateEthBalanceByAddress(ctx context.Context, address string, version int64, balance string) (bool, error) {
-	if err := ub.data.DB(ctx).Where("address=?", address).
+func (ub *UserBalanceRepo) UnLockAndUpdateEthBalanceByAddress(ctx context.Context, address string, balance string) (bool, error) {
+	if res := ub.data.DB(ctx).Where("address=? and status=?", address, 3).
 		Table("address_eth_balance").
-		Where("version=?", version).
-		Updates(map[string]interface{}{"version": gorm.Expr("version + ?", 1), "balance": balance}).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, errors.NotFound("ADDRESS_ETH_BALANCE_NOT_FOUND", "地址余额不存在")
-		}
+		Updates(map[string]interface{}{"balance": balance, "status": 2}); res.Error != nil {
+		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", res.Error.Error())
+	}
 
-		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", err.Error())
+	return true, nil
+}
+
+func (ub *UserBalanceRepo) LockEthBalanceByAddress(ctx context.Context, address string) (bool, error) {
+	if res := ub.data.DB(ctx).Where("address=? and status >= ?", address, 2).
+		Table("address_eth_balance").
+		Updates(map[string]interface{}{"status": 3}); res.Error != nil {
+		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", res.Error.Error())
+	}
+
+	return true, nil
+}
+
+func (ub *UserBalanceRepo) UnLockEthBalanceByAddress(ctx context.Context, address string) (bool, error) {
+	if res := ub.data.DB(ctx).Where("address=? and status=?", address, 3).
+		Table("address_eth_balance").
+		Updates(map[string]interface{}{"status": 2}); res.Error != nil {
+		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", res.Error.Error())
 	}
 
 	return true, nil

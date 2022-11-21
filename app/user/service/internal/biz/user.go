@@ -245,6 +245,10 @@ func (uc *UserUseCase) Deposit(ctx context.Context, u *User, req *v1.DepositRequ
 	}, nil
 }
 
+func (uc *UserUseCase) LockAddressEthBalance(ctx context.Context, address string) (bool, error) {
+	return uc.ubRepo.LockEthBalanceByAddress(ctx, address)
+}
+
 func (uc *UserUseCase) DepositHandle(ctx context.Context, balance string, address string, userId int64) (bool, error) {
 	var (
 		currentBalance, lastBalance int64
@@ -263,28 +267,35 @@ func (uc *UserUseCase) DepositHandle(ctx context.Context, balance string, addres
 	} else {
 		currentBalance = 0
 	}
-
 	lastBalance, _ = strconv.ParseInt(addressEthBalance.Balance, 10, 64)
+	fmt.Println(currentBalance, balance, addressEthBalance.Balance, lastBalance)
 	if currentBalance <= lastBalance {
-		// 这里应该余额没变动
-		// 或者出现了项目方提现了金额，但是没有更新到系统，具体原因可能是项目方提现账户USD_TOKEN时没有更新这个账户的余额，现在没有这个给功能
-		return false, err
+		// 解锁
+		_, _ = uc.ubRepo.UnLockEthBalanceByAddress(ctx, address)
+		return true, nil
 	}
 
 	depositBalanceNow := (currentBalance - lastBalance) * base
-
 	if err = uc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		_, err = uc.ubRepo.Deposit(ctx, userId, depositBalanceNow) // todo 事务
+		_, err = uc.ubRepo.Deposit(ctx, userId, depositBalanceNow)
 		if nil != err {
 			return err
 		}
-		_, err = uc.ubRepo.UpdateEthBalanceByAddress(ctx, addressEthBalance.Address, addressEthBalance.Version, strconv.FormatInt(currentBalance, 10))
+
+		// 解锁
+		_, err = uc.ubRepo.UnLockAndUpdateEthBalanceByAddress(ctx, addressEthBalance.Address, strconv.FormatInt(currentBalance, 10))
 		if err != nil {
 			return err
 		}
+
 		return nil
 	}); nil != err {
-		return false, nil
+		// 再解一次锁
+		_, err = uc.ubRepo.UnLockEthBalanceByAddress(ctx, addressEthBalance.Address)
+		if err != nil {
+			return false, err
+		}
+		return false, err
 	}
 
 	return true, nil
