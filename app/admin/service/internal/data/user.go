@@ -391,8 +391,8 @@ func (ub *UserBalanceRepo) WithdrawList(ctx context.Context, status string, b *b
 func (ub *UserBalanceRepo) LockEthBalanceByAddress(ctx context.Context, address string) (bool, error) {
 	if res := ub.data.DB(ctx).Where("address=? and status <= ?", address, 2).
 		Table("address_eth_balance").
-		Updates(map[string]interface{}{"status": 1}); res.Error != nil {
-		return false, errors.New(500, "ADDRESS_ETH_BALANCE_ERROR", res.Error.Error())
+		Updates(map[string]interface{}{"status": 1, "updated_at": time.Now().UTC()}); 0 >= res.RowsAffected || res.Error != nil {
+		return false, res.Error
 	}
 
 	return true, nil

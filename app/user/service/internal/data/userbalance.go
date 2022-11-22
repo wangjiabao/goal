@@ -92,6 +92,7 @@ func (ab AddressEthBalanceRepo) CreateAddressEthBalance(ctx context.Context, add
 	var addressEthBalance AddressEthBalance
 	addressEthBalance.Balance = ""
 	addressEthBalance.Address = address
+	addressEthBalance.Status = 2
 	res := ab.data.DB(ctx).Table("address_eth_balance").Create(&addressEthBalance)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_ADDRESS_USER_BALANCE_ERROR", "地址余额信息创建失败")
